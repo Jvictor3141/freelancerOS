@@ -1,0 +1,91 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+.pnpm-store/
+
+# =========================
+# Build outputs
+# =========================
+dist/
+build/
+out/
+.next/
+.vercel/
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# Environment variables
+# =========================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# =========================
+# Supabase / backend secrets
+# =========================
+.supabase
+supabase/.temp
+supabase/.env
+
+# =========================
+# Testing
+# =========================
+coverage/
+.vitest
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+.idea/
+*.swp
+*.swo
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
+.cache/
+
+# =========================
+# Storybook
+# =========================
+storybook-static/
+
+# =========================
+# Docker
+# =========================
+.docker/
+
+# =========================
+# Misc
+# =========================
+*.local
+*.lockb
