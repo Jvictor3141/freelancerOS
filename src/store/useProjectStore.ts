@@ -35,6 +35,10 @@ export const useProjectStore = create<ProjectStore>((set) => ({
 
   addProject: (data) => {
     const newProject = createProjectService(data);
+
+    set((state) => ({
+      projects: [newProject, ...state.projects],
+    }));
   },
 
   editProject: (id, data) => {
