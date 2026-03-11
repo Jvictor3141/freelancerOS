@@ -8,18 +8,18 @@ import { ProposalsPage } from "./pages/ProposalsPage";
 import { SettingsPage } from "./pages/SettingsPage";
 
 function App() {
-    return (
-        <DashboardLayout>
-            <Routes>
-                <Route path="/" element={<DashboardPage />} />
-                <Route path="/clientes" element={<ClientsPage />} />
-                <Route path="/projetos" element={<ProjectsPage />} />
-                <Route path="/pagamentos" element={<PaymentsPage />} />
-                <Route path="/propostas" element={<ProposalsPage />} />
-                <Route path="/configuracoes" element={<SettingsPage />} />
-            </Routes>
-        </DashboardLayout>
-    );
+  return (
+    <DashboardLayout>
+      <Routes>
+        <Route path="/" element={<DashboardPage />} />
+        <Route path="/clientes" element={<ClientsPage />} />
+        <Route path="/projetos" element={<ProjectsPage />} />
+        <Route path="/pagamentos" element={<PaymentsPage />} />
+        <Route path="/propostas" element={<ProposalsPage />} />
+        <Route path="/configuracoes" element={<SettingsPage />} />
+      </Routes>
+    </DashboardLayout>
+  );
 }
 
 export default App;
