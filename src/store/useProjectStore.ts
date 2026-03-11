@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Project, ProjectStatus } from '../types/project';
+import type { Project } from '../types/project';
 import {
   createProject as createProjectService,
   deleteProject as deleteProjectService,
@@ -17,7 +17,6 @@ type ProjectStore = {
   addProject: (data: ProjectInput) => void;
   editProject: (id: string, data: ProjectInput) => void;
   removeProject: (id: string) => void;
-  updateProjectStatus: (id: string, status: ProjectStatus) => void;
 };
 
 export const useProjectStore = create<ProjectStore>((set) => ({
@@ -64,33 +63,6 @@ export const useProjectStore = create<ProjectStore>((set) => ({
       projects: state.projects.filter((project) => project.id !== id),
       selectedProject:
         state.selectedProject?.id === id ? null : state.selectedProject,
-    }));
-  },
-
-  updateProjectStatus: (id, status) => {
-    const project = getProjects().find((item) => item.id === id);
-
-    if (!project) return;
-
-    const updatedProject = updateProjectService(id, {
-      clientId: project.clientId,
-      name: project.name,
-      description: project.description,
-      value: project.value,
-      deadline: project.deadline,
-      status,
-    });
-
-    if (!updatedProject) return;
-
-    set((state) => ({
-      projects: state.projects.map((item) =>
-        item.id === id ? updatedProject : item
-      ),
-      selectedProject:
-        state.selectedProject?.id === id
-          ? updatedProject
-          : state.selectedProject,
     }));
   },
 }));

@@ -27,7 +27,6 @@ export function ProjectsPage() {
     addProject,
     editProject,
     removeProject,
-    updateProjectStatus,
   } = useProjectStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -101,12 +100,10 @@ export function ProjectsPage() {
           <div>
             <p className="text-sm font-medium text-slate-500">Operação</p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-              Projetos vinculados a clientes reais
+              Andamento dos projetos
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Agora o sistema começa a representar trabalho de verdade. Projeto
-              sem cliente vinculado é bagunça. Cliente sem projeto é cadastro
-              morto.
+              Aqui você pode gerenciar os projetos cadastrados, acompanhar o andamento de cada um e realizar ações como criar, editar ou excluir projetos. Use os filtros para encontrar rapidamente o projeto que deseja visualizar ou modificar.
             </p>
           </div>
 
@@ -241,32 +238,11 @@ export function ProjectsPage() {
                   </td>
 
                   <td className="px-6 py-4">
-                    <div className="flex flex-col gap-2">
-                      <span
-                        className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${projectStatusClassName[project.status]}`}
-                      >
-                        {projectStatusLabel[project.status]}
-                      </span>
-
-                      <select
-                        value={project.status}
-                        onChange={(event) =>
-                          updateProjectStatus(
-                            project.id,
-                            event.target.value as ProjectStatus
-                          )
-                        }
-                        className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 outline-none transition focus:border-[#635bff]"
-                      >
-                        {statusFilterOptions
-                          .filter((status) => status !== 'all')
-                          .map((status) => (
-                            <option key={status} value={status}>
-                              {projectStatusLabel[status]}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
+                    <span
+                      className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${projectStatusClassName[project.status]}`}
+                    >
+                      {projectStatusLabel[project.status]}
+                    </span>
                   </td>
 
                   <td className="px-6 py-4">
