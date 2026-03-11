@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Modal } from '../components/Modal';
 import { ProjectForm } from '../components/ProjectForm';
 import { useClientStore } from '../store/useClientStore';
@@ -9,6 +10,7 @@ import {
   projectStatusLabel,
 } from '../utils/projectStatus';
 
+// aqui definimos as opções de filtro de status para os projetos, que incluem todos os status possíveis ('proposal', 'in_progress', 'review', 'completed') e uma opção adicional 'all' para mostrar projetos de todos os status. Essas opções são usadas para preencher o campo de seleção de filtro de status na interface do usuário, permitindo que os usuários filtrem a lista de projetos com base no status desejado.
 const statusFilterOptions: Array<ProjectStatus | 'all'> = [
   'all',
   'proposal',
@@ -17,7 +19,10 @@ const statusFilterOptions: Array<ProjectStatus | 'all'> = [
   'completed',
 ];
 
+// a função ProjectsPage é o componente principal da página de projetos. Ele gerencia o estado dos projetos, clientes, filtros de busca e modais para criar ou editar projetos. O componente usa os hooks useEffect para carregar os dados de clientes e projetos quando o componente é montado, e para abrir o modal de criação de projeto quando o parâmetro de busca 'new' é definido. Ele também usa useMemo para calcular a lista de projetos com os dados do cliente e para filtrar os projetos com base nos critérios de busca e filtro selecionados. A interface do usuário inclui uma seção para operações (como criar um novo projeto), uma seção para filtros de busca e uma tabela que exibe a lista de projetos filtrados, com opções para editar ou excluir cada projeto. O componente também gerencia a abertura e fechamento do modal de criação/edição de projetos, e passa as funções de callback apropriadas para o formulário de projeto para lidar com a criação ou edição de projetos.
 export function ProjectsPage() {
+  const [searchParams, setSearchParams] = useSearchParams(); // o hook useSearchParams é usado para acessar e manipular os parâmetros de busca na URL. Ele retorna um objeto searchParams que permite ler os parâmetros de busca atuais, e uma função setSearchParams que permite atualizar os parâmetros de busca. Nesse componente, useSearchParams é usado para verificar se o parâmetro 'new' está presente na URL para determinar se o modal de criação de projeto deve ser aberto automaticamente quando a página for carregada.
+
   const { clients, loadClients } = useClientStore();
   const {
     projects,
@@ -40,6 +45,22 @@ export function ProjectsPage() {
     loadProjects();
   }, [loadClients, loadProjects]);
 
+  // esse useEffect é responsável por abrir o modal de criação de projeto automaticamente quando a página é carregada e o parâmetro de busca 'new' está presente na URL. Ele verifica se o parâmetro 'new' é igual a '1', e se houver clientes disponíveis (pois um projeto precisa estar vinculado a um cliente). Se as condições forem atendidas, ele seleciona um projeto nulo (indicando que estamos criando um novo projeto) e abre o modal. Após abrir o modal, ele remove o parâmetro 'new' da URL para evitar que o modal seja aberto novamente em recarregamentos futuros da página.
+  useEffect(() => {
+    const shouldOpenNewModal = searchParams.get('new') === '1';
+
+    if (!shouldOpenNewModal) return;
+    if (clients.length === 0) return;
+
+    selectProject(null);
+    setIsModalOpen(true);
+
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('new');
+    setSearchParams(nextParams, { replace: true });
+  }, [searchParams, setSearchParams, clients, selectProject]);
+
+  // esse useMemo é responsável por criar uma nova lista de projetos que inclui os dados do cliente associado a cada projeto. Ele percorre a lista de projetos e, para cada projeto, encontra o cliente correspondente usando o clientId do projeto. Em seguida, ele retorna um novo objeto de projeto que inclui os campos originais do projeto, além do nome do cliente (clientName) e da empresa do cliente (clientCompany). Essa lista de projetos com os dados do cliente é usada posteriormente para exibir as informações do cliente na tabela de projetos e para facilitar a filtragem dos projetos com base no nome do cliente. O useMemo é usado para otimizar o desempenho, garantindo que essa lista de projetos com os dados do cliente só seja recalculada quando a lista de projetos ou a lista de clientes for alterada.
   const projectsWithClient = useMemo(() => {
     return projects.map((project) => {
       const client = clients.find((item) => item.id === project.clientId);
@@ -100,10 +121,12 @@ export function ProjectsPage() {
           <div>
             <p className="text-sm font-medium text-slate-500">Operação</p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-              Andamento dos projetos
+              Projetos vinculados a clientes reais
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Aqui você pode gerenciar os projetos cadastrados, acompanhar o andamento de cada um e realizar ações como criar, editar ou excluir projetos. Use os filtros para encontrar rapidamente o projeto que deseja visualizar ou modificar.
+              Agora o sistema começa a representar trabalho de verdade. Projeto
+              sem cliente vinculado é bagunça. Cliente sem projeto é cadastro
+              morto.
             </p>
           </div>
 

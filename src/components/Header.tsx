@@ -1,12 +1,28 @@
 import { Bell, Plus, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function Header() {
+  const navigate = useNavigate();
+  const dataToday = new Date();
+
+  const formattedDate = dataToday.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  });
+
+  function handleNewProjectClick() {
+    navigate('/projetos?new=1');
+  }
+
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/85 backdrop-blur">
       <div className="flex flex-col gap-4 px-5 py-4 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-500">Sábado, 7 de março</p>
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">Controle tudo sem virar refém de planilha</h2>
+          <p className="text-sm font-medium text-slate-500">{formattedDate}</p>
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Controle tudo sem virar refém de planilha
+          </h2>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -24,7 +40,11 @@ export function Header() {
             Alertas
           </button>
 
-          <button className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105">
+          <button
+            type="button"
+            onClick={handleNewProjectClick}
+            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
+          >
             <Plus size={18} />
             Novo projeto
           </button>
