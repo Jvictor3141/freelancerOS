@@ -1,5 +1,6 @@
 import type { Client } from '../types/client';
 import type { Project } from '../types/project';
+import type { Payment } from '../types/payment';
 
 // Funções para calcular métricas e dados para o dashboard do sistema de gestão de projetos. Essas funções processam os dados de clientes e projetos para gerar insights como total de clientes, projetos em andamento, receita mensal, entre outros. São utilizadas para alimentar os gráficos e indicadores do dashboard, ajudando os usuários a monitorar o desempenho do negócio de forma visual e intuitiva.
 type DashboardMetric = {
@@ -116,4 +117,63 @@ export function getRecentProjectActivities(
       createdAt: project.createdAt,
       value: project.value,
     }));
+}
+
+export function getPaymentMetrics(payments: Payment[]) {
+  const receivedAmount = payments
+    .filter((payment) => payment.status === 'paid')
+    .reduce((sum, payment) => sum + payment.amount, 0);
+
+  const pendingAmount = payments
+    .filter((payment) => payment.status === 'pending')
+    .reduce((sum, payment) => sum + payment.amount, 0);
+
+  const overdueAmount = payments
+    .filter((payment) => payment.status === 'overdue')
+    .reduce((sum, payment) => sum + payment.amount, 0);
+
+  return {
+    receivedAmount,
+    pendingAmount,
+    overdueAmount,
+  };
+}
+
+export function getMonthlyReceivedRevenue(
+  payments: Payment[],
+  monthsBack = 6
+) {
+  const now = new Date();
+
+  const buckets = Array.from({ length: monthsBack }, (_, index) => {
+    const date = new Date(now.getFullYear(), now.getMonth() - (monthsBack - 1 - index), 1);
+
+    return {
+      key: `${date.getFullYear()}-${date.getMonth()}`,
+      month: MONTH_FORMATTER.format(date),
+      revenue: 0,
+    };
+  });
+
+  const bucketMap = new Map(
+    buckets.map((bucket) => [bucket.key, bucket])
+  );
+
+  for (const payment of payments) {
+    if (payment.status !== 'paid' || !payment.paidAt) continue;
+
+    const paidAt = new Date(payment.paidAt);
+    if (Number.isNaN(paidAt.getTime())) continue;
+
+    const key = `${paidAt.getFullYear()}-${paidAt.getMonth()}`;
+    const bucket = bucketMap.get(key);
+    if (!bucket) continue;
+
+    bucket.revenue += Number(payment.amount || 0);
+  }
+
+  return buckets.map(({ month, revenue }) => ({
+    month,
+    revenue,
+  }));
 }
