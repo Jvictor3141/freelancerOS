@@ -17,6 +17,7 @@ import {
 } from '../utils/dashboard';
 import { projectStatusClassName, projectStatusLabel } from '../utils/projectStatus';
 
+// Função para formatar valores numéricos como moeda brasileira (BRL). Ela utiliza o método toLocaleString para converter o número em uma string formatada de acordo com as convenções locais, incluindo o símbolo de moeda e a formatação adequada para milhares e decimais. Essa função é usada para exibir valores monetários de forma clara e consistente no dashboard.
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
     style: 'currency',
@@ -24,10 +25,12 @@ function formatCurrency(value: number) {
   });
 }
 
+// Interface para representar um ponto de receita mensal, contendo o mês formatado e o valor da receita. Essa estrutura é utilizada para alimentar os gráficos de receita mensal no dashboard, permitindo uma visualização clara da evolução financeira ao longo do tempo.
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString('pt-BR');
 }
 
+// Estrutura para representar as principais métricas do dashboard, incluindo o total de clientes, total de projetos, número de projetos em andamento, número de projetos concluídos, valor total contratado e ticket médio. Essas métricas são calculadas com base nos dados de clientes e projetos e são essenciais para fornecer uma visão geral do desempenho do negócio.
 export function DashboardPage() {
   const { clients, loadClients } = useClientStore();
   const { projects, loadProjects } = useProjectStore();
