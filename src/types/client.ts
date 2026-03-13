@@ -6,4 +6,4 @@ export type Client = {
   phone: string;
   notes: string;
   createdAt: string;
-}
+};
