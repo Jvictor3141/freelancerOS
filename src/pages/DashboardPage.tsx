@@ -8,16 +8,29 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  CheckCircle2,
+  Clock3,
+  FolderKanban,
+  Users,
+} from 'lucide-react';
 import { useClientStore } from '../store/useClientStore';
 import { useProjectStore } from '../store/useProjectStore';
+import { usePaymentStore } from '../store/usePaymentStore';
 import {
   getDashboardMetrics,
-  getMonthlyRevenueFromProjects,
+  getMonthlyReceivedRevenue,
+  getPaymentAlerts,
+  getPaymentMetrics,
   getRecentProjectActivities,
 } from '../utils/dashboard';
-import { projectStatusClassName, projectStatusLabel } from '../utils/projectStatus';
+import {
+  projectStatusClassName,
+  projectStatusLabel,
+} from '../utils/projectStatus';
 
-// Função para formatar valores numéricos como moeda brasileira (BRL). Ela utiliza o método toLocaleString para converter o número em uma string formatada de acordo com as convenções locais, incluindo o símbolo de moeda e a formatação adequada para milhares e decimais. Essa função é usada para exibir valores monetários de forma clara e consistente no dashboard.
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
     style: 'currency',
@@ -25,64 +38,175 @@ function formatCurrency(value: number) {
   });
 }
 
-// Interface para representar um ponto de receita mensal, contendo o mês formatado e o valor da receita. Essa estrutura é utilizada para alimentar os gráficos de receita mensal no dashboard, permitindo uma visualização clara da evolução financeira ao longo do tempo.
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString('pt-BR');
 }
 
-// Estrutura para representar as principais métricas do dashboard, incluindo o total de clientes, total de projetos, número de projetos em andamento, número de projetos concluídos, valor total contratado e ticket médio. Essas métricas são calculadas com base nos dados de clientes e projetos e são essenciais para fornecer uma visão geral do desempenho do negócio.
 export function DashboardPage() {
   const { clients, loadClients } = useClientStore();
   const { projects, loadProjects } = useProjectStore();
+  const { payments, loadPayments, markAsOverdueIfNeeded } = usePaymentStore();
 
   useEffect(() => {
     loadClients();
     loadProjects();
-  }, [loadClients, loadProjects]);
+    loadPayments();
+  }, [loadClients, loadProjects, loadPayments]);
+
+  useEffect(() => {
+    markAsOverdueIfNeeded();
+  }, [markAsOverdueIfNeeded]);
 
   const metrics = useMemo(
     () => getDashboardMetrics(clients, projects),
     [clients, projects]
   );
 
+  const paymentMetrics = useMemo(
+    () => getPaymentMetrics(payments),
+    [payments]
+  );
+
   const revenue = useMemo(
-    () => getMonthlyRevenueFromProjects(projects, 6),
-    [projects]
+    () => getMonthlyReceivedRevenue(payments, 6),
+    [payments]
   );
 
   const recentActivities = useMemo(
-    () => getRecentProjectActivities(projects, clients, 5),
+    () => getRecentProjectActivities(projects, clients, 4),
     [projects, clients]
+  );
+
+  const paymentAlerts = useMemo(
+    () => getPaymentAlerts(payments, projects, clients, 4),
+    [payments, projects, clients]
   );
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-        <p className="text-sm font-medium text-slate-500">Visão geral</p>
-        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-          Dashboard real do FreelancerOS
-        </h2>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          Agora o painel usa os dados que você já cadastrou no sistema. Enquanto
-          pagamentos ainda não existem, o gráfico abaixo representa valor
-          contratado por mês com base nos projetos criados.
-        </p>
+      <section className="grid gap-4 xl:grid-cols-12">
+        <div className="rounded-[28px] bg-[#635bff] p-6 text-white shadow-[0_24px_60px_rgba(99,91,255,0.28)] xl:col-span-8">
+          <div className="flex h-full flex-col justify-between gap-6">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-indigo-100">
+                Visão financeira
+              </p>
+              <h2 className="text-3xl font-semibold tracking-tight">
+                Entradas de dinheiro e saúde do negócio
+              </h2>
+              <p className="max-w-2xl text-sm leading-6 text-indigo-100/90">
+                Um painel direto para entender o que entrou, o que ainda está
+                pendente e onde estão os gargalos financeiros.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
+                <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
+                  <ArrowUpRight size={18} />
+                </div>
+                <p className="text-sm text-indigo-100">Recebido</p>
+                <p className="mt-2 text-2xl font-semibold">
+                  {formatCurrency(paymentMetrics.receivedAmount)}
+                </p>
+              </div>
+
+              <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
+                <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
+                  <Clock3 size={18} />
+                </div>
+                <p className="text-sm text-indigo-100">Pendente</p>
+                <p className="mt-2 text-2xl font-semibold">
+                  {formatCurrency(paymentMetrics.pendingAmount)}
+                </p>
+              </div>
+
+              <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
+                <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
+                  <AlertTriangle size={18} />
+                </div>
+                <p className="text-sm text-indigo-100">Atrasado</p>
+                <p className="mt-2 text-2xl font-semibold">
+                  {formatCurrency(paymentMetrics.overdueAmount)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100 xl:col-span-4">
+          <div className="mb-5">
+            <p className="text-sm font-medium text-slate-500">Alertas</p>
+            <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+              Clientes que precisam de atenção
+            </h3>
+          </div>
+
+          <div className="space-y-3">
+            {paymentAlerts.length > 0 ? (
+              paymentAlerts.map((alert) => (
+                <div
+                  key={alert.id}
+                  className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-semibold text-slate-900">
+                        {alert.clientName}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-500">
+                        {alert.projectName}
+                      </p>
+                    </div>
+
+                    <span
+                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
+                        alert.status === 'overdue'
+                          ? 'bg-rose-100 text-rose-700'
+                          : 'bg-amber-100 text-amber-700'
+                      }`}
+                    >
+                      {alert.status === 'overdue' ? 'Atrasado' : 'Pendente'}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between text-sm text-slate-500">
+                    <span>Vence em {formatDate(alert.dueDate)}</span>
+                    <span className="font-semibold text-slate-900">
+                      {formatCurrency(alert.amount)}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
+                Nenhum cliente com cobrança pendente ou atrasada.
+              </div>
+            )}
+          </div>
+        </div>
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
-          <p className="text-sm font-medium text-slate-500">Clientes ativos</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
+          <div className="mb-4 inline-flex rounded-2xl bg-slate-100 p-3 text-slate-700">
+            <Users size={18} />
+          </div>
+          <p className="text-sm font-medium text-slate-500">Clientes</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             {metrics.totalClients}
           </p>
           <p className="mt-2 text-sm text-slate-500">
-            Total de clientes cadastrados
+            Base ativa cadastrada
           </p>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
+          <div className="mb-4 inline-flex rounded-2xl bg-blue-100 p-3 text-blue-700">
+            <FolderKanban size={18} />
+          </div>
           <p className="text-sm font-medium text-slate-500">Projetos ativos</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             {metrics.projectsInProgress}
           </p>
           <p className="mt-2 text-sm text-slate-500">
@@ -90,19 +214,25 @@ export function DashboardPage() {
           </p>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
-          <p className="text-sm font-medium text-slate-500">Projetos concluídos</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
+          <div className="mb-4 inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-700">
+            <CheckCircle2 size={18} />
+          </div>
+          <p className="text-sm font-medium text-slate-500">Concluídos</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             {metrics.completedProjects}
           </p>
           <p className="mt-2 text-sm text-slate-500">
-            Total com status concluído
+            Projetos finalizados
           </p>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
+          <div className="mb-4 inline-flex rounded-2xl bg-violet-100 p-3 text-violet-700">
+            <ArrowUpRight size={18} />
+          </div>
           <p className="text-sm font-medium text-slate-500">Ticket médio</p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             {formatCurrency(metrics.averageTicket)}
           </p>
           <p className="mt-2 text-sm text-slate-500">
@@ -112,23 +242,23 @@ export function DashboardPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-12">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100 xl:col-span-8">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100 xl:col-span-8">
           <div className="mb-6 flex items-start justify-between gap-4">
             <div>
               <p className="text-sm font-medium text-slate-500">
-                Valor contratado
+                Entradas de dinheiro
               </p>
               <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-                Últimos 6 meses
+                Recebimentos dos últimos 6 meses
               </h3>
             </div>
 
             <div className="rounded-2xl bg-slate-50 px-4 py-3">
               <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-                Total acumulado
+                Total recebido
               </p>
               <p className="mt-1 text-lg font-semibold text-slate-950">
-                {formatCurrency(metrics.totalContractedValue)}
+                {formatCurrency(paymentMetrics.receivedAmount)}
               </p>
             </div>
           </div>
@@ -169,7 +299,7 @@ export function DashboardPage() {
                 <Tooltip
                   formatter={(value) => [
                     formatCurrency(Number(value)),
-                    'Valor contratado',
+                    'Recebido',
                   ]}
                   contentStyle={{
                     borderRadius: 16,
@@ -190,15 +320,17 @@ export function DashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100 xl:col-span-4">
+        <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100 xl:col-span-4">
           <div className="mb-6">
-            <p className="text-sm font-medium text-slate-500">Atividade recente</p>
+            <p className="text-sm font-medium text-slate-500">
+              Atividade recente
+            </p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
               Últimos projetos criados
             </h3>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {recentActivities.length > 0 ? (
               recentActivities.map((activity) => (
                 <div
@@ -230,41 +362,10 @@ export function DashboardPage() {
               ))
             ) : (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-                Nenhuma atividade ainda. Crie clientes e projetos para alimentar
-                o dashboard.
+                Nenhuma atividade recente encontrada.
               </div>
             )}
           </div>
-        </div>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-          <p className="text-sm font-medium text-slate-500">Base operacional</p>
-          <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-            Total de projetos
-          </h3>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-            {metrics.totalProjects}
-          </p>
-          <p className="mt-2 text-sm text-slate-500">
-            Esse número serve de base para pagamentos, propostas convertidas e
-            previsões futuras.
-          </p>
-        </div>
-
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-          <p className="text-sm font-medium text-slate-500">Valor contratado</p>
-          <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-            Soma dos projetos cadastrados
-          </h3>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">
-            {formatCurrency(metrics.totalContractedValue)}
-          </p>
-          <p className="mt-2 text-sm text-slate-500">
-            Quando o módulo de pagamentos entrar, essa métrica deve ser separada
-            de valor recebido.
-          </p>
         </div>
       </section>
     </div>
