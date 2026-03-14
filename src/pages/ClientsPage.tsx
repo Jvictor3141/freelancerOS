@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useMemo, useState } from "react";
 import { ClientForm } from "../components/ClientForm";
 import { Modal } from "../components/Modal";
@@ -14,6 +15,8 @@ export function ClientsPage() {
     editClient,
     removeClient,
   } = useClientStore();
+
+  const navigate = useNavigate();
 
   // esses estados locais são usados para controlar a abertura do modal de criação/edição de clientes (isModalOpen) e o termo de busca para filtrar a lista de clientes (search). O estado isModalOpen é um booleano que indica se o modal está aberto ou fechado, e o estado search é uma string que armazena o termo de busca digitado pelo usuário. O useState é usado para inicializar esses estados com valores padrão (false para isModalOpen e string vazia para search) e fornecer funções para atualizar esses estados conforme o usuário interage com a interface.
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -164,6 +167,13 @@ export function ClientsPage() {
                         className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                       >
                         Editar
+                      </button>
+
+                      <button
+                        onClick={() => navigate(`/clients/${client.id}`)}
+                        className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      >
+                        Ver detalhes
                       </button>
 
                       <button

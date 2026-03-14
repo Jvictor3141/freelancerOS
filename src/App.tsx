@@ -6,6 +6,8 @@ import { PaymentsPage } from "./pages/PaymentsPage";
 import { ProjectsPage } from "./pages/ProjectsPage";
 import { ProposalsPage } from "./pages/ProposalsPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { ClientDetailsPage } from './pages/ClientDetailsPage';
+
 
 function App() {
   return (
@@ -13,6 +15,7 @@ function App() {
       <Routes>
         <Route path="/" element={<DashboardPage />} />
         <Route path="/clientes" element={<ClientsPage />} />
+        <Route path="/clients/:id" element={<ClientDetailsPage />} />
         <Route path="/projetos" element={<ProjectsPage />} />
         <Route path="/pagamentos" element={<PaymentsPage />} />
         <Route path="/propostas" element={<ProposalsPage />} />
