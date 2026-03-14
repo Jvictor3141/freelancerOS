@@ -57,13 +57,25 @@ export function PaymentForm({
   ) {
     const { name, value } = event.target;
 
-    setValues((prev) => ({
-      ...prev,
-      [name]: name === 'amount' ? Number(value) : value,
-    }));
+    setValues((prev) => {
+      const next: PaymentFormValues = {
+        ...prev,
+        [name]: name === 'amount' ? Number(value) : value,
+      } as PaymentFormValues;
+
+      if (name === 'status') {
+        if (value === 'paid') {
+          next.paidAt = prev.paidAt || new Date().toISOString().slice(0, 10);
+        } else {
+          next.paidAt = null;
+        }
+      }
+
+      return next;
+    });
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
     if (!values.projectId) {
@@ -81,20 +93,26 @@ export function PaymentForm({
       return;
     }
 
-    onSubmit(values);
+    if (values.status === 'paid' && !values.paidAt) {
+      alert('Informe a data em que o pagamento foi recebido.');
+      return;
+    }
+
+    onSubmit({
+      ...values,
+      paidAt: values.status === 'paid' ? values.paidAt : null,
+    });
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-4">
-      <label>
-        <span className="mb-2 block text-sm font-medium text-slate-700">
-          Projeto
-        </span>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+        Projeto
         <select
           name="projectId"
           value={values.projectId}
           onChange={handleChange}
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+          className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
         >
           <option value="">Selecione um projeto</option>
           {projects.map((project) => (
@@ -105,46 +123,41 @@ export function PaymentForm({
         </select>
       </label>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label>
-          <span className="mb-2 block text-sm font-medium text-slate-700">
-            Valor
-          </span>
+      <div className="grid gap-4 md:grid-cols-2">
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Valor
           <input
-            name="amount"
             type="number"
+            name="amount"
             min="0"
             step="0.01"
             value={values.amount}
             onChange={handleChange}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+            placeholder="0,00"
           />
         </label>
 
-        <label>
-          <span className="mb-2 block text-sm font-medium text-slate-700">
-            Vencimento
-          </span>
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Vencimento
           <input
-            name="dueDate"
             type="date"
+            name="dueDate"
             value={values.dueDate}
             onChange={handleChange}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
           />
         </label>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <label>
-          <span className="mb-2 block text-sm font-medium text-slate-700">
-            Status
-          </span>
+      <div className="grid gap-4 md:grid-cols-2">
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Status
           <select
             name="status"
             value={values.status}
             onChange={handleChange}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
           >
             <option value="pending">{paymentStatusLabel.pending}</option>
             <option value="paid">{paymentStatusLabel.paid}</option>
@@ -152,15 +165,13 @@ export function PaymentForm({
           </select>
         </label>
 
-        <label>
-          <span className="mb-2 block text-sm font-medium text-slate-700">
-            Método
-          </span>
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Método
           <select
             name="method"
             value={values.method}
             onChange={handleChange}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
           >
             <option value="pix">Pix</option>
             <option value="card">Cartão</option>
@@ -170,16 +181,28 @@ export function PaymentForm({
         </label>
       </div>
 
-      <label>
-        <span className="mb-2 block text-sm font-medium text-slate-700">
-          Observações
-        </span>
+      {values.status === 'paid' && (
+        <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+          Pago em
+          <input
+            type="date"
+            name="paidAt"
+            value={values.paidAt ?? ''}
+            onChange={handleChange}
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+          />
+        </label>
+      )}
+
+      <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
+        Observações
         <textarea
           name="notes"
           value={values.notes}
           onChange={handleChange}
-          className="min-h-24 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Observações do pagamento..."
+          rows={4}
+          className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+          placeholder="Adicione observações sobre este pagamento"
         />
       </label>
 
