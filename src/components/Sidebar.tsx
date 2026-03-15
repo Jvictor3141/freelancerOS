@@ -23,7 +23,7 @@ export function Sidebar() {
 
       <NavigationList className="mt-10 space-y-2" />
 
-      <div className="mt-auto rounded-3xl border border-slate-200 bg-slate-50 p-4">
+      <div className="motion-surface mt-auto rounded-3xl border border-slate-200 bg-slate-50 p-4">
         <div className="mb-4 inline-flex rounded-2xl bg-white p-3 text-[#635bff] shadow-sm shadow-slate-200">
           <ShieldCheck size={18} />
         </div>

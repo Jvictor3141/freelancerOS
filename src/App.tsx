@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useRef } from 'react';
 import { Route, Routes } from 'react-router-dom';
+import { RouteTransition } from './components/RouteTransition';
 import { DashboardLayout } from './layout/DashboardLayout';
 import { LoginPage } from './pages/LoginPage';
 import { usePreferencesStore } from './store/usePreferencesStore';
@@ -38,7 +39,7 @@ type LoadingStateProps = {
 
 function LoadingState({ title, description }: LoadingStateProps) {
   return (
-    <div className="rounded-4xl border border-slate-200 bg-white/85 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur">
+    <div className="motion-surface rounded-4xl border border-slate-200 bg-white/85 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur">
       <p className="text-sm font-medium text-slate-500">FreelancerOS</p>
       <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
         {title}
@@ -117,15 +118,17 @@ function App() {
           />
         }
       >
-        <Routes>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/clientes" element={<ClientsPage />} />
-          <Route path="/clients/:id" element={<ClientDetailsPage />} />
-          <Route path="/projetos" element={<ProjectsPage />} />
-          <Route path="/pagamentos" element={<PaymentsPage />} />
-          <Route path="/propostas" element={<ProposalsPage />} />
-          <Route path="/configuracoes" element={<SettingsPage />} />
-        </Routes>
+        <RouteTransition>
+          <Routes>
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/clientes" element={<ClientsPage />} />
+            <Route path="/clients/:id" element={<ClientDetailsPage />} />
+            <Route path="/projetos" element={<ProjectsPage />} />
+            <Route path="/pagamentos" element={<PaymentsPage />} />
+            <Route path="/propostas" element={<ProposalsPage />} />
+            <Route path="/configuracoes" element={<SettingsPage />} />
+          </Routes>
+        </RouteTransition>
       </Suspense>
     </DashboardLayout>
   );

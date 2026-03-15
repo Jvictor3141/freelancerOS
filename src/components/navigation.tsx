@@ -91,7 +91,7 @@ export function BottomNavigationBar() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-4 xl:hidden">
-      <div className="mx-auto grid max-w-3xl grid-cols-[repeat(3,minmax(0,1fr))_auto_repeat(3,minmax(0,1fr))] items-center gap-1 rounded-[30px] border border-slate-200 bg-white/95 px-3 py-3 shadow-[0_-16px_40px_rgba(15,23,42,0.08)] backdrop-blur">
+      <div className="motion-surface mx-auto grid max-w-3xl grid-cols-[repeat(3,minmax(0,1fr))_auto_repeat(3,minmax(0,1fr))] items-center gap-1 rounded-[30px] border border-slate-200 bg-white/95 px-3 py-3 shadow-[0_-16px_40px_rgba(15,23,42,0.08)] backdrop-blur">
         {leftItems.map((item) => (
           <BottomNavigationLink key={item.to} item={item} />
         ))}

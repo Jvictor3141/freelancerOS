@@ -314,7 +314,7 @@ export function SettingsPage() {
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="page-stack space-y-6">
         <section className="grid items-start gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
             <div className="mb-5 inline-flex rounded-2xl bg-indigo-50 p-3 text-[#635bff]">
@@ -437,11 +437,6 @@ export function SettingsPage() {
         onClose={() => setProfileModalOpen(false)}
       >
         <form onSubmit={handleProfileSubmit} className="space-y-4">
-          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-            Esses dados alimentam sua presenca nas propostas e deixam o
-            produto com cara de ferramenta para freelancer, nao de CRUD
-            generico.
-          </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block">

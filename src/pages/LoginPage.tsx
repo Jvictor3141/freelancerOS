@@ -80,7 +80,7 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8 lg:px-10">
+    <div className="motion-page min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8 lg:px-10">
       <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-7xl overflow-hidden rounded-[36px] border border-slate-200 bg-white/80 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur xl:grid-cols-[0.92fr_1.08fr]">
         <section className="flex items-center bg-[linear-gradient(180deg,rgba(248,250,252,0.88),rgba(255,255,255,0.98))] px-5 py-8 sm:px-8 lg:px-10">
           <div className="mx-auto w-full max-w-md">

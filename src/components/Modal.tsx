@@ -20,9 +20,9 @@ export function Modal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/40 p-4 sm:p-6">
+    <div className="motion-overlay fixed inset-0 z-50 overflow-y-auto bg-slate-950/40 p-4 sm:p-6">
       <div className="flex min-h-full items-start justify-center py-4 sm:items-center">
-        <div className="w-full max-w-2xl overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-2xl">
+        <div className="motion-dialog w-full max-w-2xl overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-2xl">
           <div className="max-h-[calc(100vh-2rem)] overflow-y-auto p-5 sm:p-6">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>

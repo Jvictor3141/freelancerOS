@@ -10,6 +10,12 @@
   --accent-soft: #eef2ff;
   --accent-soft-text: #4f46e5;
   --selection: rgba(99, 91, 255, 0.18);
+  --motion-fast: 180ms;
+  --motion-base: 260ms;
+  --motion-slow: 420ms;
+  --motion-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-focus-ring: color-mix(in srgb, var(--accent) 18%, white);
   font-family:
     Inter,
     ui-sans-serif,
@@ -44,6 +50,10 @@
   --selection: rgba(34, 197, 94, 0.2);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -56,6 +66,9 @@ body {
       var(--backdrop-secondary),
       transparent 24%),
     linear-gradient(180deg, var(--page-start) 0%, var(--page-end) 100%);
+  transition:
+    background var(--motion-slow) var(--motion-ease-standard),
+    color var(--motion-base) var(--motion-ease-standard);
 }
 
 #root {
@@ -69,8 +82,20 @@ body {
 button,
 input,
 select,
-textarea {
+textarea,
+a[class],
+[role="button"] {
   font: inherit;
+  transition-property:
+    transform,
+    background-color,
+    border-color,
+    box-shadow,
+    color,
+    opacity,
+    filter;
+  transition-duration: var(--motion-base);
+  transition-timing-function: var(--motion-ease-standard);
 }
 
 button:not(:disabled),
@@ -89,6 +114,84 @@ select:disabled,
 input:disabled,
 textarea:disabled {
   cursor: not-allowed;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  box-shadow: 0 0 0 4px var(--motion-focus-ring);
+}
+
+.motion-page {
+  animation: motion-page-enter var(--motion-slow) var(--motion-ease-emphasized)
+    both;
+}
+
+.page-stack > * {
+  opacity: 0;
+  animation: motion-section-enter 520ms var(--motion-ease-emphasized) both;
+}
+
+.page-stack > *:nth-child(1) {
+  animation-delay: 40ms;
+}
+
+.page-stack > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.page-stack > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.page-stack > *:nth-child(4) {
+  animation-delay: 190ms;
+}
+
+.page-stack > *:nth-child(5) {
+  animation-delay: 240ms;
+}
+
+.page-stack > *:nth-child(6) {
+  animation-delay: 290ms;
+}
+
+.page-stack > *:nth-child(7) {
+  animation-delay: 340ms;
+}
+
+.page-stack > *:nth-child(8) {
+  animation-delay: 390ms;
+}
+
+.motion-surface {
+  transition:
+    transform var(--motion-base) var(--motion-ease-standard),
+    box-shadow var(--motion-base) var(--motion-ease-standard),
+    border-color var(--motion-base) var(--motion-ease-standard),
+    background-color var(--motion-base) var(--motion-ease-standard);
+}
+
+.motion-surface:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 46px rgba(15, 23, 42, 0.08);
+}
+
+.motion-popover {
+  transform-origin: top right;
+  animation: motion-popover-enter 220ms var(--motion-ease-emphasized) both;
+}
+
+.motion-overlay {
+  animation: motion-overlay-enter var(--motion-fast) var(--motion-ease-standard)
+    both;
+}
+
+.motion-dialog {
+  animation: motion-dialog-enter 260ms var(--motion-ease-emphasized) both;
 }
 
 .bg-\[\#635bff\] {
@@ -118,4 +221,77 @@ textarea:disabled {
 
 ::selection {
   background: var(--selection);
+}
+
+@keyframes motion-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-section-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes motion-popover-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes motion-overlay-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes motion-dialog-enter {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

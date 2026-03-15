@@ -73,7 +73,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center justify-end gap-3 self-start xl:self-auto">
-          <div className="hidden min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm shadow-slate-100 xl:flex">
+          <div className="motion-surface hidden min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm shadow-slate-100 xl:flex">
             <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-[#635bff]">
               <ShieldCheck size={18} />
             </span>
@@ -109,7 +109,7 @@ export function Header() {
             </button>
 
             {isAccountMenuOpen ? (
-              <div className="absolute right-0 top-[calc(100%+0.75rem)] z-30 w-72 rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_24px_50px_rgba(15,23,42,0.12)]">
+              <div className="motion-popover absolute right-0 top-[calc(100%+0.75rem)] z-30 w-72 rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_24px_50px_rgba(15,23,42,0.12)]">
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-[#635bff]">
                     <ShieldCheck size={18} />
