@@ -41,24 +41,28 @@ export function getDashboardMetrics(
   clients: Client[],
   projects: Project[]
 ): DashboardMetric {
+  const operationalProjects = projects.filter(
+    (project) => project.status !== 'proposal'
+  );
   const totalClients = clients.length;
-  const totalProjects = projects.length;
 
-  const projectsInProgress = projects.filter(
+  const projectsInProgress = operationalProjects.filter(
     (project) => project.status === 'in_progress' || project.status === 'review'
   ).length;
 
-  const completedProjects = projects.filter(
+  const completedProjects = operationalProjects.filter(
     (project) => project.status === 'completed'
   ).length;
 
-  const totalContractedValue = projects.reduce(
+  const totalContractedValue = operationalProjects.reduce(
     (sum, project) => sum + Number(project.value || 0),
     0
   );
 
   const averageTicket =
-    totalProjects > 0 ? totalContractedValue / totalProjects : 0;
+    operationalProjects.length > 0
+      ? totalContractedValue / operationalProjects.length
+      : 0;
 
   return {
     totalClients,
@@ -138,7 +142,9 @@ export function getRecentProjectActivities(
 ): RecentActivity[] {
   const clientMap = new Map(clients.map((client) => [client.id, client]));
 
-  return [...projects]
+  return projects
+    .filter((project) => project.status !== 'proposal')
+    .slice()
     .sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()

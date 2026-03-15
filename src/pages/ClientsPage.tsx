@@ -154,7 +154,7 @@ export function ClientsPage() {
               onClick={openCreateModal}
               className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
             >
-              Novo cliente
+              Novo
             </button>
           </div>
         </div>

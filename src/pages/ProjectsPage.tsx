@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Modal } from '../components/Modal';
 import { ProjectForm } from '../components/ProjectForm';
 import type { ProjectInput } from '../lib/database';
@@ -14,7 +14,6 @@ import {
 
 const statusFilterOptions: Array<ProjectStatus | 'all'> = [
   'all',
-  'proposal',
   'in_progress',
   'review',
   'completed',
@@ -28,6 +27,7 @@ function formatCurrency(value: number) {
 }
 
 export function ProjectsPage() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const {
     clients,
@@ -88,10 +88,16 @@ export function ProjectsPage() {
     });
   }, [projects, clients]);
 
+  const legacyProposalProjects = useMemo(() => {
+    return projectsWithClient.filter((project) => project.status === 'proposal');
+  }, [projectsWithClient]);
+
   const filteredProjects = useMemo(() => {
     const term = search.trim().toLowerCase();
 
-    return projectsWithClient.filter((project) => {
+    return projectsWithClient
+      .filter((project) => project.status !== 'proposal')
+      .filter((project) => {
       const matchesSearch =
         !term ||
         project.name.toLowerCase().includes(term) ||
@@ -104,8 +110,8 @@ export function ProjectsPage() {
       const matchesClient =
         clientFilter === 'all' || project.clientId === clientFilter;
 
-      return matchesSearch && matchesStatus && matchesClient;
-    });
+        return matchesSearch && matchesStatus && matchesClient;
+      });
   }, [projectsWithClient, search, statusFilter, clientFilter]);
 
   function openCreateModal() {
@@ -184,6 +190,30 @@ export function ProjectsPage() {
       {combinedError ? (
         <section className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
           {combinedError}
+        </section>
+      ) : null}
+
+      {legacyProposalProjects.length > 0 ? (
+        <section className="flex flex-col gap-4 rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="font-semibold text-amber-900">
+              {legacyProposalProjects.length} registro(s) antigo(s) ainda estao
+              com status de proposta em Projetos.
+            </p>
+            <p className="mt-1">
+              A estrutura atual separa pipeline comercial da operacao. Propostas
+              devem ser geridas na aba Propostas e projetos ficam reservados ao
+              trabalho ja ativo.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate('/propostas')}
+            className="rounded-2xl border border-amber-300 bg-white px-4 py-3 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+          >
+            Ir para Propostas
+          </button>
         </section>
       ) : null}
 

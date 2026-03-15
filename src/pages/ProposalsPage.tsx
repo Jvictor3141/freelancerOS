@@ -1,14 +1,37 @@
 import {
   ArrowRight,
-  BriefcaseBusiness,
-  CircleDollarSign,
-  FileText,
+  CheckCircle2,
+  Clock3,
+  Mail,
+  PencilLine,
+  Plus,
+  RotateCcw,
+  Send,
+  Trash2,
+  XCircle,
 } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Modal } from '../components/Modal';
+import { ProposalForm } from '../components/ProposalForm';
+import type { ProposalInput } from '../lib/database';
+import { getErrorMessage } from '../lib/supabase';
 import { useClientStore } from '../store/useClientStore';
-import { useProjectStore } from '../store/useProjectStore';
-import { projectStatusClassName, projectStatusLabel } from '../utils/projectStatus';
+import { useProposalStore } from '../store/useProposalStore';
+import type { Proposal, ProposalStatus } from '../types/proposal';
+import { buildMailtoLink, buildProposalEmail } from '../utils/proposalEmail';
+import {
+  proposalStatusClassName,
+  proposalStatusLabel,
+} from '../utils/proposalStatus';
+
+const statusOptions: Array<ProposalStatus | 'all'> = [
+  'all',
+  'draft',
+  'sent',
+  'accepted',
+  'rejected',
+];
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -17,7 +40,11 @@ function formatCurrency(value: number) {
   });
 }
 
-function formatDate(value: string) {
+function formatDate(value: string | null) {
+  if (!value) {
+    return '-';
+  }
+
   return new Date(value).toLocaleDateString('pt-BR');
 }
 
@@ -30,46 +57,226 @@ export function ProposalsPage() {
     loadClients,
   } = useClientStore();
   const {
-    projects,
-    error: projectError,
-    initialized: projectsInitialized,
-    loadProjects,
-  } = useProjectStore();
+    proposals,
+    selectedProposal,
+    error: proposalError,
+    initialized: proposalsInitialized,
+    loadProposals,
+    selectProposal,
+    addProposal,
+    editProposal,
+    removeProposal,
+    sendProposalToClient,
+    acceptProposalAndGenerateProject,
+    rejectProposalById,
+    reopenProposalById,
+  } = useProposalStore();
 
-  const combinedError = clientError ?? projectError;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] =
+    useState<ProposalStatus | 'all'>('all');
+
+  const combinedError = proposalError ?? clientError;
 
   useEffect(() => {
     void loadClients();
-    void loadProjects();
-  }, [loadClients, loadProjects]);
+    void loadProposals();
+  }, [loadClients, loadProposals]);
 
-  const proposals = useMemo(() => {
-    return projects
-      .filter((project) => project.status === 'proposal')
-      .map((project) => {
-        const client = clients.find((item) => item.id === project.clientId);
+  const proposalsWithClient = useMemo(() => {
+    return proposals.map((proposal) => {
+      const client = clients.find((item) => item.id === proposal.clientId);
 
-        return {
-          ...project,
-          clientName: client?.name ?? 'Cliente nao encontrado',
-          clientCompany: client?.company ?? '',
-        };
-      })
-      .sort(
-        (left, right) =>
-          new Date(right.createdAt).getTime() -
-          new Date(left.createdAt).getTime(),
-      );
-  }, [projects, clients]);
+      return {
+        ...proposal,
+        clientName: client?.name ?? 'Cliente nao encontrado',
+        clientCompany: client?.company ?? '',
+      };
+    });
+  }, [proposals, clients]);
 
-  const proposalValue = useMemo(() => {
-    return proposals.reduce((total, proposal) => total + proposal.value, 0);
+  const filteredProposals = useMemo(() => {
+    const term = search.trim().toLowerCase();
+
+    return proposalsWithClient.filter((proposal) => {
+      const matchesSearch =
+        !term ||
+        proposal.title.toLowerCase().includes(term) ||
+        proposal.description.toLowerCase().includes(term) ||
+        proposal.clientName.toLowerCase().includes(term) ||
+        proposal.recipientEmail.toLowerCase().includes(term);
+
+      const matchesStatus =
+        statusFilter === 'all' || proposal.status === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [proposalsWithClient, search, statusFilter]);
+
+  const metrics = useMemo(() => {
+    const draftCount = proposals.filter((proposal) => proposal.status === 'draft').length;
+    const sentCount = proposals.filter((proposal) => proposal.status === 'sent').length;
+    const acceptedCount = proposals.filter(
+      (proposal) => proposal.status === 'accepted',
+    ).length;
+    const openPipelineValue = proposals
+      .filter(
+        (proposal) =>
+          proposal.status === 'draft' || proposal.status === 'sent',
+      )
+      .reduce((total, proposal) => total + proposal.amount, 0);
+
+    return {
+      draftCount,
+      sentCount,
+      acceptedCount,
+      openPipelineValue,
+    };
   }, [proposals]);
 
-  const averageProposalValue =
-    proposals.length > 0 ? proposalValue / proposals.length : 0;
+  function openCreateModal() {
+    if (clients.length === 0) {
+      alert('Cadastre pelo menos um cliente antes de criar uma proposta.');
+      return;
+    }
 
-  if (!clientsInitialized || !projectsInitialized) {
+    selectProposal(null);
+    setIsModalOpen(true);
+  }
+
+  function openEditModal(proposalId: string) {
+    const proposal = proposals.find((item) => item.id === proposalId) ?? null;
+    selectProposal(proposal);
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    selectProposal(null);
+    setIsModalOpen(false);
+  }
+
+  async function handleProposalSubmit(values: ProposalInput) {
+    setIsSubmitting(true);
+
+    try {
+      if (selectedProposal) {
+        await editProposal(selectedProposal.id, values);
+      } else {
+        await addProposal(values);
+      }
+
+      closeModal();
+    } catch (submitError) {
+      alert(
+        getErrorMessage(submitError, 'Nao foi possivel salvar a proposta.'),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleProposalRemoval(proposal: Proposal) {
+    const confirmed = window.confirm(
+      `Deseja excluir a proposta "${proposal.title}"?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await removeProposal(proposal.id);
+    } catch (removeError) {
+      alert(
+        getErrorMessage(removeError, 'Nao foi possivel excluir a proposta.'),
+      );
+    }
+  }
+
+  async function handleSendProposal(proposal: Proposal) {
+    if (!proposal.recipientEmail.trim()) {
+      alert('Defina um email valido antes de enviar a proposta.');
+      return;
+    }
+
+    try {
+      const updatedProposal = await sendProposalToClient(proposal.id);
+      const clientName =
+        clients.find((client) => client.id === updatedProposal.clientId)?.name ??
+        'cliente';
+      const { subject, body } = buildProposalEmail(updatedProposal, clientName);
+
+      window.location.href = buildMailtoLink(
+        updatedProposal.recipientEmail,
+        subject,
+        body,
+      );
+    } catch (sendError) {
+      alert(
+        getErrorMessage(sendError, 'Nao foi possivel enviar a proposta.'),
+      );
+    }
+  }
+
+  async function handleAcceptProposal(proposal: Proposal) {
+    const confirmed = window.confirm(
+      `Aceitar a proposta "${proposal.title}" e gerar o projeto automaticamente?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await acceptProposalAndGenerateProject(proposal.id);
+      alert('Projeto gerado automaticamente na aba Projetos.');
+    } catch (acceptError) {
+      alert(
+        getErrorMessage(
+          acceptError,
+          'Nao foi possivel aceitar a proposta e gerar o projeto.',
+        ),
+      );
+    }
+  }
+
+  async function handleRejectProposal(proposal: Proposal) {
+    const confirmed = window.confirm(
+      `Marcar a proposta "${proposal.title}" como recusada?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await rejectProposalById(proposal.id);
+    } catch (rejectError) {
+      alert(
+        getErrorMessage(
+          rejectError,
+          'Nao foi possivel marcar a proposta como recusada.',
+        ),
+      );
+    }
+  }
+
+  async function handleReopenProposal(proposal: Proposal) {
+    try {
+      await reopenProposalById(proposal.id);
+    } catch (reopenError) {
+      alert(
+        getErrorMessage(
+          reopenError,
+          'Nao foi possivel reabrir a proposta.',
+        ),
+      );
+    }
+  }
+
+  if (!clientsInitialized || !proposalsInitialized) {
     return (
       <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-100">
         <p className="text-sm font-medium text-slate-500">Propostas</p>
@@ -77,7 +284,7 @@ export function ProposalsPage() {
           Carregando dados do banco...
         </h2>
         <p className="mt-2 text-sm text-slate-500">
-          Consolidando clientes e projetos em fase de proposta.
+          Preparando clientes e propostas para montar o funil comercial.
         </p>
       </section>
     );
@@ -94,42 +301,55 @@ export function ProposalsPage() {
       <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
         <article className="rounded-[28px] bg-[#635bff] p-6 text-white shadow-[0_24px_60px_rgba(99,91,255,0.28)]">
           <p className="text-sm font-medium text-indigo-100">
-            Pipeline comercial
+            Fluxo comercial
           </p>
           <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-            Propostas ainda abertas no funil
+            Proposta, envio, aceite e projeto no mesmo fluxo
           </h2>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-indigo-100/90">
-            Esta tela agora usa os projetos em status de proposta para mostrar
-            volume, valor e prioridade comercial de forma objetiva.
+            A proposta nasce como rascunho, pode ser enviada ao cliente e,
+            quando aceita, gera um projeto automaticamente sem retrabalho de
+            cadastro.
           </p>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
               <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
-                <FileText size={18} />
+                <PencilLine size={18} />
               </div>
-              <p className="text-sm text-indigo-100">Propostas abertas</p>
-              <p className="mt-2 text-2xl font-semibold">{proposals.length}</p>
-            </div>
-
-            <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
-              <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
-                <CircleDollarSign size={18} />
-              </div>
-              <p className="text-sm text-indigo-100">Valor no pipeline</p>
+              <p className="text-sm text-indigo-100">Rascunhos</p>
               <p className="mt-2 text-2xl font-semibold">
-                {formatCurrency(proposalValue)}
+                {metrics.draftCount}
               </p>
             </div>
 
             <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
               <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
-                <BriefcaseBusiness size={18} />
+                <Send size={18} />
               </div>
-              <p className="text-sm text-indigo-100">Ticket medio</p>
+              <p className="text-sm text-indigo-100">Enviadas</p>
               <p className="mt-2 text-2xl font-semibold">
-                {formatCurrency(averageProposalValue)}
+                {metrics.sentCount}
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
+              <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
+                <CheckCircle2 size={18} />
+              </div>
+              <p className="text-sm text-indigo-100">Aceitas</p>
+              <p className="mt-2 text-2xl font-semibold">
+                {metrics.acceptedCount}
+              </p>
+            </div>
+
+            <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
+              <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
+                <Clock3 size={18} />
+              </div>
+              <p className="text-sm text-indigo-100">Pipeline aberto</p>
+              <p className="mt-2 text-2xl font-semibold">
+                {formatCurrency(metrics.openPipelineValue)}
               </p>
             </div>
           </div>
@@ -138,64 +358,109 @@ export function ProposalsPage() {
         <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
           <p className="text-sm font-medium text-slate-500">Acao rapida</p>
           <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-            Transforme oportunidade em execucao
+            Nova proposta operacional
           </h3>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            Crie novas propostas direto pela tela de projetos e mantenha o funil
-            alinhado ao restante da operacao.
+            Crie a proposta, envie por email direto do app e, quando houver
+            aceite, transforme em projeto com um clique.
           </p>
 
           <button
             type="button"
-            onClick={() => navigate('/projetos?new=1')}
+            onClick={openCreateModal}
             className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
           >
             Nova proposta
-            <ArrowRight size={16} />
+            <Plus size={16} />
           </button>
 
           <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-sm font-semibold text-slate-900">
-              O que entra aqui
-            </p>
+            <p className="text-sm font-semibold text-slate-900">Fluxo</p>
             <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-600">
-              <li>Projetos com status `Proposta`.</li>
-              <li>Relacionamento com cliente ja resolvido.</li>
-              <li>Valor total visivel para priorizar follow-up.</li>
+              <li>1. Crie o rascunho com escopo, valor e prazo.</li>
+              <li>2. Envie por email para o contato do cliente.</li>
+              <li>3. Ao aceitar, gere o projeto automaticamente.</li>
             </ul>
           </div>
         </article>
       </section>
 
+      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
+        <div className="grid gap-4 lg:grid-cols-3">
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar por titulo, cliente ou email"
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
+          />
+
+          <select
+            value={statusFilter}
+            onChange={(event) =>
+              setStatusFilter(event.target.value as ProposalStatus | 'all')
+            }
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
+          >
+            {statusOptions.map((status) => (
+              <option key={status} value={status}>
+                {status === 'all'
+                  ? 'Todos os status'
+                  : proposalStatusLabel[status]}
+              </option>
+            ))}
+          </select>
+
+          <button
+            type="button"
+            onClick={() => {
+              setSearch('');
+              setStatusFilter('all');
+            }}
+            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          >
+            Limpar filtros
+          </button>
+        </div>
+      </section>
+
       <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
         <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
           <p className="text-sm font-medium text-slate-500">
-            {proposals.length} proposta(s) aberta(s)
+            {filteredProposals.length} proposta(s) encontrada(s)
           </p>
           <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-            Oportunidades em andamento
+            Propostas da operacao
           </h3>
         </div>
 
         <div className="divide-y divide-slate-100">
-          {proposals.length > 0 ? (
-            proposals.map((proposal) => (
+          {filteredProposals.length > 0 ? (
+            filteredProposals.map((proposal) => (
               <article key={proposal.id} className="space-y-4 px-5 py-5 sm:px-6">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <p className="text-lg font-semibold text-slate-900">
-                      {proposal.name}
-                    </p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      {proposal.description || 'Sem descricao cadastrada.'}
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                      <p className="text-lg font-semibold text-slate-900">
+                        {proposal.title}
+                      </p>
+                      <span
+                        className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${proposalStatusClassName[proposal.status]}`}
+                      >
+                        {proposalStatusLabel[proposal.status]}
+                      </span>
+                    </div>
+
+                    <p className="mt-2 text-sm text-slate-500">
+                      {proposal.description || 'Sem escopo detalhado.'}
                     </p>
                   </div>
 
-                  <span
-                    className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${projectStatusClassName[proposal.status]}`}
-                  >
-                    {projectStatusLabel[proposal.status]}
-                  </span>
+                  <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
+                    <p className="text-slate-500">Valor da proposta</p>
+                    <p className="mt-1 font-semibold text-slate-950">
+                      {formatCurrency(proposal.amount)}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="grid gap-2 text-sm text-slate-600 md:grid-cols-2 xl:grid-cols-4">
@@ -204,30 +469,182 @@ export function ProposalsPage() {
                     {proposal.clientName}
                   </p>
                   <p>
-                    <span className="font-medium text-slate-900">Empresa:</span>{' '}
+                    <span className="font-medium text-slate-900">
+                      Empresa:
+                    </span>{' '}
                     {proposal.clientCompany || '-'}
                   </p>
+                  <p className="break-all">
+                    <span className="font-medium text-slate-900">Email:</span>{' '}
+                    {proposal.recipientEmail}
+                  </p>
                   <p>
-                    <span className="font-medium text-slate-900">Valor:</span>{' '}
-                    {formatCurrency(proposal.value)}
+                    <span className="font-medium text-slate-900">Prazo:</span>{' '}
+                    {proposal.deliveryDays} dia(s)
                   </p>
                   <p>
                     <span className="font-medium text-slate-900">
-                      Criado em:
+                      Criada em:
                     </span>{' '}
                     {formatDate(proposal.createdAt)}
                   </p>
+                  <p>
+                    <span className="font-medium text-slate-900">
+                      Enviada em:
+                    </span>{' '}
+                    {formatDate(proposal.sentAt)}
+                  </p>
+                  <p>
+                    <span className="font-medium text-slate-900">
+                      Aceita em:
+                    </span>{' '}
+                    {formatDate(proposal.acceptedAt)}
+                  </p>
+                  <p>
+                    <span className="font-medium text-slate-900">
+                      Recusada em:
+                    </span>{' '}
+                    {formatDate(proposal.rejectedAt)}
+                  </p>
+                </div>
+
+                {proposal.notes ? (
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                    <span className="font-medium text-slate-900">
+                      Observacoes:
+                    </span>{' '}
+                    {proposal.notes}
+                  </div>
+                ) : null}
+
+                <div className="flex flex-wrap gap-2">
+                  {proposal.status !== 'accepted' ? (
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(proposal.id)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    >
+                      <PencilLine size={16} />
+                      Editar
+                    </button>
+                  ) : null}
+
+                  {(proposal.status === 'draft' || proposal.status === 'rejected') ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void handleSendProposal(proposal);
+                      }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-50"
+                    >
+                      <Mail size={16} />
+                      Enviar ao cliente
+                    </button>
+                  ) : null}
+
+                  {proposal.status === 'sent' ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void handleSendProposal(proposal);
+                      }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-50"
+                    >
+                      <Send size={16} />
+                      Reenviar
+                    </button>
+                  ) : null}
+
+                  {(proposal.status === 'draft' || proposal.status === 'sent') ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void handleAcceptProposal(proposal);
+                      }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+                    >
+                      <CheckCircle2 size={16} />
+                      Aceitar e gerar projeto
+                    </button>
+                  ) : null}
+
+                  {(proposal.status === 'draft' || proposal.status === 'sent') ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void handleRejectProposal(proposal);
+                      }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
+                    >
+                      <XCircle size={16} />
+                      Marcar como recusada
+                    </button>
+                  ) : null}
+
+                  {proposal.status === 'rejected' ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void handleReopenProposal(proposal);
+                      }}
+                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    >
+                      <RotateCcw size={16} />
+                      Reabrir rascunho
+                    </button>
+                  ) : null}
+
+                  {proposal.status === 'accepted' ? (
+                    <button
+                      type="button"
+                      onClick={() => navigate('/projetos')}
+                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+                    >
+                      <ArrowRight size={16} />
+                      Abrir projetos
+                    </button>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void handleProposalRemoval(proposal);
+                    }}
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  >
+                    <Trash2 size={16} />
+                    Excluir
+                  </button>
                 </div>
               </article>
             ))
           ) : (
             <div className="px-5 py-10 text-center text-sm text-slate-500 sm:px-6">
-              Nenhuma proposta aberta. Crie um novo projeto em status de
-              proposta para alimentar essa tela.
+              Nenhuma proposta encontrada. Crie a primeira para começar o fluxo
+              comercial.
             </div>
           )}
         </div>
       </section>
+
+      <Modal
+        title={selectedProposal ? 'Editar proposta' : 'Nova proposta'}
+        description={
+          selectedProposal
+            ? 'Ajuste a proposta antes de reenviar ao cliente.'
+            : 'Preencha os dados comerciais para criar uma nova proposta.'
+        }
+        isOpen={isModalOpen}
+        onClose={closeModal}
+      >
+        <ProposalForm
+          clients={clients}
+          initialValues={selectedProposal}
+          onCancel={closeModal}
+          onSubmit={handleProposalSubmit}
+          isSubmitting={isSubmitting}
+        />
+      </Modal>
     </div>
   );
 }

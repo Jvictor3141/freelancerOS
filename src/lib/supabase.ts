@@ -42,6 +42,17 @@ export function getSupabaseErrorMessage(
     return 'As tabelas do Supabase ainda nao existem. Execute o arquivo supabase/schema.sql antes de usar o app.';
   }
 
+  if (
+    error.message.includes('function') &&
+    error.message.includes('does not exist')
+  ) {
+    return 'A funcao esperada no Supabase ainda nao existe. Atualize o banco com o arquivo supabase/schema.sql.';
+  }
+
+  if (error.message.includes('schema cache')) {
+    return 'A funcao esperada no Supabase ainda nao esta disponivel no schema cache. Rode o SQL da funcao e tente novamente em alguns segundos.';
+  }
+
   if (error.code === '23503') {
     return 'Existe um relacionamento pendente entre os registros. Revise os dados vinculados antes de continuar.';
   }

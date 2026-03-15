@@ -1,58 +1,56 @@
 import { useEffect, useState } from 'react';
+import type { ProposalInput } from '../lib/database';
 import type { Client } from '../types/client';
-import type { Project, ProjectStatus } from '../types/project';
-import { projectStatusLabel } from '../utils/projectStatus';
+import type { Proposal } from '../types/proposal';
 
-type ProjectFormValues = Omit<Project, 'id' | 'createdAt'>;
-
-type ProjectFormProps = {
+type ProposalFormProps = {
   clients: Client[];
-  initialValues?: Project | null;
-  onSubmit: (values: ProjectFormValues) => Promise<void> | void;
+  initialValues?: Proposal | null;
+  onSubmit: (values: ProposalInput) => Promise<void> | void;
   onCancel: () => void;
   isSubmitting?: boolean;
 };
 
-const emptyValues: ProjectFormValues = {
+const emptyValues: ProposalInput = {
   clientId: '',
-  name: '',
+  title: '',
   description: '',
-  value: 0,
-  deadline: '',
-  status: 'in_progress',
+  amount: 0,
+  deliveryDays: 7,
+  recipientEmail: '',
+  status: 'draft',
+  notes: '',
 };
 
-const defaultStatusOptions: ProjectStatus[] = ['in_progress', 'review', 'completed'];
-
-export function ProjectForm({
+export function ProposalForm({
   clients,
   initialValues,
   onSubmit,
   onCancel,
   isSubmitting = false,
-}: ProjectFormProps) {
-  const [values, setValues] = useState<ProjectFormValues>(emptyValues);
-  const statusOptions =
-    initialValues?.status === 'proposal'
-      ? (['proposal', ...defaultStatusOptions] as ProjectStatus[])
-      : defaultStatusOptions;
+}: ProposalFormProps) {
+  const [values, setValues] = useState<ProposalInput>(emptyValues);
 
   useEffect(() => {
     if (initialValues) {
       setValues({
         clientId: initialValues.clientId,
-        name: initialValues.name,
+        title: initialValues.title,
         description: initialValues.description,
-        value: initialValues.value,
-        deadline: initialValues.deadline,
-        status: initialValues.status,
+        amount: initialValues.amount,
+        deliveryDays: initialValues.deliveryDays,
+        recipientEmail: initialValues.recipientEmail,
+        status: 'draft',
+        notes: initialValues.notes,
       });
       return;
     }
 
+    const firstClient = clients[0];
     setValues({
       ...emptyValues,
-      clientId: clients[0]?.id ?? '',
+      clientId: firstClient?.id ?? '',
+      recipientEmail: firstClient?.email ?? '',
     });
   }, [initialValues, clients]);
 
@@ -63,10 +61,23 @@ export function ProjectForm({
   ) {
     const { name, value } = event.target;
 
-    setValues((previousValues) => ({
-      ...previousValues,
-      [name]: name === 'value' ? Number(value) : value,
-    }));
+    setValues((previousValues) => {
+      if (name === 'clientId') {
+        const selectedClient = clients.find((client) => client.id === value);
+
+        return {
+          ...previousValues,
+          clientId: value,
+          recipientEmail: selectedClient?.email ?? previousValues.recipientEmail,
+        };
+      }
+
+      return {
+        ...previousValues,
+        [name]:
+          name === 'amount' || name === 'deliveryDays' ? Number(value) : value,
+      };
+    });
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -77,23 +88,35 @@ export function ProjectForm({
       return;
     }
 
-    if (!values.name.trim()) {
-      alert('O nome do projeto e obrigatorio.');
+    if (!values.title.trim()) {
+      alert('Informe o titulo da proposta.');
       return;
     }
 
-    if (values.value < 0) {
-      alert('O valor do projeto nao pode ser negativo.');
+    if (values.amount <= 0) {
+      alert('Informe um valor maior que zero.');
+      return;
+    }
+
+    if (values.deliveryDays <= 0) {
+      alert('Informe um prazo valido em dias.');
+      return;
+    }
+
+    if (!values.recipientEmail.trim()) {
+      alert('Informe o email de envio.');
       return;
     }
 
     await onSubmit({
       clientId: values.clientId,
-      name: values.name.trim(),
+      title: values.title.trim(),
       description: values.description.trim(),
-      value: Number(values.value),
-      deadline: values.deadline,
-      status: values.status,
+      amount: values.amount,
+      deliveryDays: values.deliveryDays,
+      recipientEmail: values.recipientEmail.trim(),
+      status: 'draft',
+      notes: values.notes.trim(),
     });
   }
 
@@ -121,27 +144,14 @@ export function ProjectForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Nome do projeto
+          Titulo da proposta
         </span>
         <input
-          name="name"
-          value={values.name}
+          name="title"
+          value={values.title}
           onChange={handleChange}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Ex.: Landing page institucional"
-        />
-      </label>
-
-      <label>
-        <span className="mb-2 block text-sm font-medium text-slate-700">
-          Descricao
-        </span>
-        <textarea
-          name="description"
-          value={values.description}
-          onChange={handleChange}
-          className="min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Descreva o escopo do projeto..."
+          placeholder="Ex.: Redesign do site institucional"
         />
       </label>
 
@@ -151,11 +161,11 @@ export function ProjectForm({
             Valor
           </span>
           <input
-            name="value"
+            name="amount"
             type="number"
             min="0"
             step="0.01"
-            value={values.value}
+            value={values.amount}
             onChange={handleChange}
             className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
             placeholder="0,00"
@@ -164,12 +174,14 @@ export function ProjectForm({
 
         <label>
           <span className="mb-2 block text-sm font-medium text-slate-700">
-            Prazo
+            Prazo estimado em dias
           </span>
           <input
-            name="deadline"
-            type="date"
-            value={values.deadline}
+            name="deliveryDays"
+            type="number"
+            min="1"
+            step="1"
+            value={values.deliveryDays}
             onChange={handleChange}
             className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
           />
@@ -178,20 +190,42 @@ export function ProjectForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Status
+          Email do destinatario
         </span>
-        <select
-          name="status"
-          value={values.status}
+        <input
+          name="recipientEmail"
+          type="email"
+          value={values.recipientEmail}
           onChange={handleChange}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-        >
-          {statusOptions.map((status) => (
-            <option key={status} value={status}>
-              {projectStatusLabel[status]}
-            </option>
-          ))}
-        </select>
+          placeholder="contato@cliente.com"
+        />
+      </label>
+
+      <label>
+        <span className="mb-2 block text-sm font-medium text-slate-700">
+          Escopo
+        </span>
+        <textarea
+          name="description"
+          value={values.description}
+          onChange={handleChange}
+          className="min-h-32 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+          placeholder="Descreva entregaveis, revisoes, etapas e limites da proposta..."
+        />
+      </label>
+
+      <label>
+        <span className="mb-2 block text-sm font-medium text-slate-700">
+          Observacoes internas
+        </span>
+        <textarea
+          name="notes"
+          value={values.notes}
+          onChange={handleChange}
+          className="min-h-24 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+          placeholder="Contexto comercial, margem, pontos para negociar..."
+        />
       </label>
 
       <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
@@ -209,7 +243,7 @@ export function ProjectForm({
           disabled={isSubmitting}
           className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
-          {isSubmitting ? 'Salvando...' : 'Salvar projeto'}
+          {isSubmitting ? 'Salvando...' : 'Salvar proposta'}
         </button>
       </div>
     </form>

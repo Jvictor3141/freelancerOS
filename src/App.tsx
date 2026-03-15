@@ -5,6 +5,7 @@ import { LoginPage } from './pages/LoginPage';
 import { useAuthStore } from './store/useAuthStore';
 import { useClientStore } from './store/useClientStore';
 import { usePaymentStore } from './store/usePaymentStore';
+import { useProposalStore } from './store/useProposalStore';
 import { useProjectStore } from './store/useProjectStore';
 
 const DashboardPage = lazy(async () => ({
@@ -79,6 +80,7 @@ function App() {
     useClientStore.getState().resetStore();
     useProjectStore.getState().resetStore();
     usePaymentStore.getState().resetStore();
+    useProposalStore.getState().resetStore();
     previousUserIdRef.current = currentUserId;
   }, [user?.id]);
 

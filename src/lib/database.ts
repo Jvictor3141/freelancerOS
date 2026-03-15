@@ -1,5 +1,6 @@
 import type { Client } from '../types/client';
 import type { Payment } from '../types/payment';
+import type { Proposal } from '../types/proposal';
 import type { Project } from '../types/project';
 
 type NumericValue = number | string;
@@ -7,6 +8,10 @@ type NumericValue = number | string;
 export type ClientInput = Omit<Client, 'id' | 'createdAt'>;
 export type ProjectInput = Omit<Project, 'id' | 'createdAt'>;
 export type PaymentInput = Omit<Payment, 'id' | 'createdAt'>;
+export type ProposalInput = Omit<
+  Proposal,
+  'id' | 'projectId' | 'sentAt' | 'acceptedAt' | 'rejectedAt' | 'createdAt'
+>;
 
 export type ClientRecord = {
   id: string;
@@ -44,6 +49,24 @@ export type PaymentRecord = {
   created_at: string;
 };
 
+export type ProposalRecord = {
+  id: string;
+  user_id: string;
+  client_id: string;
+  project_id: string | null;
+  title: string;
+  description: string | null;
+  amount: NumericValue;
+  delivery_days: number;
+  recipient_email: string;
+  status: Proposal['status'];
+  sent_at: string | null;
+  accepted_at: string | null;
+  rejected_at: string | null;
+  notes: string | null;
+  created_at: string;
+};
+
 type ClientPayloadOptions = {
   id?: string;
   createdAt?: string;
@@ -60,6 +83,16 @@ type PaymentPayloadOptions = {
   id?: string;
   createdAt?: string;
   userId?: string;
+};
+
+type ProposalPayloadOptions = {
+  id?: string;
+  createdAt?: string;
+  userId?: string;
+  projectId?: string | null;
+  sentAt?: string | null;
+  acceptedAt?: string | null;
+  rejectedAt?: string | null;
 };
 
 // Os mapeamentos abaixo convertem o formato snake_case do banco no shape usado pela UI.
@@ -97,6 +130,25 @@ export function mapPaymentRecord(record: PaymentRecord): Payment {
     paidAt: record.paid_at,
     status: record.status,
     method: record.method,
+    notes: record.notes ?? '',
+    createdAt: record.created_at,
+  };
+}
+
+export function mapProposalRecord(record: ProposalRecord): Proposal {
+  return {
+    id: record.id,
+    clientId: record.client_id,
+    projectId: record.project_id,
+    title: record.title,
+    description: record.description ?? '',
+    amount: Number(record.amount),
+    deliveryDays: Number(record.delivery_days || 0),
+    recipientEmail: record.recipient_email,
+    status: record.status,
+    sentAt: record.sent_at,
+    acceptedAt: record.accepted_at,
+    rejectedAt: record.rejected_at,
     notes: record.notes ?? '',
     createdAt: record.created_at,
   };
@@ -150,6 +202,33 @@ export function toPaymentPayload(
     paid_at: data.paidAt,
     status: data.status,
     method: data.method,
+    notes: data.notes,
+  };
+}
+
+export function toProposalPayload(
+  data: ProposalInput,
+  options?: ProposalPayloadOptions,
+) {
+  return {
+    ...(options?.id ? { id: options.id } : {}),
+    ...(options?.createdAt ? { created_at: options.createdAt } : {}),
+    ...(options?.userId ? { user_id: options.userId } : {}),
+    ...(options?.projectId !== undefined ? { project_id: options.projectId } : {}),
+    ...(options?.sentAt !== undefined ? { sent_at: options.sentAt } : {}),
+    ...(options?.acceptedAt !== undefined
+      ? { accepted_at: options.acceptedAt }
+      : {}),
+    ...(options?.rejectedAt !== undefined
+      ? { rejected_at: options.rejectedAt }
+      : {}),
+    client_id: data.clientId,
+    title: data.title,
+    description: data.description,
+    amount: data.amount,
+    delivery_days: data.deliveryDays,
+    recipient_email: data.recipientEmail,
+    status: data.status,
     notes: data.notes,
   };
 }
