@@ -6,7 +6,7 @@ export function Sidebar() {
   const { user } = useAuthStore();
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-slate-200 bg-white/90 px-5 py-6 backdrop-blur lg:flex lg:flex-col">
+    <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-slate-200 bg-white/90 px-5 py-6 backdrop-blur xl:flex xl:flex-col">
       <div className="flex items-center gap-3 px-2">
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#635bff] text-white shadow-lg shadow-indigo-200">
           <BriefcaseBusiness size={20} />
