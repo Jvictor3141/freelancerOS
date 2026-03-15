@@ -1,286 +1,682 @@
-import { Database, ShieldCheck, UserRound, Workflow } from 'lucide-react';
-import { useEffect, useMemo } from 'react';
+import {
+  ArrowUpRight,
+  BriefcaseBusiness,
+  Globe,
+  KeyRound,
+  Mail,
+  MapPin,
+  Palette,
+  Save,
+  ShieldCheck,
+  Sparkles,
+} from 'lucide-react';
+import type { ReactNode } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { Modal } from '../components/Modal';
+import { getErrorMessage } from '../lib/supabase';
+import {
+  requestPasswordReset,
+  updateFreelancerProfile,
+  updatePassword,
+} from '../services/authService';
 import { useAuthStore } from '../store/useAuthStore';
-import { useClientStore } from '../store/useClientStore';
-import { usePaymentStore } from '../store/usePaymentStore';
-import { useProjectStore } from '../store/useProjectStore';
+import { usePreferencesStore } from '../store/usePreferencesStore';
+import type {
+  FreelancerProfile,
+  WorkspaceTheme,
+} from '../types/freelancerProfile';
+import {
+  buildFreelancerIntro,
+  buildFreelancerSignatureLines,
+  emptyFreelancerProfile,
+  getFreelancerProfileFromUser,
+  sanitizeFreelancerProfile,
+} from '../utils/freelancerProfile';
 
-type StatusItem = {
+type ThemeOption = {
+  value: WorkspaceTheme;
   label: string;
-  value: string;
-  tone?: 'default' | 'success';
+  description: string;
+  previewClassName: string;
 };
 
-function StatusList({
-  title,
-  description,
-  items,
-}: {
-  title: string;
-  description: string;
-  items: StatusItem[];
-}) {
-  return (
-    <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-      <p className="text-sm font-medium text-slate-500">{description}</p>
-      <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-        {title}
-      </h3>
+type FeedbackState = {
+  tone: 'success' | 'error';
+  message: string;
+} | null;
 
-      <div className="mt-6 space-y-3">
-        {items.map((item) => (
-          <div
-            key={item.label}
-            className="flex flex-col gap-2 rounded-2xl border border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <span className="text-sm font-medium text-slate-700">
-              {item.label}
-            </span>
-            <span
-              className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${
-                item.tone === 'success'
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : 'bg-slate-100 text-slate-700'
-              }`}
-            >
-              {item.value}
-            </span>
-          </div>
-        ))}
+type SummaryActionCardProps = {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  hint: string;
+  onClick: () => void;
+};
+
+const themeOptions: ThemeOption[] = [
+  {
+    value: 'indigo',
+    label: 'Studio',
+    description: 'Visual frio, nitido e com cara de produto premium.',
+    previewClassName:
+      'bg-[linear-gradient(135deg,#635bff_0%,#7c73ff_52%,#dbeafe_100%)]',
+  },
+  {
+    value: 'sunset',
+    label: 'Editorial',
+    description: 'Paleta quente para um painel mais humano e autoral.',
+    previewClassName:
+      'bg-[linear-gradient(135deg,#ea580c_0%,#fb923c_52%,#ffedd5_100%)]',
+  },
+  {
+    value: 'forest',
+    label: 'Atelier',
+    description: 'Clima mais calmo para freelancers de branding e design.',
+    previewClassName:
+      'bg-[linear-gradient(135deg,#15803d_0%,#22c55e_52%,#dcfce7_100%)]',
+  },
+];
+
+function FeedbackBanner({ feedback }: { feedback: FeedbackState }) {
+  if (!feedback) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`rounded-2xl px-4 py-3 text-sm ${
+        feedback.tone === 'success'
+          ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+          : 'border border-rose-200 bg-rose-50 text-rose-700'
+      }`}
+    >
+      {feedback.message}
+    </div>
+  );
+}
+
+function SummaryActionCard({
+  icon,
+  label,
+  value,
+  hint,
+  onClick,
+}: SummaryActionCardProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-sm hover:shadow-slate-200"
+    >
+      <div className="mb-3 inline-flex rounded-2xl bg-white p-3 text-slate-700 shadow-sm shadow-slate-200">
+        {icon}
       </div>
-    </article>
+      <p className="text-sm text-slate-500">{label}</p>
+      <div className="mt-2 flex items-start justify-between gap-3">
+        <p className="min-w-0 truncate text-lg font-semibold text-slate-950">
+          {value}
+        </p>
+        <span className="inline-flex rounded-full border border-slate-200 bg-white p-2 text-slate-500 transition group-hover:border-slate-300 group-hover:text-slate-900">
+          <ArrowUpRight size={14} />
+        </span>
+      </div>
+      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+        {hint}
+      </p>
+    </button>
   );
 }
 
 export function SettingsPage() {
   const { user } = useAuthStore();
-  const {
-    clients,
-    initialized: clientsInitialized,
-    loadClients,
-  } = useClientStore();
-  const {
-    projects,
-    initialized: projectsInitialized,
-    loadProjects,
-  } = useProjectStore();
-  const {
-    payments,
-    initialized: paymentsInitialized,
-    loadPayments,
-  } = usePaymentStore();
+  const { search } = useLocation();
+  const theme = usePreferencesStore((state) => state.theme);
+  const setTheme = usePreferencesStore((state) => state.setTheme);
+  const [profileValues, setProfileValues] =
+    useState<FreelancerProfile>(emptyFreelancerProfile);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [profileFeedback, setProfileFeedback] = useState<FeedbackState>(null);
+  const [securityFeedback, setSecurityFeedback] = useState<FeedbackState>(null);
+  const [profileSubmitting, setProfileSubmitting] = useState(false);
+  const [securitySubmitting, setSecuritySubmitting] = useState(false);
+  const [isThemeModalOpen, setThemeModalOpen] = useState(false);
+  const [isSecurityModalOpen, setSecurityModalOpen] = useState(false);
+  const [isProfileModalOpen, setProfileModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!clientsInitialized) {
-      void loadClients();
-    }
+    setProfileValues(getFreelancerProfileFromUser(user));
+  }, [user]);
 
-    if (!projectsInitialized) {
-      void loadProjects();
-    }
-
-    if (!paymentsInitialized) {
-      void loadPayments();
-    }
-  }, [
-    clientsInitialized,
-    loadClients,
-    loadPayments,
-    loadProjects,
-    paymentsInitialized,
-    projectsInitialized,
-  ]);
-
-  const accountItems = useMemo<StatusItem[]>(() => {
-    return [
-      {
-        label: 'Conta ativa',
-        value: user?.email ?? 'Usuario autenticado',
-        tone: 'success',
-      },
-      {
-        label: 'Sessao protegida',
-        value: 'Supabase Auth',
-        tone: 'success',
-      },
-      {
-        label: 'Modo de acesso',
-        value:
-          import.meta.env.VITE_SUPABASE_AUTO_ANON_AUTH === 'true'
-            ? 'Login ou sessao anonima'
-            : 'Login obrigatorio',
-      },
-    ];
-  }, [user?.email]);
-
-  const workspaceItems = useMemo<StatusItem[]>(() => {
-    return [
-      {
-        label: 'Clientes cadastrados',
-        value: String(clients.length),
-      },
-      {
-        label: 'Projetos ativos no workspace',
-        value: String(projects.length),
-      },
-      {
-        label: 'Pagamentos registrados',
-        value: String(payments.length),
-      },
-    ];
-  }, [clients.length, payments.length, projects.length]);
-
-  const infraItems = useMemo<StatusItem[]>(() => {
-    return [
-      {
-        label: 'VITE_SUPABASE_URL',
-        value: import.meta.env.VITE_SUPABASE_URL ? 'Configurada' : 'Ausente',
-        tone: import.meta.env.VITE_SUPABASE_URL ? 'success' : 'default',
-      },
-      {
-        label: 'Publishable key',
-        value:
-          import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-          import.meta.env.VITE_SUPABASE_ANON_KEY
-            ? 'Configurada'
-            : 'Ausente',
-        tone:
-          import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-          import.meta.env.VITE_SUPABASE_ANON_KEY
-            ? 'success'
-            : 'default',
-      },
-      {
-        label: 'Persistencia de sessao',
-        value: 'Ativa no cliente',
-        tone: 'success',
-      },
-    ];
-  }, []);
-
-  const recommendations = useMemo(() => {
-    const items: string[] = [];
-
-    if (clients.length === 0) {
-      items.push('Cadastrar a primeira base de clientes.');
-    }
-
-    if (projects.length === 0) {
-      items.push('Criar projetos para alimentar dashboard e propostas.');
-    }
-
-    if (payments.length === 0) {
-      items.push('Registrar pagamentos para ativar o controle financeiro.');
-    }
-
-    if (items.length === 0) {
-      items.push(
-        'A estrutura minima do app esta preenchida. O proximo ganho real esta em relatorios e automacoes.',
-      );
-    }
-
-    return items;
-  }, [clients.length, payments.length, projects.length]);
-
-  if (!clientsInitialized || !projectsInitialized || !paymentsInitialized) {
+  const currentTheme = useMemo(() => {
     return (
-      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-100">
-        <p className="text-sm font-medium text-slate-500">Configuracoes</p>
-        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-          Carregando dados do ambiente...
-        </h2>
-        <p className="mt-2 text-sm text-slate-500">
-          Validando conta ativa, estrutura do workspace e configuracao do
-          Supabase.
-        </p>
-      </section>
+      themeOptions.find((option) => option.value === theme) ?? themeOptions[0]!
     );
+  }, [theme]);
+
+  const isRecoveryFlow = useMemo(() => {
+    return new URLSearchParams(search).get('recovery') === '1';
+  }, [search]);
+
+  useEffect(() => {
+    if (isRecoveryFlow) {
+      setSecurityModalOpen(true);
+    }
+  }, [isRecoveryFlow]);
+
+  const profileIntro = useMemo(() => {
+    return buildFreelancerIntro(profileValues);
+  }, [profileValues]);
+
+  const profilePreviewLines = useMemo(() => {
+    return buildFreelancerSignatureLines(profileValues);
+  }, [profileValues]);
+
+  function handleProfileFieldChange(
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
+    const { name, value } = event.target;
+
+    setProfileValues((currentValues) => ({
+      ...currentValues,
+      [name]: value,
+    }));
+  }
+
+  async function handleProfileSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!user) {
+      return;
+    }
+
+    setProfileSubmitting(true);
+    setProfileFeedback(null);
+
+    try {
+      const sanitizedProfile = sanitizeFreelancerProfile(
+        profileValues,
+        user.email,
+      );
+      const { error } = await updateFreelancerProfile(
+        sanitizedProfile,
+        user.user_metadata,
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      setProfileValues(sanitizedProfile);
+      setProfileFeedback({
+        tone: 'success',
+        message:
+          'Perfil comercial salvo. As proximas propostas ja podem sair com sua assinatura e posicionamento.',
+      });
+    } catch (error) {
+      setProfileFeedback({
+        tone: 'error',
+        message: getErrorMessage(
+          error,
+          'Nao foi possivel salvar o perfil profissional.',
+        ),
+      });
+    } finally {
+      setProfileSubmitting(false);
+    }
+  }
+
+  async function handlePasswordReset() {
+    if (!user?.email) {
+      setSecurityFeedback({
+        tone: 'error',
+        message: 'A conta atual nao possui um email valido para recuperacao.',
+      });
+      return;
+    }
+
+    setSecuritySubmitting(true);
+    setSecurityFeedback(null);
+
+    try {
+      const { error } = await requestPasswordReset(user.email);
+
+      if (error) {
+        throw error;
+      }
+
+      setSecurityFeedback({
+        tone: 'success',
+        message: `Link de recuperacao enviado para ${user.email}.`,
+      });
+    } catch (error) {
+      setSecurityFeedback({
+        tone: 'error',
+        message: getErrorMessage(
+          error,
+          'Nao foi possivel enviar o link de recuperacao.',
+        ),
+      });
+    } finally {
+      setSecuritySubmitting(false);
+    }
+  }
+
+  async function handlePasswordUpdate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (newPassword.length < 6) {
+      setSecurityFeedback({
+        tone: 'error',
+        message: 'Use uma senha com pelo menos 6 caracteres.',
+      });
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setSecurityFeedback({
+        tone: 'error',
+        message: 'A confirmacao da nova senha nao confere.',
+      });
+      return;
+    }
+
+    setSecuritySubmitting(true);
+    setSecurityFeedback(null);
+
+    try {
+      const { error } = await updatePassword(newPassword);
+
+      if (error) {
+        throw error;
+      }
+
+      setNewPassword('');
+      setConfirmPassword('');
+      setSecurityFeedback({
+        tone: 'success',
+        message:
+          'Senha atualizada com sucesso. Se voce abriu o app por um link de recuperacao, ele ja pode ser descartado.',
+      });
+    } catch (error) {
+      setSecurityFeedback({
+        tone: 'error',
+        message: getErrorMessage(
+          error,
+          'Nao foi possivel atualizar a senha da conta.',
+        ),
+      });
+    } finally {
+      setSecuritySubmitting(false);
+    }
   }
 
   return (
-    <div className="space-y-6">
-      <section className="grid gap-6 xl:grid-cols-2">
-        <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-          <div className="mb-5 inline-flex rounded-2xl bg-indigo-50 p-3 text-[#635bff]">
-            <UserRound size={18} />
+    <>
+      <div className="space-y-6">
+        <section className="grid items-start gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
+            <div className="mb-5 inline-flex rounded-2xl bg-indigo-50 p-3 text-[#635bff]">
+              <Sparkles size={18} />
+            </div>
+            <p className="text-sm font-medium text-slate-500">
+              Aparencia, conta e posicionamento
+            </p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
+              Configure o painel para parecer seu
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
+              Os cards abaixo viram atalhos reais: tema abre em modal,
+              seguranca abre em modal e a identidade profissional tambem fica
+              concentrada em modal.
+            </p>
+
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+              <SummaryActionCard
+                icon={<Palette size={18} />}
+                label="Tema atual"
+                value={currentTheme.label}
+                hint="Abrir tema"
+                onClick={() => setThemeModalOpen(true)}
+              />
+
+              <SummaryActionCard
+                icon={<BriefcaseBusiness size={18} />}
+                label="Assinatura usada"
+                value={
+                  profileValues.businessName ||
+                  profileValues.displayName ||
+                  'Nao configurada'
+                }
+                hint="Abrir perfil"
+                onClick={() => setProfileModalOpen(true)}
+              />
+
+              <SummaryActionCard
+                icon={<ShieldCheck size={18} />}
+                label="Conta"
+                value={user?.email ?? 'Conta autenticada'}
+                hint="Abrir seguranca"
+                onClick={() => setSecurityModalOpen(true)}
+              />
+            </div>
+          </article>
+
+          <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
+            <p className="text-sm font-medium text-slate-500">
+              Preview nas propostas
+            </p>
+            <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+              Como sua identidade aparece para o cliente
+            </h3>
+            <p className="mt-3 text-sm leading-6 text-slate-600">
+              Esse bloco entra no email da proposta para levar contexto
+              comercial junto com valor, prazo e escopo.
+            </p>
+
+            <div className="mt-6 rounded-[28px] border border-slate-200 bg-slate-50 p-5">
+              <div className="flex items-start gap-3">
+                <div className="rounded-2xl bg-white p-3 text-[#635bff] shadow-sm shadow-slate-200">
+                  <Mail size={18} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Proposta comercial
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Assunto de email + assinatura comercial
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-5 rounded-3xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">
+                <p>Ola, cliente.</p>
+                {profileIntro ? <p className="mt-3">{profileIntro}</p> : null}
+                <p className="mt-3">
+                  Segue a proposta do projeto "Landing Page".
+                </p>
+
+                {profilePreviewLines.length > 0 ? (
+                  <div className="mt-4 space-y-2 border-t border-slate-200 pt-4 text-slate-700">
+                    {profilePreviewLines.map((line) => (
+                      <p key={line}>{line}</p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-2xl border border-dashed border-slate-300 px-4 py-3 text-slate-500">
+                    Preencha seu perfil para personalizar as propostas
+                    enviadas.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6 space-y-3 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              <div className="flex items-start gap-3">
+                <BriefcaseBusiness size={16} className="mt-0.5 text-slate-500" />
+                <p>Nome comercial e especialidade reforcam autoridade.</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <Globe size={16} className="mt-0.5 text-slate-500" />
+                <p>Site e WhatsApp reduzem atrito na resposta do cliente.</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <MapPin size={16} className="mt-0.5 text-slate-500" />
+                <p>Cidade e assinatura deixam a comunicacao menos generica.</p>
+              </div>
+            </div>
+          </article>
+        </section>
+      </div>
+
+      <Modal
+        title="Identidade profissional"
+        description="Edite sua apresentacao comercial sem deixar a tela principal carregada."
+        isOpen={isProfileModalOpen}
+        onClose={() => setProfileModalOpen(false)}
+      >
+        <form onSubmit={handleProfileSubmit} className="space-y-4">
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+            Esses dados alimentam sua presenca nas propostas e deixam o
+            produto com cara de ferramenta para freelancer, nao de CRUD
+            generico.
           </div>
-          <p className="text-sm font-medium text-slate-500">Conta e acesso</p>
-          <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-            Configuracao real do painel
-          </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-            Esta pagina deixou de ser um conjunto de toggles estaticos. Agora
-            ela mostra o estado real da conta, do ambiente e do workspace.
-          </p>
 
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <div className="mb-3 inline-flex rounded-2xl bg-white p-3 text-slate-700 shadow-sm shadow-slate-200">
-                <ShieldCheck size={18} />
-              </div>
-              <p className="text-sm text-slate-500">Autenticacao</p>
-              <p className="mt-2 text-lg font-semibold text-slate-950">
-                Ativa
-              </p>
-            </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                Nome de exibicao
+              </span>
+              <input
+                name="displayName"
+                value={profileValues.displayName}
+                onChange={handleProfileFieldChange}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+                placeholder="Seu nome ou nome artistico"
+              />
+            </label>
 
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <div className="mb-3 inline-flex rounded-2xl bg-white p-3 text-slate-700 shadow-sm shadow-slate-200">
-                <Database size={18} />
-              </div>
-              <p className="text-sm text-slate-500">Banco</p>
-              <p className="mt-2 text-lg font-semibold text-slate-950">
-                Supabase
-              </p>
-            </div>
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                Nome do estudio ou empresa
+              </span>
+              <input
+                name="businessName"
+                value={profileValues.businessName}
+                onChange={handleProfileFieldChange}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+                placeholder="Ex.: Atelier Norte"
+              />
+            </label>
 
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
-              <div className="mb-3 inline-flex rounded-2xl bg-white p-3 text-slate-700 shadow-sm shadow-slate-200">
-                <Workflow size={18} />
-              </div>
-              <p className="text-sm text-slate-500">Workspace</p>
-              <p className="mt-2 text-lg font-semibold text-slate-950">
-                {clients.length + projects.length + payments.length} registros
-              </p>
-            </div>
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                Cargo ou especialidade
+              </span>
+              <input
+                name="headline"
+                value={profileValues.headline}
+                onChange={handleProfileFieldChange}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+                placeholder="Ex.: Designer de produto"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                Cidade ou base de operacao
+              </span>
+              <input
+                name="city"
+                value={profileValues.city}
+                onChange={handleProfileFieldChange}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+                placeholder="Ex.: Sao Paulo, SP"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                Site ou portfolio
+              </span>
+              <input
+                name="website"
+                value={profileValues.website}
+                onChange={handleProfileFieldChange}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+                placeholder="https://seuportfolio.com"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                WhatsApp comercial
+              </span>
+              <input
+                name="whatsapp"
+                value={profileValues.whatsapp}
+                onChange={handleProfileFieldChange}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+                placeholder="(11) 99999-9999"
+              />
+            </label>
           </div>
-        </article>
 
-        <StatusList
-          title="Checklist da conta"
-          description="Status atual"
-          items={accountItems}
-        />
-      </section>
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-slate-700">
+              Como voce se apresenta ao cliente
+            </span>
+            <textarea
+              name="bio"
+              value={profileValues.bio}
+              onChange={handleProfileFieldChange}
+              className="min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+              placeholder="Ex.: Ajudo negocios a transformar operacao, branding e conversao em interfaces mais claras."
+            />
+          </label>
 
-      <section className="grid gap-6 xl:grid-cols-2">
-        <StatusList
-          title="Volume do workspace"
-          description="Uso atual"
-          items={workspaceItems}
-        />
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-slate-700">
+              Fechamento usado nas propostas
+            </span>
+            <textarea
+              name="proposalSignature"
+              value={profileValues.proposalSignature}
+              onChange={handleProfileFieldChange}
+              className="min-h-24 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+              placeholder="Ex.: Fico a disposicao para alinhar ajustes e iniciar assim que houver sinal verde."
+            />
+          </label>
 
-        <StatusList
-          title="Infraestrutura"
-          description="Ambiente"
-          items={infraItems}
-        />
-      </section>
+          <FeedbackBanner feedback={profileFeedback} />
 
-      <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-        <p className="text-sm font-medium text-slate-500">
-          Proximos passos recomendados
-        </p>
-        <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-          O que move o produto daqui para frente
-        </h3>
+          <button
+            type="submit"
+            disabled={profileSubmitting}
+            className="inline-flex items-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-70"
+          >
+            <Save size={16} />
+            {profileSubmitting ? 'Salvando...' : 'Salvar perfil profissional'}
+          </button>
+        </form>
+      </Modal>
 
-        <ul className="mt-6 space-y-3 text-sm leading-6 text-slate-600">
-          {recommendations.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </article>
-    </div>
+      <Modal
+        title="Tema do painel"
+        description="Troque o clima visual do workspace sem ocupar espaco fixo na pagina."
+        isOpen={isThemeModalOpen}
+        onClose={() => setThemeModalOpen(false)}
+      >
+        <div className="space-y-5">
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+            O tema altera fundo, destaques e botoes principais. A troca e
+            instantanea e fica salva neste navegador.
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {themeOptions.map((option) => {
+              const isActive = option.value === theme;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setTheme(option.value)}
+                  className={`rounded-3xl border p-3 text-left transition ${
+                    isActive
+                      ? 'border-slate-900 bg-slate-50 shadow-sm shadow-slate-200'
+                      : 'border-slate-200 bg-white hover:bg-slate-50'
+                  }`}
+                >
+                  <div className={`h-24 rounded-[20px] ${option.previewClassName}`} />
+                  <p className="mt-4 text-sm font-semibold text-slate-950">
+                    {option.label}
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-slate-500">
+                    {option.description}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        title="Seguranca da conta"
+        description="Recuperacao e troca de senha concentradas em um unico fluxo."
+        isOpen={isSecurityModalOpen}
+        onClose={() => setSecurityModalOpen(false)}
+      >
+        <div className="space-y-5">
+          {isRecoveryFlow ? (
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              Link de recuperacao identificado. Defina sua nova senha abaixo
+              para concluir o processo.
+            </div>
+          ) : null}
+
+          <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+            <p className="text-sm font-semibold text-slate-900">
+              Email da conta
+            </p>
+            <p className="mt-1 break-all text-sm text-slate-600">
+              {user?.email ?? 'Email indisponivel'}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                void handlePasswordReset();
+              }}
+              disabled={securitySubmitting}
+              className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-70"
+            >
+              <Mail size={16} />
+              Enviar link de recuperacao
+            </button>
+          </div>
+
+          <form onSubmit={handlePasswordUpdate} className="space-y-4">
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                Nova senha
+              </span>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(event) => setNewPassword(event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+                placeholder="Minimo de 6 caracteres"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-slate-700">
+                Confirmar nova senha
+              </span>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+                placeholder="Repita a nova senha"
+              />
+            </label>
+
+            <FeedbackBanner feedback={securityFeedback} />
+
+            <button
+              type="submit"
+              disabled={securitySubmitting}
+              className="inline-flex items-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-70"
+            >
+              <KeyRound size={16} />
+              {securitySubmitting ? 'Atualizando...' : 'Atualizar senha'}
+            </button>
+          </form>
+        </div>
+      </Modal>
+    </>
   );
 }

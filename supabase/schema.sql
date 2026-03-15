@@ -19,7 +19,7 @@ create table if not exists public.projects (
   description text not null default '',
   value numeric(12, 2) not null default 0,
   deadline date,
-  status text not null check (status in ('proposal', 'in_progress', 'review', 'completed')),
+  status text not null check (status in ('in_progress', 'review', 'completed')),
   created_at timestamptz not null default timezone('utc', now())
 );
 

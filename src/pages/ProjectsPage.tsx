@@ -5,6 +5,7 @@ import { ProjectForm } from '../components/ProjectForm';
 import type { ProjectInput } from '../lib/database';
 import { getErrorMessage } from '../lib/supabase';
 import { useClientStore } from '../store/useClientStore';
+import { useProposalStore } from '../store/useProposalStore';
 import { useProjectStore } from '../store/useProjectStore';
 import type { Project, ProjectStatus } from '../types/project';
 import {
@@ -46,6 +47,12 @@ export function ProjectsPage() {
     editProject,
     removeProject,
   } = useProjectStore();
+  const {
+    proposals,
+    error: proposalError,
+    initialized: proposalsInitialized,
+    loadProposals,
+  } = useProposalStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,7 +66,8 @@ export function ProjectsPage() {
   useEffect(() => {
     void loadClients();
     void loadProjects();
-  }, [loadClients, loadProjects]);
+    void loadProposals();
+  }, [loadClients, loadProjects, loadProposals]);
 
   useEffect(() => {
     const shouldOpenNewModal = searchParams.get('new') === '1';
@@ -88,9 +96,26 @@ export function ProjectsPage() {
     });
   }, [projects, clients]);
 
-  const legacyProposalProjects = useMemo(() => {
-    return projectsWithClient.filter((project) => project.status === 'proposal');
-  }, [projectsWithClient]);
+  const commercialSummary = useMemo(() => {
+    const openProposals = proposals.filter(
+      (proposal) => proposal.status === 'draft' || proposal.status === 'sent',
+    );
+    const sentCount = openProposals.filter(
+      (proposal) => proposal.status === 'sent',
+    ).length;
+    const draftCount = openProposals.length - sentCount;
+    const openPipelineValue = openProposals.reduce(
+      (total, proposal) => total + proposal.amount,
+      0,
+    );
+
+    return {
+      openCount: openProposals.length,
+      sentCount,
+      draftCount,
+      openPipelineValue,
+    };
+  }, [proposals]);
 
   const filteredProjects = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -193,24 +218,32 @@ export function ProjectsPage() {
         </section>
       ) : null}
 
-      {legacyProposalProjects.length > 0 ? (
-        <section className="flex flex-col gap-4 rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800 lg:flex-row lg:items-center lg:justify-between">
+      {proposalError ? (
+        <section className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
+          Nao foi possivel carregar o resumo comercial das propostas nesta
+          pagina. A operacao de projetos continua disponivel normalmente.
+        </section>
+      ) : null}
+
+      {proposalsInitialized && commercialSummary.openCount > 0 ? (
+        <section className="flex flex-col gap-4 rounded-3xl border border-indigo-200 bg-indigo-50 px-5 py-4 text-sm text-indigo-900 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="font-semibold text-amber-900">
-              {legacyProposalProjects.length} registro(s) antigo(s) ainda estao
-              com status de proposta em Projetos.
+            <p className="font-semibold text-indigo-950">
+              {commercialSummary.openCount} proposta(s) aberta(s) no pipeline
+              comercial.
             </p>
-            <p className="mt-1">
-              A estrutura atual separa pipeline comercial da operacao. Propostas
-              devem ser geridas na aba Propostas e projetos ficam reservados ao
-              trabalho ja ativo.
+            <p className="mt-1 text-indigo-800">
+              {commercialSummary.draftCount} em rascunho,{' '}
+              {commercialSummary.sentCount} enviada(s) e{' '}
+              {formatCurrency(commercialSummary.openPipelineValue)} em valor
+              potencial antes de virarem projeto.
             </p>
           </div>
 
           <button
             type="button"
             onClick={() => navigate('/propostas')}
-            className="rounded-2xl border border-amber-300 bg-white px-4 py-3 text-sm font-semibold text-amber-900 transition hover:bg-amber-100"
+            className="rounded-2xl border border-indigo-300 bg-white px-4 py-3 text-sm font-semibold text-indigo-900 transition hover:bg-indigo-100"
           >
             Ir para Propostas
           </button>

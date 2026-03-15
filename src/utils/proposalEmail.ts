@@ -1,4 +1,9 @@
 import type { Proposal } from '../types/proposal';
+import type { FreelancerProfile } from '../types/freelancerProfile';
+import {
+  buildFreelancerIntro,
+  buildFreelancerSignatureLines,
+} from './freelancerProfile';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -10,11 +15,20 @@ function formatCurrency(value: number) {
 export function buildProposalEmail(
   proposal: Proposal,
   clientName: string,
+  senderProfile?: FreelancerProfile | null,
 ): { subject: string; body: string } {
   const subject = `Proposta comercial - ${proposal.title}`;
+  const freelancerIntro = senderProfile
+    ? buildFreelancerIntro(senderProfile)
+    : '';
+  const signatureLines = senderProfile
+    ? buildFreelancerSignatureLines(senderProfile)
+    : [];
   const body = [
     `Ola, ${clientName}.`,
     '',
+    freelancerIntro || null,
+    freelancerIntro ? '' : null,
     `Segue a proposta do projeto "${proposal.title}".`,
     '',
     `Valor: ${formatCurrency(proposal.amount)}`,
@@ -26,6 +40,8 @@ export function buildProposalEmail(
     proposal.notes ? `Observacoes: ${proposal.notes}` : null,
     '',
     'Se estiver de acordo, posso marcar a proposta como aceita e gerar o projeto no painel.',
+    signatureLines.length > 0 ? '' : null,
+    ...signatureLines,
   ]
     .filter(Boolean)
     .join('\n');

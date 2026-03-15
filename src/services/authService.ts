@@ -1,5 +1,6 @@
 import type { User } from '@supabase/supabase-js';
 import { supabase, getSupabaseErrorMessage } from '../lib/supabase';
+import type { FreelancerProfile } from '../types/freelancerProfile';
 
 const autoAnonymousAuth =
   import.meta.env.VITE_SUPABASE_AUTO_ANON_AUTH === 'true';
@@ -25,6 +26,43 @@ export async function signOut() {
 
 export async function getSession() {
   return supabase.auth.getSession();
+}
+
+function getMetadataObject(metadata: unknown) {
+  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+    return {};
+  }
+
+  return metadata as Record<string, unknown>;
+}
+
+export async function requestPasswordReset(email: string) {
+  const redirectTo =
+    typeof window === 'undefined'
+      ? undefined
+      : `${window.location.origin}/configuracoes?recovery=1`;
+
+  if (!redirectTo) {
+    return supabase.auth.resetPasswordForEmail(email);
+  }
+
+  return supabase.auth.resetPasswordForEmail(email, { redirectTo });
+}
+
+export async function updatePassword(password: string) {
+  return supabase.auth.updateUser({ password });
+}
+
+export async function updateFreelancerProfile(
+  profile: FreelancerProfile,
+  currentMetadata: unknown,
+) {
+  return supabase.auth.updateUser({
+    data: {
+      ...getMetadataObject(currentMetadata),
+      freelancer_profile: profile,
+    },
+  });
 }
 
 // Esta rotina garante uma sessao autenticada para que as policies com auth.uid() funcionem.

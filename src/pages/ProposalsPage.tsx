@@ -16,9 +16,11 @@ import { Modal } from '../components/Modal';
 import { ProposalForm } from '../components/ProposalForm';
 import type { ProposalInput } from '../lib/database';
 import { getErrorMessage } from '../lib/supabase';
+import { useAuthStore } from '../store/useAuthStore';
 import { useClientStore } from '../store/useClientStore';
 import { useProposalStore } from '../store/useProposalStore';
 import type { Proposal, ProposalStatus } from '../types/proposal';
+import { getFreelancerProfileFromUser } from '../utils/freelancerProfile';
 import { buildMailtoLink, buildProposalEmail } from '../utils/proposalEmail';
 import {
   proposalStatusClassName,
@@ -50,6 +52,7 @@ function formatDate(value: string | null) {
 
 export function ProposalsPage() {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
   const {
     clients,
     error: clientError,
@@ -79,6 +82,9 @@ export function ProposalsPage() {
     useState<ProposalStatus | 'all'>('all');
 
   const combinedError = proposalError ?? clientError;
+  const freelancerProfile = useMemo(() => {
+    return getFreelancerProfileFromUser(user);
+  }, [user]);
 
   useEffect(() => {
     void loadClients();
@@ -206,7 +212,11 @@ export function ProposalsPage() {
       const clientName =
         clients.find((client) => client.id === updatedProposal.clientId)?.name ??
         'cliente';
-      const { subject, body } = buildProposalEmail(updatedProposal, clientName);
+      const { subject, body } = buildProposalEmail(
+        updatedProposal,
+        clientName,
+        freelancerProfile,
+      );
 
       window.location.href = buildMailtoLink(
         updatedProposal.recipientEmail,

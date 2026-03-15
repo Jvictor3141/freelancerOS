@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useRef } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { DashboardLayout } from './layout/DashboardLayout';
 import { LoginPage } from './pages/LoginPage';
+import { usePreferencesStore } from './store/usePreferencesStore';
 import { useAuthStore } from './store/useAuthStore';
 import { useClientStore } from './store/useClientStore';
 import { usePaymentStore } from './store/usePaymentStore';
@@ -49,7 +50,12 @@ function LoadingState({ title, description }: LoadingStateProps) {
 
 function App() {
   const { user, initialized, initialize } = useAuthStore();
+  const theme = usePreferencesStore((state) => state.theme);
   const previousUserIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   useEffect(() => {
     let isMounted = true;
