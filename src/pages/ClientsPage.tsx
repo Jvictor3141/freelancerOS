@@ -1,3 +1,4 @@
+import { Eye, PencilLine, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClientForm } from '../components/ClientForm';
@@ -9,6 +10,14 @@ import type { Client } from '../types/client';
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString('pt-BR');
+}
+
+function getClientActionButtonClassName(tone: 'neutral' | 'danger') {
+  if (tone === 'danger') {
+    return 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100';
+  }
+
+  return 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50';
 }
 
 export function ClientsPage() {
@@ -126,48 +135,37 @@ export function ClientsPage() {
         </section>
       ) : null}
 
-      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">
-              Base de clientes
-            </p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-              Gerencie seus clientes sem depender de planilha
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Centralize contato, empresa e historico para nao perder contexto
-              quando o trabalho apertar.
-            </p>
-          </div>
-
-          <div className="flex w-full flex-col gap-3 sm:flex-row xl:w-auto">
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Buscar por nome, empresa ou email"
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff] sm:min-w-72"
-            />
-
-            <button
-              type="button"
-              onClick={openCreateModal}
-              className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
-            >
-              Novo
-            </button>
-          </div>
-        </div>
-      </section>
-
       <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
         <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
-          <p className="text-sm font-medium text-slate-500">
-            {filteredClients.length} cliente(s) encontrado(s)
-          </p>
-          <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-            Lista de clientes
-          </h3>
+          <div className="flex flex-col gap-4 min-[425px]:flex-row min-[425px]:items-start min-[425px]:justify-between lg:items-center">
+            <div className="min-w-0 flex-1">
+              <h3 className="text-xl font-semibold tracking-tight text-slate-950">
+                Lista de clientes
+              </h3>
+              <p className="mt-1 text-sm font-medium text-slate-500">
+                {filteredClients.length} cliente(s) encontrado(s)
+              </p>
+            </div>
+
+            <div className="flex min-w-0 items-center gap-3 min-[425px]:shrink-0">
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar por nome, empresa ou email"
+                className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff] min-[425px]:w-52 min-[425px]:flex-none sm:w-60 md:w-72 lg:w-80"
+              />
+
+              <button
+                type="button"
+                onClick={openCreateModal}
+                aria-label="Novo cliente"
+                title="Novo cliente"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#635bff] text-2xl font-semibold leading-none text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
+              >
+                +
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="divide-y divide-slate-100 lg:hidden">
@@ -193,21 +191,25 @@ export function ClientsPage() {
                   Criado em {formatDate(client.createdAt)}
                 </p>
 
-                <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="inline-flex max-w-full flex-nowrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() => openEditModal(client.id)}
-                    className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    aria-label={`Editar cliente ${client.name}`}
+                    title="Editar cliente"
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getClientActionButtonClassName('neutral')}`}
                   >
-                    Editar
+                    <PencilLine size={15} />
                   </button>
 
                   <button
                     type="button"
                     onClick={() => navigate(`/clients/${client.id}`)}
-                    className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    aria-label={`Ver detalhes do cliente ${client.name}`}
+                    title="Ver detalhes"
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getClientActionButtonClassName('neutral')}`}
                   >
-                    Ver detalhes
+                    <Eye size={15} />
                   </button>
 
                   <button
@@ -215,9 +217,11 @@ export function ClientsPage() {
                     onClick={() => {
                       void handleClientRemoval(client);
                     }}
-                    className="rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
+                    aria-label={`Excluir cliente ${client.name}`}
+                    title="Excluir cliente"
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getClientActionButtonClassName('danger')}`}
                   >
-                    Excluir
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </article>
@@ -285,17 +289,21 @@ export function ClientsPage() {
                       <button
                         type="button"
                         onClick={() => openEditModal(client.id)}
-                        className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                        aria-label={`Editar cliente ${client.name}`}
+                        title="Editar cliente"
+                        className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getClientActionButtonClassName('neutral')}`}
                       >
-                        Editar
+                        <PencilLine size={17} />
                       </button>
 
                       <button
                         type="button"
                         onClick={() => navigate(`/clients/${client.id}`)}
-                        className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                        aria-label={`Ver detalhes do cliente ${client.name}`}
+                        title="Ver detalhes"
+                        className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getClientActionButtonClassName('neutral')}`}
                       >
-                        Ver detalhes
+                        <Eye size={17} />
                       </button>
 
                       <button
@@ -303,9 +311,11 @@ export function ClientsPage() {
                         onClick={() => {
                           void handleClientRemoval(client);
                         }}
-                        className="rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
+                        aria-label={`Excluir cliente ${client.name}`}
+                        title="Excluir cliente"
+                        className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getClientActionButtonClassName('danger')}`}
                       >
-                        Excluir
+                        <Trash2 size={17} />
                       </button>
                     </div>
                   </td>

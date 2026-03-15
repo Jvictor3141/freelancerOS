@@ -1,3 +1,4 @@
+import { CheckCheck, ListFilter, PencilLine, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal } from '../components/Modal';
 import { PaymentForm } from '../components/PaymentForm';
@@ -6,17 +7,38 @@ import { getErrorMessage } from '../lib/supabase';
 import { useClientStore } from '../store/useClientStore';
 import { usePaymentStore } from '../store/usePaymentStore';
 import { useProjectStore } from '../store/useProjectStore';
-import type { Payment } from '../types/payment';
+import type { Payment, PaymentStatus } from '../types/payment';
 import {
   paymentStatusClassName,
   paymentStatusLabel,
 } from '../utils/paymentStatus';
+
+const statusFilterOptions: Array<PaymentStatus | 'all'> = [
+  'all',
+  'pending',
+  'paid',
+  'overdue',
+];
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
   });
+}
+
+function getPaymentActionButtonClassName(
+  tone: 'success' | 'neutral' | 'danger',
+) {
+  if (tone === 'success') {
+    return 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100';
+  }
+
+  if (tone === 'danger') {
+    return 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100';
+  }
+
+  return 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50';
 }
 
 export function PaymentsPage() {
@@ -47,10 +69,16 @@ export function PaymentsPage() {
   } = usePaymentStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<PaymentStatus | 'all'>(
+    'all',
+  );
+  const [statusFilterDraft, setStatusFilterDraft] =
+    useState<PaymentStatus | 'all'>('all');
 
   const combinedError = paymentError ?? projectError ?? clientError;
+  const hasActiveFilters = statusFilter !== 'all';
 
   useEffect(() => {
     void loadClients();
@@ -102,6 +130,21 @@ export function PaymentsPage() {
   function closeModal() {
     selectPayment(null);
     setIsModalOpen(false);
+  }
+
+  function openFilterModal() {
+    setStatusFilterDraft(statusFilter);
+    setIsFilterModalOpen(true);
+  }
+
+  function applyFilterModal() {
+    setStatusFilter(statusFilterDraft);
+    setIsFilterModalOpen(false);
+  }
+
+  function clearFilterModal() {
+    setStatusFilterDraft('all');
+    setStatusFilter('all');
   }
 
   async function handlePaymentSubmit(values: PaymentInput) {
@@ -175,52 +218,63 @@ export function PaymentsPage() {
         </section>
       ) : null}
 
-      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">Financeiro</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-              Controle de pagamentos
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Veja o que venceu, o que entrou e o que ainda depende de
-              cobranca sem forcar scroll lateral no celular.
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={openCreateModal}
-            className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
-          >
-            Novo pagamento
-          </button>
-        </div>
-      </section>
-
-      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <select
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
-          >
-            <option value="all">Todos os status</option>
-            <option value="pending">Pendentes</option>
-            <option value="paid">Pagos</option>
-            <option value="overdue">Atrasados</option>
-          </select>
-        </div>
-      </section>
-
       <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
         <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
-          <p className="text-sm font-medium text-slate-500">
-            {filteredPayments.length} pagamento(s) encontrado(s)
-          </p>
-          <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-            Lista de pagamentos
-          </h3>
+          <div className="flex items-start justify-between gap-4 max-[425px]:items-center">
+            <div className="min-w-0 flex-1">
+              <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+                Lista de pagamentos
+              </h3>
+              <p className="text-sm font-medium text-slate-500">
+                {filteredPayments.length} pagamento(s) encontrado(s)
+              </p>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-3">
+              <select
+                value={statusFilter}
+                onChange={(event) =>
+                  setStatusFilter(event.target.value as PaymentStatus | 'all')
+                }
+                className="w-44 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff] sm:w-52 md:w-56 max-[425px]:hidden"
+              >
+                {statusFilterOptions.map((status) => (
+                  <option key={status} value={status}>
+                    {status === 'all'
+                      ? 'Todos os status'
+                      : paymentStatusLabel[status]}
+                  </option>
+                ))}
+              </select>
+
+              <button
+                type="button"
+                onClick={openFilterModal}
+                aria-label="Abrir filtros"
+                title="Abrir filtros"
+                className={`relative hidden h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-white text-slate-700 transition hover:bg-slate-50 max-[425px]:flex ${
+                  hasActiveFilters
+                    ? 'border-[#635bff] text-[#635bff]'
+                    : 'border-slate-200'
+                }`}
+              >
+                <ListFilter size={18} />
+                {hasActiveFilters ? (
+                  <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-[#635bff]" />
+                ) : null}
+              </button>
+
+              <button
+                type="button"
+                onClick={openCreateModal}
+                aria-label="Novo pagamento"
+                title="Novo pagamento"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#635bff] text-2xl font-semibold leading-none text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
+              >
+                +
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="divide-y divide-slate-100 lg:hidden">
@@ -257,16 +311,18 @@ export function PaymentsPage() {
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="inline-flex max-w-full flex-nowrap items-center gap-2">
                   {payment.status !== 'paid' ? (
                     <button
                       type="button"
                       onClick={() => {
                         void handleMarkAsPaid(payment.id);
                       }}
-                      className="rounded-xl border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+                      aria-label={`Marcar pagamento de ${payment.clientName} como pago`}
+                      title="Marcar como pago"
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getPaymentActionButtonClassName('success')}`}
                     >
-                      Marcar como pago
+                      <CheckCheck size={15} />
                     </button>
                   ) : null}
 
@@ -276,9 +332,11 @@ export function PaymentsPage() {
                       selectPayment(payment);
                       setIsModalOpen(true);
                     }}
-                    className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    aria-label={`Editar pagamento de ${payment.clientName}`}
+                    title="Editar pagamento"
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getPaymentActionButtonClassName('neutral')}`}
                   >
-                    Editar
+                    <PencilLine size={15} />
                   </button>
 
                   <button
@@ -286,9 +344,11 @@ export function PaymentsPage() {
                     onClick={() => {
                       void handlePaymentRemoval(payment);
                     }}
-                    className="rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
+                    aria-label={`Excluir pagamento de ${payment.clientName}`}
+                    title="Excluir pagamento"
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getPaymentActionButtonClassName('danger')}`}
                   >
-                    Excluir
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </article>
@@ -358,9 +418,11 @@ export function PaymentsPage() {
                           onClick={() => {
                             void handleMarkAsPaid(payment.id);
                           }}
-                          className="rounded-xl border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+                          aria-label={`Marcar pagamento de ${payment.clientName} como pago`}
+                          title="Marcar como pago"
+                          className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getPaymentActionButtonClassName('success')}`}
                         >
-                          Marcar como pago
+                          <CheckCheck size={18} />
                         </button>
                       ) : null}
 
@@ -370,9 +432,11 @@ export function PaymentsPage() {
                           selectPayment(payment);
                           setIsModalOpen(true);
                         }}
-                        className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                        aria-label={`Editar pagamento de ${payment.clientName}`}
+                        title="Editar pagamento"
+                        className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getPaymentActionButtonClassName('neutral')}`}
                       >
-                        Editar
+                        <PencilLine size={17} />
                       </button>
 
                       <button
@@ -380,9 +444,11 @@ export function PaymentsPage() {
                         onClick={() => {
                           void handlePaymentRemoval(payment);
                         }}
-                        className="rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
+                        aria-label={`Excluir pagamento de ${payment.clientName}`}
+                        title="Excluir pagamento"
+                        className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getPaymentActionButtonClassName('danger')}`}
                       >
-                        Excluir
+                        <Trash2 size={17} />
                       </button>
                     </div>
                   </td>
@@ -403,6 +469,56 @@ export function PaymentsPage() {
           </table>
         </div>
       </section>
+
+      <Modal
+        title="Filtrar pagamentos"
+        description="Escolha o status para refinar a lista e aplique quando terminar."
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+      >
+        <div className="space-y-4">
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-slate-700">
+              Status
+            </span>
+            <select
+              value={statusFilterDraft}
+              onChange={(event) =>
+                setStatusFilterDraft(
+                  event.target.value as PaymentStatus | 'all',
+                )
+              }
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
+            >
+              {statusFilterOptions.map((status) => (
+                <option key={status} value={status}>
+                  {status === 'all'
+                    ? 'Todos os status'
+                    : paymentStatusLabel[status]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={clearFilterModal}
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Limpar filtros
+            </button>
+
+            <button
+              type="button"
+              onClick={applyFilterModal}
+              className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
+            >
+              Aplicar filtros
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         title={selectedPayment ? 'Editar pagamento' : 'Novo pagamento'}

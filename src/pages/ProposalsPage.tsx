@@ -2,6 +2,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock3,
+  ListFilter,
   Mail,
   PencilLine,
   Plus,
@@ -50,6 +51,24 @@ function formatDate(value: string | null) {
   return new Date(value).toLocaleDateString('pt-BR');
 }
 
+function getProposalActionButtonClassName(
+  tone: 'neutral' | 'info' | 'success' | 'danger',
+) {
+  if (tone === 'info') {
+    return 'border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100';
+  }
+
+  if (tone === 'success') {
+    return 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100';
+  }
+
+  if (tone === 'danger') {
+    return 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100';
+  }
+
+  return 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50';
+}
+
 export function ProposalsPage() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
@@ -76,12 +95,16 @@ export function ProposalsPage() {
   } = useProposalStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] =
     useState<ProposalStatus | 'all'>('all');
+  const [statusFilterDraft, setStatusFilterDraft] =
+    useState<ProposalStatus | 'all'>('all');
 
   const combinedError = proposalError ?? clientError;
+  const hasActiveFilters = search.trim() !== '' || statusFilter !== 'all';
   const freelancerProfile = useMemo(() => {
     return getFreelancerProfileFromUser(user);
   }, [user]);
@@ -161,6 +184,27 @@ export function ProposalsPage() {
   function closeModal() {
     selectProposal(null);
     setIsModalOpen(false);
+  }
+
+  function resetAllFilters() {
+    setSearch('');
+    setStatusFilter('all');
+    setStatusFilterDraft('all');
+  }
+
+  function openFilterModal() {
+    setStatusFilterDraft(statusFilter);
+    setIsFilterModalOpen(true);
+  }
+
+  function applyFilterModal() {
+    setStatusFilter(statusFilterDraft);
+    setIsFilterModalOpen(false);
+  }
+
+  function clearFilterModal() {
+    setStatusFilterDraft('all');
+    setStatusFilter('all');
   }
 
   async function handleProposalSubmit(values: ProposalInput) {
@@ -396,7 +440,7 @@ export function ProposalsPage() {
       </section>
 
       <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="hidden gap-4 lg:grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.9fr)_minmax(0,0.75fr)]">
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -422,25 +466,62 @@ export function ProposalsPage() {
 
           <button
             type="button"
-            onClick={() => {
-              setSearch('');
-              setStatusFilter('all');
-            }}
+            onClick={resetAllFilters}
             className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
             Limpar filtros
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3 lg:hidden">
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Buscar por titulo, cliente ou email"
+            className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
+          />
+
+          <button
+            type="button"
+            onClick={openFilterModal}
+            aria-label="Abrir filtros"
+            title="Abrir filtros"
+            className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-white text-slate-700 transition hover:bg-slate-50 ${
+              statusFilter !== 'all'
+                ? 'border-[#635bff] text-[#635bff]'
+                : 'border-slate-200'
+            }`}
+          >
+            <ListFilter size={18} />
+            {statusFilter !== 'all' ? (
+              <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-[#635bff]" />
+            ) : null}
+          </button>
+
+          <button
+            type="button"
+            onClick={resetAllFilters}
+            aria-label="Limpar filtros"
+            title="Limpar filtros"
+            className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition ${
+              hasActiveFilters
+                ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                : 'border-slate-200 bg-slate-100 text-slate-400'
+            }`}
+          >
+            <RotateCcw size={18} />
           </button>
         </div>
       </section>
 
       <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
         <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
-          <p className="text-sm font-medium text-slate-500">
-            {filteredProposals.length} proposta(s) encontrada(s)
-          </p>
           <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
             Propostas da operacao
           </h3>
+          <p className="text-sm font-medium text-slate-500">
+            {filteredProposals.length} proposta(s) encontrada(s)
+          </p>
         </div>
 
         <div className="divide-y divide-slate-100">
@@ -527,15 +608,16 @@ export function ProposalsPage() {
                   </div>
                 ) : null}
 
-                <div className="flex flex-wrap gap-2">
+                <div className="inline-flex max-w-full flex-nowrap items-center gap-2">
                   {proposal.status !== 'accepted' ? (
                     <button
                       type="button"
                       onClick={() => openEditModal(proposal.id)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      aria-label={`Editar proposta ${proposal.title}`}
+                      title="Editar proposta"
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName('neutral')}`}
                     >
-                      <PencilLine size={16} />
-                      Editar
+                      <PencilLine size={15} className="lg:h-4.25 lg:w-4.25" />
                     </button>
                   ) : null}
 
@@ -545,10 +627,11 @@ export function ProposalsPage() {
                       onClick={() => {
                         void handleSendProposal(proposal);
                       }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-50"
+                      aria-label={`Enviar proposta ${proposal.title} ao cliente`}
+                      title="Enviar ao cliente"
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName('info')}`}
                     >
-                      <Mail size={16} />
-                      Enviar ao cliente
+                      <Mail size={15} className="lg:h-4.25 lg:w-4.25" />
                     </button>
                   ) : null}
 
@@ -558,10 +641,11 @@ export function ProposalsPage() {
                       onClick={() => {
                         void handleSendProposal(proposal);
                       }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-blue-200 px-3 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-50"
+                      aria-label={`Reenviar proposta ${proposal.title}`}
+                      title="Reenviar proposta"
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName('info')}`}
                     >
-                      <Send size={16} />
-                      Reenviar
+                      <Send size={15} className="lg:h-4.25 lg:w-4.25" />
                     </button>
                   ) : null}
 
@@ -571,10 +655,11 @@ export function ProposalsPage() {
                       onClick={() => {
                         void handleAcceptProposal(proposal);
                       }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+                      aria-label={`Aceitar proposta ${proposal.title} e gerar projeto`}
+                      title="Aceitar e gerar projeto"
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName('success')}`}
                     >
-                      <CheckCircle2 size={16} />
-                      Aceitar e gerar projeto
+                      <CheckCircle2 size={15} className="lg:h-4.25 lg:w-4.25" />
                     </button>
                   ) : null}
 
@@ -584,10 +669,11 @@ export function ProposalsPage() {
                       onClick={() => {
                         void handleRejectProposal(proposal);
                       }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
+                      aria-label={`Marcar proposta ${proposal.title} como recusada`}
+                      title="Marcar como recusada"
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName('danger')}`}
                     >
-                      <XCircle size={16} />
-                      Marcar como recusada
+                      <XCircle size={15} className="lg:h-4.25 lg:w-4.25" />
                     </button>
                   ) : null}
 
@@ -597,10 +683,11 @@ export function ProposalsPage() {
                       onClick={() => {
                         void handleReopenProposal(proposal);
                       }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      aria-label={`Reabrir proposta ${proposal.title} como rascunho`}
+                      title="Reabrir rascunho"
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName('neutral')}`}
                     >
-                      <RotateCcw size={16} />
-                      Reabrir rascunho
+                      <RotateCcw size={15} className="lg:h-4.25 lg:w-4.25" />
                     </button>
                   ) : null}
 
@@ -608,10 +695,11 @@ export function ProposalsPage() {
                     <button
                       type="button"
                       onClick={() => navigate('/projetos')}
-                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+                      aria-label="Abrir projetos"
+                      title="Abrir projetos"
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName('success')}`}
                     >
-                      <ArrowRight size={16} />
-                      Abrir projetos
+                      <ArrowRight size={15} className="lg:h-4.25 lg:w-4.25" />
                     </button>
                   ) : null}
 
@@ -620,10 +708,11 @@ export function ProposalsPage() {
                     onClick={() => {
                       void handleProposalRemoval(proposal);
                     }}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    aria-label={`Excluir proposta ${proposal.title}`}
+                    title="Excluir proposta"
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName('neutral')}`}
                   >
-                    <Trash2 size={16} />
-                    Excluir
+                    <Trash2 size={15} className="lg:h-4.25 lg:w-4.25" />
                   </button>
                 </div>
               </article>
@@ -636,6 +725,56 @@ export function ProposalsPage() {
           )}
         </div>
       </section>
+
+      <Modal
+        title="Filtrar propostas"
+        description="Escolha o status comercial para refinar a lista e aplique quando terminar."
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+      >
+        <div className="space-y-4">
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-slate-700">
+              Status
+            </span>
+            <select
+              value={statusFilterDraft}
+              onChange={(event) =>
+                setStatusFilterDraft(
+                  event.target.value as ProposalStatus | 'all',
+                )
+              }
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
+            >
+              {statusOptions.map((status) => (
+                <option key={status} value={status}>
+                  {status === 'all'
+                    ? 'Todos os status'
+                    : proposalStatusLabel[status]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={clearFilterModal}
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Limpar filtros
+            </button>
+
+            <button
+              type="button"
+              onClick={applyFilterModal}
+              className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
+            >
+              Aplicar filtros
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <Modal
         title={selectedProposal ? 'Editar proposta' : 'Nova proposta'}
