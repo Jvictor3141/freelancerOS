@@ -2,15 +2,16 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Modal } from '../components/Modal';
 import { ProjectForm } from '../components/ProjectForm';
+import type { ProjectInput } from '../lib/database';
+import { getErrorMessage } from '../lib/supabase';
 import { useClientStore } from '../store/useClientStore';
 import { useProjectStore } from '../store/useProjectStore';
-import type { ProjectStatus } from '../types/project';
+import type { Project, ProjectStatus } from '../types/project';
 import {
   projectStatusClassName,
   projectStatusLabel,
 } from '../utils/projectStatus';
 
-// aqui definimos as opções de filtro de status para os projetos, que incluem todos os status possíveis ('proposal', 'in_progress', 'review', 'completed') e uma opção adicional 'all' para mostrar projetos de todos os status. Essas opções são usadas para preencher o campo de seleção de filtro de status na interface do usuário, permitindo que os usuários filtrem a lista de projetos com base no status desejado.
 const statusFilterOptions: Array<ProjectStatus | 'all'> = [
   'all',
   'proposal',
@@ -19,14 +20,19 @@ const statusFilterOptions: Array<ProjectStatus | 'all'> = [
   'completed',
 ];
 
-// a função ProjectsPage é o componente principal da página de projetos. Ele gerencia o estado dos projetos, clientes, filtros de busca e modais para criar ou editar projetos. O componente usa os hooks useEffect para carregar os dados de clientes e projetos quando o componente é montado, e para abrir o modal de criação de projeto quando o parâmetro de busca 'new' é definido. Ele também usa useMemo para calcular a lista de projetos com os dados do cliente e para filtrar os projetos com base nos critérios de busca e filtro selecionados. A interface do usuário inclui uma seção para operações (como criar um novo projeto), uma seção para filtros de busca e uma tabela que exibe a lista de projetos filtrados, com opções para editar ou excluir cada projeto. O componente também gerencia a abertura e fechamento do modal de criação/edição de projetos, e passa as funções de callback apropriadas para o formulário de projeto para lidar com a criação ou edição de projetos.
 export function ProjectsPage() {
-  const [searchParams, setSearchParams] = useSearchParams(); // o hook useSearchParams é usado para acessar e manipular os parâmetros de busca na URL. Ele retorna um objeto searchParams que permite ler os parâmetros de busca atuais, e uma função setSearchParams que permite atualizar os parâmetros de busca. Nesse componente, useSearchParams é usado para verificar se o parâmetro 'new' está presente na URL para determinar se o modal de criação de projeto deve ser aberto automaticamente quando a página for carregada.
-
-  const { clients, loadClients } = useClientStore();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const {
+    clients,
+    error: clientError,
+    initialized: clientsInitialized,
+    loadClients,
+  } = useClientStore();
   const {
     projects,
     selectedProject,
+    error: projectError,
+    initialized: projectsInitialized,
     loadProjects,
     selectProject,
     addProject,
@@ -35,22 +41,25 @@ export function ProjectsPage() {
   } = useProjectStore();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] =
     useState<ProjectStatus | 'all'>('all');
   const [clientFilter, setClientFilter] = useState('all');
 
+  const combinedError = clientError ?? projectError;
+
   useEffect(() => {
-    loadClients();
-    loadProjects();
+    void loadClients();
+    void loadProjects();
   }, [loadClients, loadProjects]);
 
-  // esse useEffect é responsável por abrir o modal de criação de projeto automaticamente quando a página é carregada e o parâmetro de busca 'new' está presente na URL. Ele verifica se o parâmetro 'new' é igual a '1', e se houver clientes disponíveis (pois um projeto precisa estar vinculado a um cliente). Se as condições forem atendidas, ele seleciona um projeto nulo (indicando que estamos criando um novo projeto) e abre o modal. Após abrir o modal, ele remove o parâmetro 'new' da URL para evitar que o modal seja aberto novamente em recarregamentos futuros da página.
   useEffect(() => {
     const shouldOpenNewModal = searchParams.get('new') === '1';
 
-    if (!shouldOpenNewModal) return;
-    if (clients.length === 0) return;
+    if (!shouldOpenNewModal || clients.length === 0) {
+      return;
+    }
 
     selectProject(null);
     setIsModalOpen(true);
@@ -60,14 +69,13 @@ export function ProjectsPage() {
     setSearchParams(nextParams, { replace: true });
   }, [searchParams, setSearchParams, clients, selectProject]);
 
-  // esse useMemo é responsável por criar uma nova lista de projetos que inclui os dados do cliente associado a cada projeto. Ele percorre a lista de projetos e, para cada projeto, encontra o cliente correspondente usando o clientId do projeto. Em seguida, ele retorna um novo objeto de projeto que inclui os campos originais do projeto, além do nome do cliente (clientName) e da empresa do cliente (clientCompany). Essa lista de projetos com os dados do cliente é usada posteriormente para exibir as informações do cliente na tabela de projetos e para facilitar a filtragem dos projetos com base no nome do cliente. O useMemo é usado para otimizar o desempenho, garantindo que essa lista de projetos com os dados do cliente só seja recalculada quando a lista de projetos ou a lista de clientes for alterada.
   const projectsWithClient = useMemo(() => {
     return projects.map((project) => {
       const client = clients.find((item) => item.id === project.clientId);
 
       return {
         ...project,
-        clientName: client?.name ?? 'Cliente não encontrado',
+        clientName: client?.name ?? 'Cliente nao encontrado',
         clientCompany: client?.company ?? '',
       };
     });
@@ -114,18 +122,77 @@ export function ProjectsPage() {
     setIsModalOpen(false);
   }
 
+  // O submit espera a gravacao remota antes de liberar a UI e fechar o modal.
+  async function handleProjectSubmit(values: ProjectInput) {
+    setIsSubmitting(true);
+
+    try {
+      if (selectedProject) {
+        await editProject(selectedProject.id, values);
+      } else {
+        await addProject(values);
+      }
+
+      closeModal();
+    } catch (submitError) {
+      alert(
+        getErrorMessage(submitError, 'Nao foi possivel salvar o projeto.'),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleProjectRemoval(project: Project) {
+    const confirmed = window.confirm(
+      `Deseja excluir o projeto "${project.name}"?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await removeProject(project.id);
+    } catch (removeError) {
+      alert(
+        getErrorMessage(removeError, 'Nao foi possivel excluir o projeto.'),
+      );
+    }
+  }
+
+  if (!clientsInitialized || !projectsInitialized) {
+    return (
+      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-100">
+        <p className="text-sm font-medium text-slate-500">Projetos</p>
+        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
+          Carregando dados do banco...
+        </h2>
+        <p className="mt-2 text-sm text-slate-500">
+          Sincronizando clientes e projetos no Supabase.
+        </p>
+      </section>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {combinedError ? (
+        <section className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+          {combinedError}
+        </section>
+      ) : null}
+
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <p className="text-sm font-medium text-slate-500">Operação</p>
+            <p className="text-sm font-medium text-slate-500">Operacao</p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
               Projetos vinculados a clientes reais
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Agora o sistema começa a representar trabalho de verdade. Projeto
-              sem cliente vinculado é bagunça. Cliente sem projeto é cadastro
+              Agora o sistema comeca a representar trabalho de verdade. Projeto
+              sem cliente vinculado e bagunca. Cliente sem projeto e cadastro
               morto.
             </p>
           </div>
@@ -144,7 +211,7 @@ export function ProjectsPage() {
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar projeto, descrição ou cliente"
+            placeholder="Buscar projeto, descricao ou cliente"
             className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
           />
 
@@ -218,7 +285,7 @@ export function ProjectsPage() {
                   Status
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Ações
+                  Acoes
                 </th>
               </tr>
             </thead>
@@ -233,7 +300,7 @@ export function ProjectsPage() {
                     <div>
                       <p className="font-semibold text-slate-900">{project.name}</p>
                       <p className="text-xs text-slate-500">
-                        {project.description || 'Sem descrição'}
+                        {project.description || 'Sem descricao'}
                       </p>
                     </div>
                   </td>
@@ -242,7 +309,7 @@ export function ProjectsPage() {
                     <div>
                       <p>{project.clientName}</p>
                       <p className="text-xs text-slate-500">
-                        {project.clientCompany || '—'}
+                        {project.clientCompany || '-'}
                       </p>
                     </div>
                   </td>
@@ -257,7 +324,7 @@ export function ProjectsPage() {
                   <td className="px-6 py-4 text-sm text-slate-700">
                     {project.deadline
                       ? new Date(project.deadline).toLocaleDateString('pt-BR')
-                      : '—'}
+                      : '-'}
                   </td>
 
                   <td className="px-6 py-4">
@@ -279,13 +346,7 @@ export function ProjectsPage() {
 
                       <button
                         onClick={() => {
-                          const confirmed = window.confirm(
-                            `Deseja excluir o projeto "${project.name}"?`
-                          );
-
-                          if (!confirmed) return;
-
-                          removeProject(project.id);
+                          void handleProjectRemoval(project);
                         }}
                         className="rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
                       >
@@ -315,7 +376,7 @@ export function ProjectsPage() {
         title={selectedProject ? 'Editar projeto' : 'Novo projeto'}
         description={
           selectedProject
-            ? 'Atualize as informações do projeto.'
+            ? 'Atualize as informacoes do projeto.'
             : 'Preencha os dados para cadastrar um novo projeto.'
         }
         isOpen={isModalOpen}
@@ -325,15 +386,8 @@ export function ProjectsPage() {
           clients={clients}
           initialValues={selectedProject}
           onCancel={closeModal}
-          onSubmit={(values) => {
-            if (selectedProject) {
-              editProject(selectedProject.id, values);
-            } else {
-              addProject(values);
-            }
-
-            closeModal();
-          }}
+          onSubmit={handleProjectSubmit}
+          isSubmitting={isSubmitting}
         />
       </Modal>
     </div>

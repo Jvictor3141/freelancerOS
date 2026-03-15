@@ -3,17 +3,17 @@ export function SettingsPage() {
     <section className="grid gap-6 xl:grid-cols-2">
       <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
         <p className="text-sm font-medium text-slate-500">
-          Preferências visuais
+          Preferencias visuais
         </p>
         <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-          Ajustes rápidos
+          Ajustes rapidos
         </h3>
         <div className="mt-6 space-y-4">
           {[
-            "Tema claro",
-            "Compactar sidebar",
-            "Receber alertas de atraso",
-            "Resumo semanal por email",
+            'Tema claro',
+            'Compactar sidebar',
+            'Receber alertas de atraso',
+            'Resumo semanal por email',
           ].map((item) => (
             <label
               key={item}
@@ -32,22 +32,21 @@ export function SettingsPage() {
 
       <article className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
         <p className="text-sm font-medium text-slate-500">
-          Próximos passos
+          Proximos passos
         </p>
         <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
           O que ainda falta neste MVP
         </h3>
         <ul className="mt-6 space-y-4 text-sm leading-6 text-slate-600">
           <li>
-            • Estado global real para clientes, projetos e
-            pagamentos.
+            • Estado global real para clientes, projetos e pagamentos.
           </li>
-          <li>• Formulários funcionais em vez de mock estático.</li>
-          <li>• Persistência com Supabase ou localStorage.</li>
-          <li>• Autenticação, filtros e feedbacks de ação.</li>
+          <li>• Formularios funcionais em vez de mock estatico.</li>
+          <li>• Persistencia com Supabase ja integrada.</li>
+          <li>• Feedbacks mais finos de acao em toda a interface.</li>
           <li>
-            • Melhor tratamento mobile, porque o layout ainda está
-            muito mais forte no desktop.
+            • Melhor tratamento mobile, porque o layout ainda esta muito mais
+            forte no desktop.
           </li>
         </ul>
       </article>

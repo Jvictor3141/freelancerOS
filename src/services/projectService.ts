@@ -1,71 +1,119 @@
-import { getStorageItem, setStorageItem } from '../lib/storage';
+import { supabase, getSupabaseErrorMessage } from '../lib/supabase';
+import {
+  mapProjectRecord,
+  toProjectPayload,
+  type ProjectInput,
+  type ProjectRecord,
+} from '../lib/database';
+import { ensureDatabaseBootstrap } from './bootstrapService';
 import type { Project } from '../types/project';
 
-// essa constante é usada como chave para armazenar e buscar os projetos no localStorage. O prefixo 'freelanceros:' é uma convenção para evitar conflitos com outras chaves que possam existir no localStorage, garantindo que os dados relacionados aos projetos sejam organizados e facilmente identificáveis.
-const PROJECTS_KEY = 'freelanceros:projects'; 
+// O service de projetos agora filtra e grava usando user_id para respeitar as policies do banco.
+export async function getProjects(): Promise<Project[]> {
+  const userId = await ensureDatabaseBootstrap();
 
-// essa função é responsável por buscar a lista de projetos do localStorage. Se não houver projetos salvos, ela retorna um array vazio como fallback. Se houver projetos salvos, ela os retorna como um array de objetos do tipo Project.
-export function getProjects(): Project[] {
-  return getStorageItem<Project[]>(PROJECTS_KEY, []);
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(
+      getSupabaseErrorMessage(
+        error,
+        'Nao foi possivel carregar os projetos no banco.',
+      ),
+    );
+  }
+
+  return (data as ProjectRecord[] | null)?.map(mapProjectRecord) ?? [];
 }
 
-// essa função é responsável por salvar a lista de projetos no localStorage usando a função setStorageItem e a chave PROJECTS_KEY. Ela recebe um array de objetos do tipo Project como parâmetro e salva esse array no localStorage para uso futuro.
-export function saveProjects(projects: Project[]) {
-  setStorageItem(PROJECTS_KEY, projects);
+export async function createProject(data: ProjectInput): Promise<Project> {
+  const userId = await ensureDatabaseBootstrap();
+
+  const { data: createdProject, error } = await supabase
+    .from('projects')
+    .insert(toProjectPayload(data, { userId }))
+    .select()
+    .single();
+
+  if (error || !createdProject) {
+    throw new Error(
+      getSupabaseErrorMessage(
+        error,
+        'Nao foi possivel criar o projeto no banco.',
+      ),
+    );
+  }
+
+  return mapProjectRecord(createdProject as ProjectRecord);
 }
 
-// essa função é responsável por criar um novo projeto. Ela recebe um objeto com os dados do projeto (exceto id e createdAt) como parâmetro, gera um ID único e a data de criação para o novo projeto, salva o novo projeto na lista de projetos existente no localStorage e retorna o novo projeto criado.
-export function createProject(
-  data: Omit<Project, 'id' | 'createdAt'>
-): Project {
-  const projects = getProjects();
-
-  const newProject: Project = {
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-    ...data,
-  };
-
-  const updatedProjects = [newProject, ...projects];
-  saveProjects(updatedProjects);
-
-  return newProject;
-}
-
-// essa função é responsável por atualizar um projeto existente. Ela recebe o ID do projeto a ser atualizado e um objeto com os novos dados do projeto (exceto id e createdAt) como parâmetros, busca a lista de projetos existente no localStorage, atualiza o projeto correspondente ao ID fornecido com os novos dados, salva a lista de projetos atualizada no localStorage e retorna o projeto atualizado. Se o projeto com o ID fornecido não for encontrado, a função retorna null.
-export function updateProject(
+export async function updateProject(
   id: string,
-  data: Omit<Project, 'id' | 'createdAt'>
-): Project | null {
-  const projects = getProjects();
+  data: ProjectInput,
+): Promise<Project> {
+  const userId = await ensureDatabaseBootstrap();
 
-  let updatedProject: Project | null = null;
+  const { data: updatedProject, error } = await supabase
+    .from('projects')
+    .update(toProjectPayload(data, { userId }))
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single();
 
-  const updatedProjects = projects.map((project) => {
-    if (project.id !== id) return project;
+  if (error || !updatedProject) {
+    throw new Error(
+      getSupabaseErrorMessage(
+        error,
+        'Nao foi possivel atualizar o projeto no banco.',
+      ),
+    );
+  }
 
-    updatedProject = {
-      ...project,
-      ...data,
-    };
-
-    return updatedProject;
-  });
-
-  saveProjects(updatedProjects);
-
-  return updatedProject;
+  return mapProjectRecord(updatedProject as ProjectRecord);
 }
 
-// essa função é responsável por deletar um projeto existente. Ela recebe o ID do projeto a ser deletado como parâmetro, busca a lista de projetos existente no localStorage, filtra a lista para remover o projeto correspondente ao ID fornecido e salva a lista de projetos atualizada no localStorage. A função não retorna nenhum valor.
-export function deleteProject(id: string) {
-  const projects = getProjects();
-  const updatedProjects = projects.filter((project) => project.id !== id);
-  saveProjects(updatedProjects);
+export async function deleteProject(id: string) {
+  const userId = await ensureDatabaseBootstrap();
+
+  const { error } = await supabase
+    .from('projects')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId);
+
+  if (error) {
+    throw new Error(
+      getSupabaseErrorMessage(
+        error,
+        'Nao foi possivel excluir o projeto no banco.',
+      ),
+    );
+  }
 }
 
-// essa função é responsável por buscar os projetos associados a um cliente específico. Ela recebe o ID do cliente como parâmetro, busca a lista de projetos existente no localStorage e retorna um array de projetos que possuem o clientId correspondente ao ID do cliente fornecido. Se nenhum projeto for encontrado para o cliente, a função retorna um array vazio.
-export function getProjectByClientId(clientId: string): Project[] {
-  const projects = getProjects();
-  return projects.filter((project) => project.clientId === clientId);
+export async function getProjectByClientId(clientId: string): Promise<Project[]> {
+  const userId = await ensureDatabaseBootstrap();
+
+  const { data, error } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('client_id', clientId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(
+      getSupabaseErrorMessage(
+        error,
+        'Nao foi possivel carregar os projetos desse cliente.',
+      ),
+    );
+  }
+
+  return (data as ProjectRecord[] | null)?.map(mapProjectRecord) ?? [];
 }

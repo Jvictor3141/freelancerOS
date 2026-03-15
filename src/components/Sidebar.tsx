@@ -1,5 +1,14 @@
-import { BriefcaseBusiness, CreditCard, FileText, Home, Settings, Users } from 'lucide-react';
+import {
+  BriefcaseBusiness,
+  CreditCard,
+  FileText,
+  Home,
+  Settings,
+  ShieldCheck,
+  Users,
+} from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { useAuthStore } from '../store/useAuthStore';
 
 const navItems = [
   { label: 'Dashboard', to: '/', icon: Home },
@@ -7,10 +16,12 @@ const navItems = [
   { label: 'Projetos', to: '/projetos', icon: BriefcaseBusiness },
   { label: 'Pagamentos', to: '/pagamentos', icon: CreditCard },
   { label: 'Propostas', to: '/propostas', icon: FileText },
-  { label: 'Configurações', to: '/configuracoes', icon: Settings },
+  { label: 'Configuracoes', to: '/configuracoes', icon: Settings },
 ];
 
 export function Sidebar() {
+  const { user } = useAuthStore();
+
   return (
     <aside className="hidden min-h-screen w-72 shrink-0 border-r border-slate-200 bg-white/90 px-5 py-6 backdrop-blur xl:block">
       <div className="flex items-center gap-3 px-2">
@@ -18,8 +29,12 @@ export function Sidebar() {
           <BriefcaseBusiness size={20} />
         </div>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">FreelancerOS</p>
-          <h1 className="text-lg font-semibold text-slate-900">Painel operacional</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+            FreelancerOS
+          </p>
+          <h1 className="text-lg font-semibold text-slate-900">
+            Painel operacional
+          </h1>
         </div>
       </div>
 
@@ -43,10 +58,18 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-10 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Resumo rápido</p>
-        <h2 className="mt-2 text-sm font-semibold text-slate-900">Seu mês está saudável</h2>
+        <div className="mb-4 inline-flex rounded-2xl bg-white p-3 text-[#635bff] shadow-sm shadow-slate-200">
+          <ShieldCheck size={18} />
+        </div>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+          Conta conectada
+        </p>
+        <h2 className="mt-2 text-sm font-semibold text-slate-900">
+          {user?.email ?? 'Usuario autenticado'}
+        </h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">
-          Você já bateu 78% da meta mensal e só tem 2 cobranças que precisam de atenção.
+          Seus dados ficam vinculados a essa conta e passam pelas regras de
+          seguranca do Supabase.
         </p>
       </div>
     </aside>

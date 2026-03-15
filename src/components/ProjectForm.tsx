@@ -10,8 +10,9 @@ type ProjectFormValues = Omit<Project, 'id' | 'createdAt'>;
 type ProjectFormProps = {
   clients: Client[];
   initialValues?: Project | null;
-  onSubmit: (values: ProjectFormValues) => void;
+  onSubmit: (values: ProjectFormValues) => Promise<void> | void;
   onCancel: () => void;
+  isSubmitting?: boolean;
 };
 
 // aqui definimos os valores iniciais do formulário de projeto, que são usados para preencher os campos do formulário quando o componente é montado ou quando os valores iniciais são atualizados. Esses valores incluem um clientId vazio, um nome vazio, uma descrição vazia, um valor de 0, um prazo vazio e um status inicial de 'proposal'. Esses valores garantem que o formulário comece com campos vazios ou com um status padrão quando for usado para criar um novo projeto.
@@ -38,6 +39,7 @@ export function ProjectForm({
   initialValues,
   onSubmit,
   onCancel,
+  isSubmitting = false,
 }: ProjectFormProps) {
   const [values, setValues] = useState<ProjectFormValues>(emptyValues);
 
@@ -77,7 +79,8 @@ export function ProjectForm({
     }));
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  // O envio assincromo garante que a interface espere o banco concluir antes de fechar o formulario.
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!values.clientId) {
@@ -95,7 +98,7 @@ export function ProjectForm({
       return;
     }
 
-    onSubmit({
+    await onSubmit({
       clientId: values.clientId,
       name: values.name.trim(),
       description: values.description.trim(),
@@ -205,6 +208,7 @@ export function ProjectForm({
         <button
           type="button"
           onClick={onCancel}
+          disabled={isSubmitting}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
           Cancelar
@@ -212,9 +216,10 @@ export function ProjectForm({
 
         <button
           type="submit"
+          disabled={isSubmitting}
           className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
-          Salvar projeto
+          {isSubmitting ? 'Salvando...' : 'Salvar projeto'}
         </button>
       </div>
     </form>

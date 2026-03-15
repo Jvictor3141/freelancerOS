@@ -1,16 +1,22 @@
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Clock3, FolderKanban, Wallet } from 'lucide-react';
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock3,
+  FolderKanban,
+  Wallet,
+} from 'lucide-react';
 import { useClientStore } from '../store/useClientStore';
-import { useProjectStore } from '../store/useProjectStore';
 import { usePaymentStore } from '../store/usePaymentStore';
+import { useProjectStore } from '../store/useProjectStore';
 import {
   getClientFinancialSummary,
   getClientPayments,
   getClientProjects,
 } from '../utils/clientDetails';
-import { projectStatusClassName, projectStatusLabel } from '../utils/projectStatus';
 import { paymentStatusClassName, paymentStatusLabel } from '../utils/paymentStatus';
+import { projectStatusClassName, projectStatusLabel } from '../utils/projectStatus';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -23,57 +29,105 @@ export function ClientDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { clients, loadClients } = useClientStore();
-  const { projects, loadProjects } = useProjectStore();
-  const { payments, loadPayments } = usePaymentStore();
+  const {
+    clients,
+    error: clientError,
+    initialized: clientsInitialized,
+    loadClients,
+  } = useClientStore();
+  const {
+    projects,
+    error: projectError,
+    initialized: projectsInitialized,
+    loadProjects,
+  } = useProjectStore();
+  const {
+    payments,
+    error: paymentError,
+    initialized: paymentsInitialized,
+    loadPayments,
+  } = usePaymentStore();
+
+  const combinedError = paymentError ?? projectError ?? clientError;
 
   useEffect(() => {
-    loadClients();
-    loadProjects();
-    loadPayments();
+    void loadClients();
+    void loadProjects();
+    void loadPayments();
   }, [loadClients, loadProjects, loadPayments]);
 
   const client = useMemo(
     () => clients.find((item) => item.id === id) ?? null,
-    [clients, id]
+    [clients, id],
   );
 
   const clientProjects = useMemo(() => {
-    if (!id) return [];
+    if (!id) {
+      return [];
+    }
+
     return getClientProjects(projects, id);
   }, [projects, id]);
 
   const clientPayments = useMemo(
     () => getClientPayments(payments, clientProjects),
-    [payments, clientProjects]
+    [payments, clientProjects],
   );
 
   const summary = useMemo(
     () => getClientFinancialSummary(clientProjects, clientPayments),
-    [clientProjects, clientPayments]
+    [clientProjects, clientPayments],
   );
+
+  if (!clientsInitialized || !projectsInitialized || !paymentsInitialized) {
+    return (
+      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-100">
+        <p className="text-sm font-medium text-slate-500">Cliente</p>
+        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
+          Carregando dados do banco...
+        </h2>
+        <p className="mt-2 text-sm text-slate-500">
+          Buscando clientes, projetos e pagamentos relacionados.
+        </p>
+      </section>
+    );
+  }
 
   if (!client) {
     return (
-      <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-100">
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-          Cliente não encontrado
-        </h2>
-        <p className="mt-2 text-sm text-slate-500">
-          Esse cliente não existe ou foi removido.
-        </p>
-        <button
-          onClick={() => navigate('/clientes')}
-          className="mt-6 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white"
-        >
-          Voltar para clientes
-        </button>
+      <div className="space-y-6">
+        {combinedError ? (
+          <section className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+            {combinedError}
+          </section>
+        ) : null}
+
+        <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-100">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+            Cliente nao encontrado
+          </h2>
+          <p className="mt-2 text-sm text-slate-500">
+            Esse cliente nao existe ou foi removido.
+          </p>
+          <button
+            onClick={() => navigate('/clientes')}
+            className="mt-6 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white"
+          >
+            Voltar para clientes
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {combinedError ? (
+        <section className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+          {combinedError}
+        </section>
+      ) : null}
+
       <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
         <button
           onClick={() => navigate('/clientes')}
@@ -99,7 +153,7 @@ export function ClientDetailsPage() {
           <div className="max-w-xl rounded-3xl bg-slate-50 p-4 text-sm text-slate-600">
             <p className="font-medium text-slate-800">Notas</p>
             <p className="mt-2 leading-6">
-              {client.notes || 'Nenhuma observação cadastrada para este cliente.'}
+              {client.notes || 'Nenhuma observacao cadastrada para este cliente.'}
             </p>
           </div>
         </div>
@@ -140,7 +194,7 @@ export function ClientDetailsPage() {
           <div className="mb-4 inline-flex rounded-2xl bg-violet-100 p-3 text-violet-700">
             <CheckCircle2 size={18} />
           </div>
-          <p className="text-sm font-medium text-slate-500">Concluídos</p>
+          <p className="text-sm font-medium text-slate-500">Concluidos</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             {summary.completedProjects}
           </p>
@@ -164,7 +218,7 @@ export function ClientDetailsPage() {
                     <div>
                       <p className="font-semibold text-slate-900">{project.name}</p>
                       <p className="mt-1 text-sm text-slate-500">
-                        {project.description || 'Sem descrição'}
+                        {project.description || 'Sem descricao'}
                       </p>
                     </div>
 
@@ -180,7 +234,7 @@ export function ClientDetailsPage() {
                       Prazo:{' '}
                       {project.deadline
                         ? new Date(project.deadline).toLocaleDateString('pt-BR')
-                        : '—'}
+                        : '-'}
                     </span>
                     <span className="font-semibold text-slate-900">
                       {formatCurrency(project.value)}
@@ -200,7 +254,7 @@ export function ClientDetailsPage() {
           <div className="border-b border-slate-200 px-6 py-5">
             <p className="text-sm font-medium text-slate-500">Pagamentos</p>
             <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Histórico financeiro
+              Historico financeiro
             </h2>
           </div>
 

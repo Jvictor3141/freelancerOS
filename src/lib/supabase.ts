@@ -1,16 +1,83 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ??
+  import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Supabase env vars ausentes.');
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    'Configure VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY no arquivo .env.',
+  );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+// O cliente abaixo centraliza toda a comunicacao com o banco para que os services
+// usem a mesma sessao e a mesma configuracao de autenticacao.
+export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
   },
 });
+
+type ErrorLike = {
+  code?: string;
+  message?: string;
+};
+
+// Esta funcao transforma erros tecnicos do Supabase em mensagens objetivas para a UI.
+export function getSupabaseErrorMessage(
+  error: ErrorLike | null,
+  fallback: string,
+) {
+  if (!error?.message) {
+    return fallback;
+  }
+
+  if (
+    error.message.includes('relation') &&
+    error.message.includes('does not exist')
+  ) {
+    return 'As tabelas do Supabase ainda nao existem. Execute o arquivo supabase/schema.sql antes de usar o app.';
+  }
+
+  if (error.code === '23503') {
+    return 'Existe um relacionamento pendente entre os registros. Revise os dados vinculados antes de continuar.';
+  }
+
+  if (error.code === '23505') {
+    return 'Ja existe um registro com os mesmos dados unicos no banco.';
+  }
+
+  if (
+    error.code === '42501' ||
+    error.message.includes('row-level security')
+  ) {
+    return 'A sessao atual nao tem permissao para acessar esses dados. Verifique a autenticacao e o campo user_id das tabelas.';
+  }
+
+  if (error.message.includes('Anonymous sign-ins are disabled')) {
+    return 'O projeto precisa de uma sessao autenticada. Ative Anonymous Sign-Ins no Supabase Auth ou implemente login antes de usar o app.';
+  }
+
+  return error.message;
+}
+
+// Esta funcao padroniza erros vindos de qualquer camada para simplificar o tratamento nas stores.
+export function getErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message;
+  }
+
+  return fallback;
+}

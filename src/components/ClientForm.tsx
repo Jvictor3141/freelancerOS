@@ -10,8 +10,9 @@ type ClientFormValues = Omit<Client, "id" | "createdAt">;
 // - onCancel: uma função que será chamada quando o usuário clicar no botão de cancelar. Essa função é responsável por lidar com a ação de cancelamento, como fechar o formulário ou limpar os valores preenchidos.
 type ClientFormProps = {
   initialValues?: Client | null;
-  onSubmit: (values: ClientFormValues) => void;
+  onSubmit: (values: ClientFormValues) => Promise<void> | void;
   onCancel: () => void;
+  isSubmitting?: boolean;
 };
 
 //essa parte define um objeto emptyValues do tipo ClientFormValues, que contém valores vazios para cada campo do formulário de cliente. Esse objeto é usado para inicializar o estado do formulário quando não há valores iniciais fornecidos (ou seja, quando initialValues é null ou undefined). Ele garante que o formulário comece com campos vazios, prontos para serem preenchidos pelo usuário.
@@ -28,6 +29,7 @@ export function ClientForm({
   initialValues,
   onSubmit,
   onCancel,
+  isSubmitting = false,
 }: ClientFormProps) {
   const [values, setValues] = useState<ClientFormValues>(emptyValues);
 
@@ -59,7 +61,8 @@ export function ClientForm({
   }
 
   // essa função é responsável por lidar com a submissão do formulário. Ela recebe um evento de submissão (submit event) como parâmetro, impede o comportamento padrão de recarregar a página, valida os campos obrigatórios (nome e email) para garantir que não estejam vazios, e se a validação passar, chama a função onSubmit com os valores do formulário (name, company, email, phone e notes) para que o cliente seja salvo ou atualizado conforme necessário. Se a validação falhar (ou seja, se o nome ou email estiverem vazios), a função exibe um alerta para o usuário informando que esses campos são obrigatórios e não chama a função onSubmit.
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  // O submit agora espera a resposta do banco para evitar que o modal feche antes da hora.
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!values.name.trim() || !values.email.trim()) {
@@ -68,7 +71,7 @@ export function ClientForm({
     }
 
     // essa parte chama a função onSubmit, passando um objeto com os valores do formulário (name, company, email, phone e notes) como argumento. Antes de passar os valores para onSubmit, a função trim() é usada para remover quaisquer espaços em branco extras no início ou no final dos valores, garantindo que os dados enviados sejam limpos e formatados corretamente. A função onSubmit é responsável por lidar com a lógica de salvar ou atualizar o cliente com os valores fornecidos, e é chamada apenas se a validação dos campos obrigatórios for bem-sucedida.
-    onSubmit({
+    await onSubmit({
       name: values.name.trim(),
       company: values.company.trim(),
       email: values.email.trim(),
@@ -150,6 +153,7 @@ export function ClientForm({
         <button
           type="button"
           onClick={onCancel}
+          disabled={isSubmitting}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
           Cancelar
@@ -157,9 +161,10 @@ export function ClientForm({
 
         <button
           type="submit"
+          disabled={isSubmitting}
           className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
-          Salvar cliente
+          {isSubmitting ? 'Salvando...' : 'Salvar cliente'}
         </button>
       </div>
     </form>

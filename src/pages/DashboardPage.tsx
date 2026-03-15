@@ -17,8 +17,8 @@ import {
   Users,
 } from 'lucide-react';
 import { useClientStore } from '../store/useClientStore';
-import { useProjectStore } from '../store/useProjectStore';
 import { usePaymentStore } from '../store/usePaymentStore';
+import { useProjectStore } from '../store/useProjectStore';
 import {
   getDashboardMetrics,
   getMonthlyReceivedRevenue,
@@ -43,60 +43,102 @@ function formatDate(value: string) {
 }
 
 export function DashboardPage() {
-  const { clients, loadClients } = useClientStore();
-  const { projects, loadProjects } = useProjectStore();
-  const { payments, loadPayments, markAsOverdueIfNeeded } = usePaymentStore();
+  const {
+    clients,
+    error: clientError,
+    initialized: clientsInitialized,
+    loadClients,
+  } = useClientStore();
+  const {
+    projects,
+    error: projectError,
+    initialized: projectsInitialized,
+    loadProjects,
+  } = useProjectStore();
+  const {
+    payments,
+    error: paymentError,
+    initialized: paymentsInitialized,
+    loadPayments,
+    markAsOverdueIfNeeded,
+  } = usePaymentStore();
+
+  const combinedError = paymentError ?? projectError ?? clientError;
 
   useEffect(() => {
-    loadClients();
-    loadProjects();
-    loadPayments();
+    void loadClients();
+    void loadProjects();
+    void loadPayments();
   }, [loadClients, loadProjects, loadPayments]);
 
   useEffect(() => {
-    markAsOverdueIfNeeded();
-  }, [markAsOverdueIfNeeded]);
+    if (!paymentsInitialized) {
+      return;
+    }
+
+    void markAsOverdueIfNeeded();
+  }, [paymentsInitialized, markAsOverdueIfNeeded]);
 
   const metrics = useMemo(
     () => getDashboardMetrics(clients, projects),
-    [clients, projects]
+    [clients, projects],
   );
 
   const paymentMetrics = useMemo(
     () => getPaymentMetrics(payments),
-    [payments]
+    [payments],
   );
 
   const revenue = useMemo(
     () => getMonthlyReceivedRevenue(payments, 6),
-    [payments]
+    [payments],
   );
 
   const recentActivities = useMemo(
     () => getRecentProjectActivities(projects, clients, 4),
-    [projects, clients]
+    [projects, clients],
   );
 
   const paymentAlerts = useMemo(
     () => getPaymentAlerts(payments, projects, clients, 4),
-    [payments, projects, clients]
+    [payments, projects, clients],
   );
+
+  if (!clientsInitialized || !projectsInitialized || !paymentsInitialized) {
+    return (
+      <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-100">
+        <p className="text-sm font-medium text-slate-500">Dashboard</p>
+        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
+          Carregando dados do banco...
+        </h2>
+        <p className="mt-2 text-sm text-slate-500">
+          Consolidando clientes, projetos e pagamentos no Supabase.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {combinedError ? (
+        <section className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
+          {combinedError}
+        </section>
+      ) : null}
+
       <section className="grid gap-4 xl:grid-cols-12">
         <div className="rounded-[28px] bg-[#635bff] p-6 text-white shadow-[0_24px_60px_rgba(99,91,255,0.28)] xl:col-span-8">
           <div className="flex h-full flex-col justify-between gap-6">
             <div className="space-y-2">
               <p className="text-sm font-medium text-indigo-100">
-                Visão financeira
+                Visao financeira
               </p>
               <h2 className="text-3xl font-semibold tracking-tight">
-                Entradas de dinheiro e saúde do negócio
+                Entradas de dinheiro e saude do negocio
               </h2>
               <p className="max-w-2xl text-sm leading-6 text-indigo-100/90">
-                Um painel direto para entender o que entrou, o que ainda está
-                pendente e onde estão os gargalos financeiros.
+                Um painel direto para entender o que entrou, o que ainda esta
+                pendente e onde estao os gargalos financeiros.
               </p>
             </div>
 
@@ -138,7 +180,7 @@ export function DashboardPage() {
           <div className="mb-5">
             <p className="text-sm font-medium text-slate-500">Alertas</p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Clientes que precisam de atenção
+              Clientes que precisam de atencao
             </h3>
           </div>
 
@@ -180,7 +222,7 @@ export function DashboardPage() {
               ))
             ) : (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-                Nenhum cliente com cobrança pendente ou atrasada.
+                Nenhum cliente com cobranca pendente ou atrasada.
               </div>
             )}
           </div>
@@ -210,7 +252,7 @@ export function DashboardPage() {
             {metrics.projectsInProgress}
           </p>
           <p className="mt-2 text-sm text-slate-500">
-            Em andamento ou revisão
+            Em andamento ou revisao
           </p>
         </div>
 
@@ -218,7 +260,7 @@ export function DashboardPage() {
           <div className="mb-4 inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-700">
             <CheckCircle2 size={18} />
           </div>
-          <p className="text-sm font-medium text-slate-500">Concluídos</p>
+          <p className="text-sm font-medium text-slate-500">Concluidos</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             {metrics.completedProjects}
           </p>
@@ -231,12 +273,12 @@ export function DashboardPage() {
           <div className="mb-4 inline-flex rounded-2xl bg-violet-100 p-3 text-violet-700">
             <ArrowUpRight size={18} />
           </div>
-          <p className="text-sm font-medium text-slate-500">Ticket médio</p>
+          <p className="text-sm font-medium text-slate-500">Ticket medio</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             {formatCurrency(metrics.averageTicket)}
           </p>
           <p className="mt-2 text-sm text-slate-500">
-            Valor médio por projeto
+            Valor medio por projeto
           </p>
         </div>
       </section>
@@ -249,7 +291,7 @@ export function DashboardPage() {
                 Entradas de dinheiro
               </p>
               <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-                Recebimentos dos últimos 6 meses
+                Recebimentos dos ultimos 6 meses
               </h3>
             </div>
 
@@ -326,7 +368,7 @@ export function DashboardPage() {
               Atividade recente
             </p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Últimos projetos criados
+              Ultimos projetos criados
             </h3>
           </div>
 

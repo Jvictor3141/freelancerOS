@@ -8,8 +8,9 @@ type PaymentFormValues = Omit<Payment, 'id' | 'createdAt'>;
 type PaymentFormProps = {
   projects: Project[];
   initialValues?: Payment | null;
-  onSubmit: (values: PaymentFormValues) => void;
+  onSubmit: (values: PaymentFormValues) => Promise<void> | void;
   onCancel: () => void;
+  isSubmitting?: boolean;
 };
 
 const emptyValues: PaymentFormValues = {
@@ -27,6 +28,7 @@ export function PaymentForm({
   initialValues,
   onSubmit,
   onCancel,
+  isSubmitting = false,
 }: PaymentFormProps) {
   const [values, setValues] = useState<PaymentFormValues>(emptyValues);
 
@@ -75,7 +77,8 @@ export function PaymentForm({
     });
   }
 
-  function handleSubmit(event: React.FormEvent) {
+  // O formulario aguarda o retorno do banco para manter o estado visual coerente com a gravacao remota.
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
     if (!values.projectId) {
@@ -98,7 +101,7 @@ export function PaymentForm({
       return;
     }
 
-    onSubmit({
+    await onSubmit({
       ...values,
       paidAt: values.status === 'paid' ? values.paidAt : null,
     });
@@ -210,6 +213,7 @@ export function PaymentForm({
         <button
           type="button"
           onClick={onCancel}
+          disabled={isSubmitting}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
           Cancelar
@@ -217,9 +221,10 @@ export function PaymentForm({
 
         <button
           type="submit"
+          disabled={isSubmitting}
           className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
-          Salvar pagamento
+          {isSubmitting ? 'Salvando...' : 'Salvar pagamento'}
         </button>
       </div>
     </form>
