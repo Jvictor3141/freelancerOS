@@ -104,7 +104,6 @@ export function PaymentsPage() {
     setIsModalOpen(false);
   }
 
-  // O submit aguarda a resposta do banco para manter o modal coerente com a persistencia remota.
   async function handlePaymentSubmit(values: PaymentInput) {
     setIsSubmitting(true);
 
@@ -176,20 +175,21 @@ export function PaymentsPage() {
         </section>
       ) : null}
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-        <div className="flex items-end justify-between gap-4">
+      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="text-sm font-medium text-slate-500">Financeiro</p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
               Controle de pagamentos
             </h2>
-            <p className="mt-2 max-w-2xl text-sm text-slate-600">
-              Aqui o sistema comeca a resolver a dor mais seria do freelancer:
-              saber quem pagou, quem nao pagou e o que venceu.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              Veja o que venceu, o que entrou e o que ainda depende de
+              cobranca sem forcar scroll lateral no celular.
             </p>
           </div>
 
           <button
+            type="button"
             onClick={openCreateModal}
             className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
           >
@@ -198,8 +198,8 @@ export function PaymentsPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-        <div className="flex gap-3">
+      <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
@@ -213,8 +213,8 @@ export function PaymentsPage() {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-slate-200 bg-white shadow-sm shadow-slate-100">
-        <div className="border-b border-slate-200 px-6 py-5">
+      <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
+        <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
           <p className="text-sm font-medium text-slate-500">
             {filteredPayments.length} pagamento(s) encontrado(s)
           </p>
@@ -223,7 +223,84 @@ export function PaymentsPage() {
           </h3>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-slate-100 lg:hidden">
+          {filteredPayments.length > 0 ? (
+            filteredPayments.map((payment) => (
+              <article key={payment.id} className="space-y-4 px-5 py-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-semibold text-slate-900">
+                      {payment.clientName}
+                    </p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {payment.projectName}
+                    </p>
+                  </div>
+
+                  <span
+                    className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${paymentStatusClassName[payment.status]}`}
+                  >
+                    {paymentStatusLabel[payment.status]}
+                  </span>
+                </div>
+
+                <div className="grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+                  <p>
+                    <span className="font-medium text-slate-900">Valor:</span>{' '}
+                    {formatCurrency(payment.amount)}
+                  </p>
+                  <p>
+                    <span className="font-medium text-slate-900">
+                      Vencimento:
+                    </span>{' '}
+                    {new Date(payment.dueDate).toLocaleDateString('pt-BR')}
+                  </p>
+                </div>
+
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  {payment.status !== 'paid' ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void handleMarkAsPaid(payment.id);
+                      }}
+                      className="rounded-xl border border-emerald-200 px-3 py-2 text-sm font-medium text-emerald-700 transition hover:bg-emerald-50"
+                    >
+                      Marcar como pago
+                    </button>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      selectPayment(payment);
+                      setIsModalOpen(true);
+                    }}
+                    className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void handlePaymentRemoval(payment);
+                    }}
+                    className="rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </article>
+            ))
+          ) : (
+            <div className="px-5 py-10 text-center text-sm text-slate-500">
+              Nenhum pagamento encontrado.
+            </div>
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto lg:block">
           <table className="min-w-full border-collapse">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/80">
@@ -274,9 +351,10 @@ export function PaymentsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {payment.status !== 'paid' ? (
                         <button
+                          type="button"
                           onClick={() => {
                             void handleMarkAsPaid(payment.id);
                           }}
@@ -287,6 +365,7 @@ export function PaymentsPage() {
                       ) : null}
 
                       <button
+                        type="button"
                         onClick={() => {
                           selectPayment(payment);
                           setIsModalOpen(true);
@@ -297,6 +376,7 @@ export function PaymentsPage() {
                       </button>
 
                       <button
+                        type="button"
                         onClick={() => {
                           void handlePaymentRemoval(payment);
                         }}

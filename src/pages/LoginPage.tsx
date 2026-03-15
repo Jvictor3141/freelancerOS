@@ -14,7 +14,7 @@ const highlights = [
   {
     title: 'Clientes, projetos e pagamentos no mesmo fluxo',
     description:
-      'Pare de espalhar a operação em planilhas soltas e centralize tudo no mesmo painel.',
+      'Pare de espalhar a operacao em planilhas soltas e centralize tudo no mesmo painel.',
     icon: BriefcaseBusiness,
   },
   {
@@ -32,7 +32,8 @@ const highlights = [
 ];
 
 export function LoginPage() {
-  const { loading, error, notice, signIn, signUp, clearFeedback } = useAuthStore();
+  const { loading, error, notice, signIn, signUp, clearFeedback } =
+    useAuthStore();
 
   const [mode, setMode] = useState<AuthMode>('sign_in');
   const [email, setEmail] = useState('');
@@ -45,7 +46,6 @@ export function LoginPage() {
     setLocalError(null);
   }, [mode, clearFeedback]);
 
-  // O submit centraliza validacao local e aciona login ou cadastro conforme o modo atual.
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     clearFeedback();
@@ -75,61 +75,16 @@ export function LoginPage() {
         await signUp(email.trim(), password);
       }
     } catch {
-      // O erro ja e exibido pela store para manter a tela consistente.
+      return;
     }
   }
 
   return (
     <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8 lg:px-10">
-      <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-7xl overflow-hidden rounded-[36px] border border-slate-200 bg-white/80 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur xl:grid-cols-[1.15fr_0.85fr]">
-        <section className="relative overflow-hidden bg-[#635bff] px-6 py-8 text-white sm:px-10 sm:py-10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.22),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(15,23,42,0.24),transparent_32%)]" />
-
-          <div className="relative flex h-full flex-col justify-between gap-10">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[#635bff] shadow-lg shadow-indigo-950/20">
-                  <BriefcaseBusiness size={20} />
-                </span>
-                FreelancerOS
-              </div>
-
-              <div className="max-w-2xl space-y-4">
-                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-indigo-100/90">
-                  Painel operacional
-                </p>
-                <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-                  Entre para gerenciar sua operacao sem virar refem de planilha
-                </h1>
-                <p className="max-w-xl text-base leading-7 text-indigo-100/90 sm:text-lg">
-                  Login e cadastro no mesmo fluxo, no mesmo tema do produto e
-                  conectados direto ao Supabase com acesso protegido por usuario.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-4">
-              {highlights.map(({ title, description, icon: Icon }) => (
-                <article
-                  key={title}
-                  className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm"
-                >
-                  <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white">
-                    <Icon size={18} />
-                  </div>
-                  <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-indigo-100/90">
-                    {description}
-                  </p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
+      <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-7xl overflow-hidden rounded-[36px] border border-slate-200 bg-white/80 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur xl:grid-cols-[0.92fr_1.08fr]">
         <section className="flex items-center bg-[linear-gradient(180deg,rgba(248,250,252,0.88),rgba(255,255,255,0.98))] px-5 py-8 sm:px-8 lg:px-10">
           <div className="mx-auto w-full max-w-md">
-            <div className="rounded-4x1 border border-slate-200 bg-white p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)] sm:p-8">
+            <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)] sm:p-8">
               <div className="space-y-3">
                 <p className="text-sm font-medium text-slate-500">
                   {mode === 'sign_in' ? 'Acesse sua conta' : 'Crie sua conta'}
@@ -204,7 +159,9 @@ export function LoginPage() {
                     <input
                       type="password"
                       value={confirmPassword}
-                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      onChange={(event) =>
+                        setConfirmPassword(event.target.value)
+                      }
                       placeholder="Repita sua senha"
                       className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#635bff] focus:bg-white"
                     />
@@ -255,6 +212,54 @@ export function LoginPage() {
                   ficam alinhados com as policies do banco por usuario.
                 </p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="relative overflow-hidden bg-[#635bff] px-6 py-8 text-white sm:px-10 sm:py-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.22),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(15,23,42,0.24),transparent_32%)]" />
+
+          <div className="relative flex h-full flex-col justify-between gap-10">
+            <div className="space-y-6">
+              <div className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[#635bff] shadow-lg shadow-indigo-950/20">
+                  <BriefcaseBusiness size={20} />
+                </span>
+                FreelancerOS
+              </div>
+
+              <div className="max-w-2xl space-y-4">
+                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-indigo-100/90">
+                  Painel operacional
+                </p>
+                <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+                  Entre para gerenciar sua operacao sem virar refem de planilha
+                </h1>
+                <p className="max-w-xl text-base leading-7 text-indigo-100/90 sm:text-lg">
+                  Login e cadastro no mesmo fluxo, no mesmo tema do produto e
+                  conectados direto ao Supabase com acesso protegido por
+                  usuario.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-4">
+              {highlights.map(({ title, description, icon: Icon }) => (
+                <article
+                  key={title}
+                  className="rounded-3xl border border-white/15 bg-white/10 p-5 backdrop-blur-sm"
+                >
+                  <div className="mb-4 inline-flex rounded-2xl bg-white/15 p-3 text-white">
+                    <Icon size={18} />
+                  </div>
+                  <h2 className="text-lg font-semibold tracking-tight">
+                    {title}
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-indigo-100/90">
+                    {description}
+                  </p>
+                </article>
+              ))}
             </div>
           </div>
         </section>

@@ -3,10 +3,8 @@ import type { Client } from '../types/client';
 import type { Project, ProjectStatus } from '../types/project';
 import { projectStatusLabel } from '../utils/projectStatus';
 
-//aqui definimos os tipos para os valores do formulário de projeto e as props do componente ProjectForm. O tipo ProjectFormValues é uma versão simplificada do tipo Project, omitindo os campos id e createdAt, que são gerados automaticamente. O tipo ProjectFormProps define as propriedades que o componente espera receber, incluindo a lista de clientes, os valores iniciais do projeto (se houver), a função de callback para quando o formulário for submetido e a função de callback para quando o formulário for cancelado.
 type ProjectFormValues = Omit<Project, 'id' | 'createdAt'>;
 
-// nesse tipo, definimos as propriedades que o componente ProjectForm espera receber. Ele inclui uma lista de clientes (clients), os valores iniciais do projeto (initialValues) que podem ser nulos, uma função de callback (onSubmit) que é chamada quando o formulário é submetido com os valores do formulário, e uma função de callback (onCancel) que é chamada quando o formulário é cancelado. Essas props permitem que o componente ProjectForm seja reutilizável para criar ou editar projetos, dependendo dos valores iniciais fornecidos.
 type ProjectFormProps = {
   clients: Client[];
   initialValues?: Project | null;
@@ -15,7 +13,6 @@ type ProjectFormProps = {
   isSubmitting?: boolean;
 };
 
-// aqui definimos os valores iniciais do formulário de projeto, que são usados para preencher os campos do formulário quando o componente é montado ou quando os valores iniciais são atualizados. Esses valores incluem um clientId vazio, um nome vazio, uma descrição vazia, um valor de 0, um prazo vazio e um status inicial de 'proposal'. Esses valores garantem que o formulário comece com campos vazios ou com um status padrão quando for usado para criar um novo projeto.
 const emptyValues: ProjectFormValues = {
   clientId: '',
   name: '',
@@ -25,7 +22,6 @@ const emptyValues: ProjectFormValues = {
   status: 'proposal',
 };
 
-// aqui definimos as opções de status para os projetos, que são usadas para preencher o campo de seleção de status no formulário. Essas opções incluem os status 'proposal', 'in_progress', 'review' e 'completed', que correspondem aos diferentes estágios do ciclo de vida de um projeto. Essas opções permitem que os usuários do aplicativo selecionem o status apropriado para cada projeto ao criar ou editar um projeto.
 const statusOptions: ProjectStatus[] = [
   'proposal',
   'in_progress',
@@ -33,7 +29,6 @@ const statusOptions: ProjectStatus[] = [
   'completed',
 ];
 
-//essa função é o componente ProjectForm, que é um formulário para criar ou editar projetos. Ele recebe uma lista de clientes, os valores iniciais do projeto (se houver), uma função de callback para quando o formulário for submetido e uma função de callback para quando o formulário for cancelado. O componente usa o hook useState para gerenciar os valores do formulário e o hook useEffect para definir os valores iniciais quando o componente é montado ou quando os valores iniciais ou a lista de clientes mudam. O formulário inclui campos para selecionar o cliente, inserir o nome do projeto, a descrição, o valor, o prazo e o status do projeto. Quando o formulário é submetido, ele valida os campos e chama a função de callback onSubmit com os valores do formulário.
 export function ProjectForm({
   clients,
   initialValues,
@@ -56,30 +51,25 @@ export function ProjectForm({
       return;
     }
 
-    setValues((prev) => ({
+    setValues({
       ...emptyValues,
       clientId: clients[0]?.id ?? '',
-      status: prev.status,
-    }));
+    });
   }, [initialValues, clients]);
 
   function handleChange(
     event: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) {
     const { name, value } = event.target;
 
-    setValues((prev) => ({
-      ...prev,
-      [name]:
-        name === 'value'
-          ? Number(value)
-          : value,
+    setValues((previousValues) => ({
+      ...previousValues,
+      [name]: name === 'value' ? Number(value) : value,
     }));
   }
 
-  // O envio assincromo garante que a interface espere o banco concluir antes de fechar o formulario.
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -89,12 +79,12 @@ export function ProjectForm({
     }
 
     if (!values.name.trim()) {
-      alert('O nome do projeto é obrigatório.');
+      alert('O nome do projeto e obrigatorio.');
       return;
     }
 
     if (values.value < 0) {
-      alert('O valor do projeto não pode ser negativo.');
+      alert('O valor do projeto nao pode ser negativo.');
       return;
     }
 
@@ -123,7 +113,8 @@ export function ProjectForm({
           <option value="">Selecione um cliente</option>
           {clients.map((client) => (
             <option key={client.id} value={client.id}>
-              {client.name} {client.company ? `• ${client.company}` : ''}
+              {client.name}
+              {client.company ? ` - ${client.company}` : ''}
             </option>
           ))}
         </select>
@@ -144,7 +135,7 @@ export function ProjectForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Descrição
+          Descricao
         </span>
         <textarea
           name="description"
@@ -204,7 +195,7 @@ export function ProjectForm({
         </select>
       </label>
 
-      <div className="flex items-center justify-end gap-3 pt-2">
+      <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={onCancel}

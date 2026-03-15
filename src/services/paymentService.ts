@@ -95,25 +95,3 @@ export async function deletePayment(id: string) {
     );
   }
 }
-
-export async function getPaymentsByProjectId(projectId: string): Promise<Payment[]> {
-  const userId = await ensureDatabaseBootstrap();
-
-  const { data, error } = await supabase
-    .from('payments')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('project_id', projectId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(
-      getSupabaseErrorMessage(
-        error,
-        'Nao foi possivel carregar os pagamentos desse projeto.',
-      ),
-    );
-  }
-
-  return (data as PaymentRecord[] | null)?.map(mapPaymentRecord) ?? [];
-}

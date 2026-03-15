@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import type { Project } from '../types/project';
+import { useEffect, useState } from 'react';
 import type { Payment } from '../types/payment';
+import type { Project } from '../types/project';
 import { paymentStatusLabel } from '../utils/paymentStatus';
 
 type PaymentFormValues = Omit<Payment, 'id' | 'createdAt'>;
@@ -55,30 +55,28 @@ export function PaymentForm({
   function handleChange(
     event: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) {
     const { name, value } = event.target;
 
-    setValues((prev) => {
-      const next: PaymentFormValues = {
-        ...prev,
+    setValues((previousValues) => {
+      const nextValues: PaymentFormValues = {
+        ...previousValues,
         [name]: name === 'amount' ? Number(value) : value,
       } as PaymentFormValues;
 
       if (name === 'status') {
-        if (value === 'paid') {
-          next.paidAt = prev.paidAt || new Date().toISOString().slice(0, 10);
-        } else {
-          next.paidAt = null;
-        }
+        nextValues.paidAt =
+          value === 'paid'
+            ? previousValues.paidAt || new Date().toISOString().slice(0, 10)
+            : null;
       }
 
-      return next;
+      return nextValues;
     });
   }
 
-  // O formulario aguarda o retorno do banco para manter o estado visual coerente com a gravacao remota.
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!values.projectId) {
@@ -126,7 +124,7 @@ export function PaymentForm({
         </select>
       </label>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
           Valor
           <input
@@ -153,7 +151,7 @@ export function PaymentForm({
         </label>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
           Status
           <select
@@ -169,7 +167,7 @@ export function PaymentForm({
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Método
+          Metodo
           <select
             name="method"
             value={values.method}
@@ -177,14 +175,14 @@ export function PaymentForm({
             className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
           >
             <option value="pix">Pix</option>
-            <option value="card">Cartão</option>
-            <option value="bank_transfer">Transferência</option>
+            <option value="card">Cartao</option>
+            <option value="bank_transfer">Transferencia</option>
             <option value="cash">Dinheiro</option>
           </select>
         </label>
       </div>
 
-      {values.status === 'paid' && (
+      {values.status === 'paid' ? (
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
           Pago em
           <input
@@ -195,21 +193,21 @@ export function PaymentForm({
             className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
           />
         </label>
-      )}
+      ) : null}
 
       <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-        Observações
+        Observacoes
         <textarea
           name="notes"
           value={values.notes}
           onChange={handleChange}
           rows={4}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-          placeholder="Adicione observações sobre este pagamento"
+          placeholder="Adicione observacoes sobre este pagamento"
         />
       </label>
 
-      <div className="flex items-center justify-end gap-3 pt-2">
+      <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={onCancel}

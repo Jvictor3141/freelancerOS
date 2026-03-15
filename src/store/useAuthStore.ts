@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Session, User } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 import { supabase, getErrorMessage } from '../lib/supabase';
 import {
   getSession,
@@ -9,7 +9,6 @@ import {
 } from '../services/authService';
 
 type AuthStore = {
-  session: Session | null;
   user: User | null;
   initialized: boolean;
   loading: boolean;
@@ -26,17 +25,18 @@ function getAuthStoreError(error: unknown, fallback: string) {
   return getErrorMessage(error, fallback);
 }
 
-function applySession(set: (partial: Partial<AuthStore>) => void, session: Session | null) {
+function applySession(
+  set: (partial: Partial<AuthStore>) => void,
+  currentSession: { user: User } | null,
+) {
   set({
-    session,
-    user: session?.user ?? null,
+    user: currentSession?.user ?? null,
     initialized: true,
     loading: false,
   });
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
-  session: null,
   user: null,
   initialized: false,
   loading: false,

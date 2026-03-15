@@ -1,29 +1,12 @@
-import {
-  BriefcaseBusiness,
-  CreditCard,
-  FileText,
-  Home,
-  Settings,
-  ShieldCheck,
-  Users,
-} from 'lucide-react';
-import { NavLink } from 'react-router-dom';
+import { BriefcaseBusiness, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
-
-const navItems = [
-  { label: 'Dashboard', to: '/', icon: Home },
-  { label: 'Clientes', to: '/clientes', icon: Users },
-  { label: 'Projetos', to: '/projetos', icon: BriefcaseBusiness },
-  { label: 'Pagamentos', to: '/pagamentos', icon: CreditCard },
-  { label: 'Propostas', to: '/propostas', icon: FileText },
-  { label: 'Configuracoes', to: '/configuracoes', icon: Settings },
-];
+import { NavigationList } from './navigation';
 
 export function Sidebar() {
   const { user } = useAuthStore();
 
   return (
-    <aside className="hidden min-h-screen w-72 shrink-0 border-r border-slate-200 bg-white/90 px-5 py-6 backdrop-blur xl:block">
+    <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-slate-200 bg-white/90 px-5 py-6 backdrop-blur lg:flex lg:flex-col">
       <div className="flex items-center gap-3 px-2">
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#635bff] text-white shadow-lg shadow-indigo-200">
           <BriefcaseBusiness size={20} />
@@ -38,33 +21,16 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="mt-10 space-y-2">
-        {navItems.map(({ label, to, icon: Icon }) => (
-          <NavLink
-            key={label}
-            to={to}
-            className={({ isActive }) =>
-              `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-[#635bff] text-white shadow-md shadow-indigo-200'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-              }`
-            }
-          >
-            <Icon size={18} />
-            {label}
-          </NavLink>
-        ))}
-      </nav>
+      <NavigationList className="mt-10 space-y-2" />
 
-      <div className="mt-10 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+      <div className="mt-auto rounded-3xl border border-slate-200 bg-slate-50 p-4">
         <div className="mb-4 inline-flex rounded-2xl bg-white p-3 text-[#635bff] shadow-sm shadow-slate-200">
           <ShieldCheck size={18} />
         </div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
           Conta conectada
         </p>
-        <h2 className="mt-2 text-sm font-semibold text-slate-900">
+        <h2 className="mt-2 break-all text-sm font-semibold text-slate-900">
           {user?.email ?? 'Usuario autenticado'}
         </h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">

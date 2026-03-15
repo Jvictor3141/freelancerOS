@@ -95,25 +95,3 @@ export async function deleteProject(id: string) {
     );
   }
 }
-
-export async function getProjectByClientId(clientId: string): Promise<Project[]> {
-  const userId = await ensureDatabaseBootstrap();
-
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('client_id', clientId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    throw new Error(
-      getSupabaseErrorMessage(
-        error,
-        'Nao foi possivel carregar os projetos desse cliente.',
-      ),
-    );
-  }
-
-  return (data as ProjectRecord[] | null)?.map(mapProjectRecord) ?? [];
-}

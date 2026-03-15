@@ -1,18 +1,50 @@
-import { useEffect, useRef } from 'react';
+import { Suspense, lazy, useEffect, useRef } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { DashboardLayout } from './layout/DashboardLayout';
-import { ClientDetailsPage } from './pages/ClientDetailsPage';
-import { ClientsPage } from './pages/ClientsPage';
-import { DashboardPage } from './pages/DashboardPage';
 import { LoginPage } from './pages/LoginPage';
-import { PaymentsPage } from './pages/PaymentsPage';
-import { ProjectsPage } from './pages/ProjectsPage';
-import { ProposalsPage } from './pages/ProposalsPage';
-import { SettingsPage } from './pages/SettingsPage';
 import { useAuthStore } from './store/useAuthStore';
 import { useClientStore } from './store/useClientStore';
 import { usePaymentStore } from './store/usePaymentStore';
 import { useProjectStore } from './store/useProjectStore';
+
+const DashboardPage = lazy(async () => ({
+  default: (await import('./pages/DashboardPage')).DashboardPage,
+}));
+const ClientsPage = lazy(async () => ({
+  default: (await import('./pages/ClientsPage')).ClientsPage,
+}));
+const ClientDetailsPage = lazy(async () => ({
+  default: (await import('./pages/ClientDetailsPage')).ClientDetailsPage,
+}));
+const ProjectsPage = lazy(async () => ({
+  default: (await import('./pages/ProjectsPage')).ProjectsPage,
+}));
+const PaymentsPage = lazy(async () => ({
+  default: (await import('./pages/PaymentsPage')).PaymentsPage,
+}));
+const ProposalsPage = lazy(async () => ({
+  default: (await import('./pages/ProposalsPage')).ProposalsPage,
+}));
+const SettingsPage = lazy(async () => ({
+  default: (await import('./pages/SettingsPage')).SettingsPage,
+}));
+
+type LoadingStateProps = {
+  title: string;
+  description: string;
+};
+
+function LoadingState({ title, description }: LoadingStateProps) {
+  return (
+    <div className="rounded-4xl border border-slate-200 bg-white/85 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur">
+      <p className="text-sm font-medium text-slate-500">FreelancerOS</p>
+      <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+        {title}
+      </h1>
+      <p className="mt-2 text-sm text-slate-500">{description}</p>
+    </div>
+  );
+}
 
 function App() {
   const { user, initialized, initialize } = useAuthStore();
@@ -37,7 +69,6 @@ function App() {
     };
   }, [initialize]);
 
-  // Quando a conta muda, limpamos as stores para nao reaproveitar dados de outra sessao.
   useEffect(() => {
     const currentUserId = user?.id ?? null;
 
@@ -54,18 +85,11 @@ function App() {
   if (!initialized) {
     return (
       <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8">
-        <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center rounded-[36px] border border-slate-200 bg-white/80 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur">
-          <div className="space-y-3 text-center">
-            <p className="text-sm font-medium text-slate-500">
-              FreelancerOS
-            </p>
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-              Preparando sua sessao
-            </h1>
-            <p className="text-sm text-slate-500">
-              Verificando autenticacao e conectando o painel ao Supabase.
-            </p>
-          </div>
+        <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
+          <LoadingState
+            title="Preparando sua sessao"
+            description="Verificando autenticacao e conectando o painel ao Supabase."
+          />
         </div>
       </div>
     );
@@ -77,15 +101,24 @@ function App() {
 
   return (
     <DashboardLayout>
-      <Routes>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/clientes" element={<ClientsPage />} />
-        <Route path="/clients/:id" element={<ClientDetailsPage />} />
-        <Route path="/projetos" element={<ProjectsPage />} />
-        <Route path="/pagamentos" element={<PaymentsPage />} />
-        <Route path="/propostas" element={<ProposalsPage />} />
-        <Route path="/configuracoes" element={<SettingsPage />} />
-      </Routes>
+      <Suspense
+        fallback={
+          <LoadingState
+            title="Carregando pagina"
+            description="Montando a interface e buscando os modulos necessarios."
+          />
+        }
+      >
+        <Routes>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/clientes" element={<ClientsPage />} />
+          <Route path="/clients/:id" element={<ClientDetailsPage />} />
+          <Route path="/projetos" element={<ProjectsPage />} />
+          <Route path="/pagamentos" element={<PaymentsPage />} />
+          <Route path="/propostas" element={<ProposalsPage />} />
+          <Route path="/configuracoes" element={<SettingsPage />} />
+        </Routes>
+      </Suspense>
     </DashboardLayout>
   );
 }

@@ -4,10 +4,8 @@ import type { Payment } from '../types/payment';
 
 type DashboardMetric = {
   totalClients: number;
-  totalProjects: number;
   projectsInProgress: number;
   completedProjects: number;
-  totalContractedValue: number;
   averageTicket: number;
 };
 
@@ -64,10 +62,8 @@ export function getDashboardMetrics(
 
   return {
     totalClients,
-    totalProjects,
     projectsInProgress,
     completedProjects,
-    totalContractedValue,
     averageTicket,
   };
 }
