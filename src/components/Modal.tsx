@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 type ModalProps = {
   title: string;
@@ -15,15 +16,32 @@ export function Modal({
   onClose,
   children,
 }: ModalProps) {
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [isOpen]);
+
   if (!isOpen) {
     return null;
   }
 
-  return (
-    <div className="motion-overlay fixed inset-0 z-50 overflow-y-auto bg-slate-950/40 p-4 sm:p-6">
-      <div className="flex min-h-full items-start justify-center py-4 sm:items-center">
-        <div className="motion-dialog w-full max-w-2xl overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-2xl">
-          <div className="max-h-[calc(100vh-2rem)] overflow-y-auto p-5 sm:p-6">
+  return createPortal(
+    <div className="motion-overlay fixed inset-0 z-[100] overflow-x-hidden overflow-y-auto bg-slate-950/34 p-4 backdrop-blur-sm sm:p-6">
+      <div className="flex min-h-[calc(100dvh-2rem)] items-start justify-center py-4 sm:min-h-[calc(100dvh-3rem)] sm:items-center">
+        <div className="motion-dialog w-full max-w-2xl overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_32px_80px_rgba(15,23,42,0.22)]">
+          <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-5 sm:max-h-[calc(100dvh-4rem)] sm:p-6">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h3 className="text-xl font-semibold tracking-tight text-slate-950">
@@ -47,6 +65,7 @@ export function Modal({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

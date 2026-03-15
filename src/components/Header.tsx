@@ -61,14 +61,11 @@ export function Header() {
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/85 backdrop-blur">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 px-4 py-3 sm:px-6 lg:px-8 xl:items-center">
         <div className="min-w-0">
-          <p className="text-sm font-medium capitalize text-slate-500">
-            {formattedDate}
-          </p>
           <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950 lg:text-2xl">
             Controle tudo sem virar refem de planilha
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Clientes, projetos e pagamentos em um fluxo so.
+          <p className="text-sm font-medium capitalize text-slate-500">
+            {formattedDate}
           </p>
         </div>
 
@@ -109,7 +106,7 @@ export function Header() {
             </button>
 
             {isAccountMenuOpen ? (
-              <div className="motion-popover absolute right-0 top-[calc(100%+0.75rem)] z-30 w-72 rounded-[24px] border border-slate-200 bg-white p-4 shadow-[0_24px_50px_rgba(15,23,42,0.12)]">
+              <div className="motion-popover absolute right-0 top-[calc(100%+0.75rem)] z-30 w-72 rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_24px_50px_rgba(15,23,42,0.12)]">
                 <div className="flex items-center gap-3">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-[#635bff]">
                     <ShieldCheck size={18} />

@@ -12,9 +12,6 @@ export function Sidebar() {
           <BriefcaseBusiness size={20} />
         </div>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
-            FreelancerOS
-          </p>
           <h1 className="text-lg font-semibold text-slate-900">
             Painel operacional
           </h1>
