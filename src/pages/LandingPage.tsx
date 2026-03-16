@@ -61,7 +61,10 @@ const metrics = [
 
 export function LandingPage() {
   return (
-    <div className="motion-page min-h-screen bg-transparent text-slate-900">
+    <div
+      id="top"
+      className="motion-page min-h-screen bg-transparent text-slate-900"
+    >
       <div className="relative overflow-hidden">
         <div className="absolute inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top_left,rgba(99,91,255,0.16),transparent_34%),radial-gradient(circle_at_top_right,rgba(56,189,248,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.9),rgba(248,250,252,0.72))]" />
         <div className="absolute left-1/2 top-28 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-white/70 blur-3xl" />
@@ -390,6 +393,69 @@ export function LandingPage() {
             </section>
           </div>
         </main>
+
+        <footer className="border-t border-slate-200/70 bg-slate-950 text-white">
+          <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(12rem,0.8fr)_minmax(12rem,0.8fr)]">
+              <div className="space-y-4">
+                <img
+                  src={freelancerosLogo}
+                  alt="FreelancerOS"
+                  className="h-10 w-auto brightness-0 invert"
+                />
+                <p className="max-w-xl text-sm leading-7 text-white/72">
+                  FreelancerOS organiza apresentação comercial, execução de
+                  projetos e controle financeiro em uma experiência única para
+                  operações enxutas.
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/45">
+                  Navegação
+                </p>
+                <div className="mt-4 flex flex-col gap-3 text-sm text-white/72">
+                  <a href="#produto" className="transition hover:text-white">
+                    Produto
+                  </a>
+                  <a href="#fluxo" className="transition hover:text-white">
+                    Fluxo
+                  </a>
+                  <a href="#seguranca" className="transition hover:text-white">
+                    Segurança
+                  </a>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/45">
+                  Acesso
+                </p>
+                <div className="mt-4 flex flex-col gap-3 text-sm">
+                  <Link
+                    to="/login?mode=sign_in"
+                    className="text-white/72 transition hover:text-white"
+                  >
+                    Entrar no painel
+                  </Link>
+                  <Link
+                    to="/login?mode=sign_up"
+                    className="text-white/72 transition hover:text-white"
+                  >
+                    Criar conta
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 flex flex-col gap-3 border-t border-white/10 pt-5 text-sm text-white/50 sm:flex-row sm:items-center sm:justify-between">
+              <p>© {new Date().getFullYear()} FreelancerOS. Todos os direitos reservados.</p>
+              <a href="#top" className="transition hover:text-white">
+                Voltar ao topo
+              </a>
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );
