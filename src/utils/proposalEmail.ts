@@ -54,10 +54,15 @@ export function buildMailtoLink(
   subject: string,
   body: string,
 ) {
-  const query = new URLSearchParams({
-    subject,
-    body,
-  });
+  const normalizedRecipientEmail = recipientEmail.trim();
+  const query = [
+    `subject=${encodeMailtoValue(subject)}`,
+    `body=${encodeMailtoValue(body)}`,
+  ].join('&');
 
-  return `mailto:${encodeURIComponent(recipientEmail)}?${query.toString()}`;
+  return `mailto:${normalizedRecipientEmail}?${query}`;
+}
+
+function encodeMailtoValue(value: string) {
+  return encodeURIComponent(value).replace(/%0A/g, '%0D%0A');
 }
