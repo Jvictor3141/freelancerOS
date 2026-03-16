@@ -1,10 +1,8 @@
 import {
   ArrowUpRight,
   BriefcaseBusiness,
-  Globe,
   KeyRound,
   Mail,
-  MapPin,
   Palette,
   Save,
   ShieldCheck,
@@ -409,21 +407,6 @@ export function SettingsPage() {
                     enviadas.
                   </div>
                 )}
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-3 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-              <div className="flex items-start gap-3">
-                <BriefcaseBusiness size={16} className="mt-0.5 text-slate-500" />
-                <p>Nome comercial e especialidade reforcam autoridade.</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <Globe size={16} className="mt-0.5 text-slate-500" />
-                <p>Site e WhatsApp reduzem atrito na resposta do cliente.</p>
-              </div>
-              <div className="flex items-start gap-3">
-                <MapPin size={16} className="mt-0.5 text-slate-500" />
-                <p>Cidade e assinatura deixam a comunicacao menos generica.</p>
               </div>
             </div>
           </article>

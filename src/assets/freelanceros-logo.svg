@@ -1,0 +1,48 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 1500 320"
+  fill="none"
+>
+  <g
+    stroke="#1715b8"
+    stroke-width="12"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <rect x="40" y="36" width="320" height="216" rx="28" />
+    <path d="M40 208H360" />
+    <path d="M180 252 164 308" />
+    <path d="M220 252 236 308" />
+    <rect x="140" y="308" width="120" height="28" rx="14" />
+    <path d="M98 168 162 96 222 152 304 60" />
+    <circle cx="98" cy="168" r="13" />
+    <circle cx="162" cy="96" r="13" />
+    <circle cx="222" cy="152" r="13" />
+    <circle cx="304" cy="60" r="13" />
+    <path d="M184 226H216" />
+  </g>
+
+  <text
+    x="430"
+    y="150"
+    fill="#1715b8"
+    font-family="Inter, 'Segoe UI', Arial, sans-serif"
+    font-size="106"
+    font-weight="800"
+    letter-spacing="1.5"
+  >
+    FREELANCEROS
+  </text>
+
+  <text
+    x="432"
+    y="238"
+    fill="#1715b8"
+    font-family="Inter, 'Segoe UI', Arial, sans-serif"
+    font-size="35"
+    font-weight="500"
+    letter-spacing="6"
+  >
+    THE OPERATING SYSTEM FOR FREELANCERS
+  </text>
+</svg>

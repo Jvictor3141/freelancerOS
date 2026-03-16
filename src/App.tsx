@@ -1,8 +1,9 @@
 import { Suspense, lazy, useEffect, useRef } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useLocation } from 'react-router-dom';
 import { RouteTransition } from './components/RouteTransition';
 import { DashboardLayout } from './layout/DashboardLayout';
 import { LoginPage } from './pages/LoginPage';
+import { RecoveryPasswordPage } from './pages/RecoveryPasswordPage';
 import { usePreferencesStore } from './store/usePreferencesStore';
 import { useAuthStore } from './store/useAuthStore';
 import { useClientStore } from './store/useClientStore';
@@ -50,9 +51,11 @@ function LoadingState({ title, description }: LoadingStateProps) {
 }
 
 function App() {
-  const { user, initialized, initialize } = useAuthStore();
+  const location = useLocation();
+  const { user, initialized, initialize, isRecoveryMode } = useAuthStore();
   const theme = usePreferencesStore((state) => state.theme);
   const previousUserIdRef = useRef<string | null>(null);
+  const isRecoveryRoute = location.pathname === '/redefinir-senha';
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -102,6 +105,10 @@ function App() {
         </div>
       </div>
     );
+  }
+
+  if (isRecoveryMode || isRecoveryRoute) {
+    return <RecoveryPasswordPage />;
   }
 
   if (!user) {

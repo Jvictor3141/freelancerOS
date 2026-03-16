@@ -40,7 +40,7 @@ export async function requestPasswordReset(email: string) {
   const redirectTo =
     typeof window === 'undefined'
       ? undefined
-      : `${window.location.origin}/configuracoes?recovery=1`;
+      : `${window.location.origin}/redefinir-senha`;
 
   if (!redirectTo) {
     return supabase.auth.resetPasswordForEmail(email);

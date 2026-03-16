@@ -194,6 +194,10 @@ summary:focus-visible {
   animation: motion-dialog-enter 260ms var(--motion-ease-emphasized) both;
 }
 
+.motion-swap {
+  animation: motion-swap-enter 240ms var(--motion-ease-emphasized) both;
+}
+
 .bg-\[\#635bff\] {
   background-color: var(--accent) !important;
 }
@@ -278,6 +282,18 @@ summary:focus-visible {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes motion-swap-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

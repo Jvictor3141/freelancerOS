@@ -3,9 +3,13 @@ import {
   ArrowRight,
   BriefcaseBusiness,
   FolderKanban,
+  Mail,
   ShieldCheck,
   Wallet,
 } from 'lucide-react';
+import freelancerosLogo from '../assets/freelanceros-logo.svg';
+import { getErrorMessage } from '../lib/supabase';
+import { requestPasswordReset } from '../services/authService';
 import { useAuthStore } from '../store/useAuthStore';
 
 type AuthMode = 'sign_in' | 'sign_up';
@@ -40,10 +44,17 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
+  const [passwordResetFeedback, setPasswordResetFeedback] = useState<{
+    tone: 'success' | 'error';
+    message: string;
+  } | null>(null);
+  const [isPasswordResetSubmitting, setPasswordResetSubmitting] =
+    useState(false);
 
   useEffect(() => {
     clearFeedback();
     setLocalError(null);
+    setPasswordResetFeedback(null);
   }, [mode, clearFeedback]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -79,24 +90,75 @@ export function LoginPage() {
     }
   }
 
+  async function handlePasswordReset() {
+    clearFeedback();
+    setLocalError(null);
+    setPasswordResetFeedback(null);
+
+    if (!email.trim()) {
+      setPasswordResetFeedback({
+        tone: 'error',
+        message: 'Informe o email da conta para receber o link de recuperacao.',
+      });
+      return;
+    }
+
+    setPasswordResetSubmitting(true);
+
+    try {
+      const { error } = await requestPasswordReset(email.trim());
+
+      if (error) {
+        throw error;
+      }
+
+      setPasswordResetFeedback({
+        tone: 'success',
+        message: `Link de recuperacao enviado para ${email.trim()}.`,
+      });
+    } catch (error) {
+      setPasswordResetFeedback({
+        tone: 'error',
+        message: getErrorMessage(
+          error,
+          'Nao foi possivel enviar o link de recuperacao.',
+        ),
+      });
+    } finally {
+      setPasswordResetSubmitting(false);
+    }
+  }
+
   return (
     <div className="motion-page min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8 lg:px-10">
       <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-7xl overflow-hidden rounded-[36px] border border-slate-200 bg-white/80 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur xl:grid-cols-[0.92fr_1.08fr]">
         <section className="flex items-center bg-[linear-gradient(180deg,rgba(248,250,252,0.88),rgba(255,255,255,0.98))] px-5 py-8 sm:px-8 lg:px-10">
           <div className="mx-auto w-full max-w-md">
             <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)] sm:p-8">
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-slate-500">
-                  {mode === 'sign_in' ? 'Acesse sua conta' : 'Crie sua conta'}
-                </p>
-                <h2 className="text-3xl font-semibold tracking-tight text-slate-950">
-                  {mode === 'sign_in' ? 'Entrar no painel' : 'Cadastrar conta'}
-                </h2>
-                <p className="text-sm leading-6 text-slate-500">
-                  {mode === 'sign_in'
-                    ? 'Use seu email e senha para acessar seus dados protegidos.'
-                    : 'Crie seu acesso para gravar clientes, projetos e pagamentos no banco.'}
-                </p>
+              <div className="mb-6 flex justify-center">
+                <img
+                  src={freelancerosLogo}
+                  alt="FreelancerOS"
+                  className="h-auto w-full max-w-110"
+                />
+              </div>
+
+              <div className="min-h-35">
+                <div key={`auth-copy-${mode}`} className="motion-swap space-y-3">
+                  <p className="text-sm font-medium text-slate-500">
+                    {mode === 'sign_in' ? 'Acesse sua conta' : 'Crie sua conta'}
+                  </p>
+                  <h2 className="text-3xl font-semibold tracking-tight text-slate-950">
+                    {mode === 'sign_in'
+                      ? 'Entrar no painel'
+                      : 'Cadastrar conta'}
+                  </h2>
+                  <p className="text-sm leading-6 text-slate-500">
+                    {mode === 'sign_in'
+                      ? 'Use seu email e senha para acessar seus dados protegidos.'
+                      : 'Crie seu acesso para gravar clientes, projetos e pagamentos no banco.'}
+                  </p>
+                </div>
               </div>
 
               <div className="mt-6 grid grid-cols-2 rounded-2xl bg-slate-100 p-1">
@@ -151,22 +213,65 @@ export function LoginPage() {
                   />
                 </label>
 
-                {mode === 'sign_up' ? (
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-medium text-slate-700">
-                      Confirmar senha
-                    </span>
-                    <input
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(event) =>
-                        setConfirmPassword(event.target.value)
-                      }
-                      placeholder="Repita sua senha"
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#635bff] focus:bg-white"
-                    />
-                  </label>
-                ) : null}
+                <div className="min-h-31">
+                  <div key={`auth-slot-${mode}`} className="motion-swap">
+                    {mode === 'sign_up' ? (
+                      <label className="block">
+                        <span className="mb-2 block text-sm font-medium text-slate-700">
+                          Confirmar senha
+                        </span>
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(event) =>
+                            setConfirmPassword(event.target.value)
+                          }
+                          placeholder="Repita sua senha"
+                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#635bff] focus:bg-white"
+                        />
+                      </label>
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold text-slate-900">
+                              Esqueceu sua senha?
+                            </p>
+                            <p className="mt-1 text-sm leading-6 text-slate-500">
+                              Digite seu email acima e receba um link de
+                              recuperacao.
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void handlePasswordReset();
+                            }}
+                            disabled={isPasswordResetSubmitting}
+                            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm shadow-slate-100 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
+                            aria-label="Enviar link de recuperacao"
+                            title="Enviar link de recuperacao"
+                          >
+                            <Mail size={16} />
+                          </button>
+                        </div>
+
+                        {passwordResetFeedback ? (
+                          <div
+                            className={`mt-3 rounded-2xl px-3 py-2 text-sm ${
+                              passwordResetFeedback.tone === 'success'
+                                ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                                : 'border border-rose-200 bg-rose-50 text-rose-700'
+                            }`}
+                          >
+                            {passwordResetFeedback.message}
+                          </div>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 {localError ? (
                   <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -191,12 +296,17 @@ export function LoginPage() {
                   disabled={loading}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {loading
-                    ? 'Processando...'
-                    : mode === 'sign_in'
-                      ? 'Entrar no painel'
-                      : 'Criar conta'}
-                  <ArrowRight size={16} />
+                  <span
+                    key={`submit-copy-${mode}-${loading ? 'loading' : 'idle'}`}
+                    className="motion-swap inline-flex items-center gap-2"
+                  >
+                    {loading
+                      ? 'Processando...'
+                      : mode === 'sign_in'
+                        ? 'Entrar no painel'
+                        : 'Criar conta'}
+                    <ArrowRight size={16} />
+                  </span>
                 </button>
               </form>
 
