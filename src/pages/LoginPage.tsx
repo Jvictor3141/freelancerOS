@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
+import { PasswordField } from '../components/PasswordField';
 import { getErrorMessage } from '../lib/supabase';
 import { requestPasswordReset } from '../services/authService';
 import { useAuthStore } from '../store/useAuthStore';
@@ -216,36 +217,28 @@ export function LoginPage() {
                   />
                 </label>
 
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">
-                    Senha
-                  </span>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Sua senha"
-                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#635bff] focus:bg-white"
-                  />
-                </label>
+                <PasswordField
+                  label="Senha"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="Sua senha"
+                  autoComplete={
+                    mode === 'sign_in' ? 'current-password' : 'new-password'
+                  }
+                />
 
                 <div className="min-h-31">
                   <div key={`auth-slot-${mode}`} className="motion-swap">
                     {mode === 'sign_up' ? (
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-medium text-slate-700">
-                          Confirmar senha
-                        </span>
-                        <input
-                          type="password"
-                          value={confirmPassword}
-                          onChange={(event) =>
-                            setConfirmPassword(event.target.value)
-                          }
-                          placeholder="Repita sua senha"
-                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#635bff] focus:bg-white"
-                        />
-                      </label>
+                      <PasswordField
+                        label="Confirmar senha"
+                        value={confirmPassword}
+                        onChange={(event) =>
+                          setConfirmPassword(event.target.value)
+                        }
+                        placeholder="Repita sua senha"
+                        autoComplete="new-password"
+                      />
                     ) : (
                       <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-3">
                         <div className="flex items-start justify-between gap-3">

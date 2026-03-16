@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, KeyRound, ShieldAlert } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
+import { PasswordField } from '../components/PasswordField';
 import { getErrorMessage } from '../lib/supabase';
 import { updatePassword } from '../services/authService';
 import { useAuthStore } from '../store/useAuthStore';
@@ -110,15 +111,13 @@ export function RecoveryPasswordPage() {
 
                     <div className="space-y-3">
                       <p className="text-sm font-medium text-slate-500">
-                        Recuperação indisponível
+                        Senha redefinida com sucesso!
                       </p>
                       <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-                        Link inválido ou expirado
+                        Sua senha foi atualizada com sucesso.
                       </h1>
                       <p className="text-sm leading-6 text-slate-500">
-                        Para proteger a conta, o acesso ao painel não é liberado
-                        por esse link. Solicite uma nova recuperação pela tela
-                        de login.
+                        Por segurança, este link não permite acesso direto ao painel. Volte à página de login e entre usando sua nova senha.
                       </p>
                     </div>
 
@@ -154,33 +153,23 @@ export function RecoveryPasswordPage() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-medium text-slate-700">
-                          Nova senha
-                        </span>
-                        <input
-                          type="password"
-                          value={password}
-                          onChange={(event) => setPassword(event.target.value)}
-                          placeholder="Mínimo de 6 caracteres"
-                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#635bff] focus:bg-white"
-                        />
-                      </label>
+                      <PasswordField
+                        label="Nova senha"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        placeholder="Mínimo de 6 caracteres"
+                        autoComplete="new-password"
+                      />
 
-                      <label className="block">
-                        <span className="mb-2 block text-sm font-medium text-slate-700">
-                          Confirmar nova senha
-                        </span>
-                        <input
-                          type="password"
-                          value={confirmPassword}
-                          onChange={(event) =>
-                            setConfirmPassword(event.target.value)
-                          }
-                          placeholder="Repita a nova senha"
-                          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#635bff] focus:bg-white"
-                        />
-                      </label>
+                      <PasswordField
+                        label="Confirmar nova senha"
+                        value={confirmPassword}
+                        onChange={(event) =>
+                          setConfirmPassword(event.target.value)
+                        }
+                        placeholder="Repita a nova senha"
+                        autoComplete="new-password"
+                      />
 
                       <div className="rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm leading-6 text-slate-500">
                         Depois de atualizar a senha, a sessão temporária será
