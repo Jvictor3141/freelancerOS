@@ -4,6 +4,9 @@ import type { Project } from '../types/project';
 import { paymentStatusLabel } from '../utils/paymentStatus';
 
 type PaymentFormValues = Omit<Payment, 'id' | 'createdAt'>;
+type PaymentFormState = Omit<PaymentFormValues, 'amount'> & {
+  amount: string;
+};
 
 type PaymentFormProps = {
   projects: Project[];
@@ -13,9 +16,9 @@ type PaymentFormProps = {
   isSubmitting?: boolean;
 };
 
-const emptyValues: PaymentFormValues = {
+const emptyValues: PaymentFormState = {
   projectId: '',
-  amount: 0,
+  amount: '',
   dueDate: '',
   paidAt: null,
   status: 'pending',
@@ -30,13 +33,13 @@ export function PaymentForm({
   onCancel,
   isSubmitting = false,
 }: PaymentFormProps) {
-  const [values, setValues] = useState<PaymentFormValues>(emptyValues);
+  const [values, setValues] = useState<PaymentFormState>(emptyValues);
 
   useEffect(() => {
     if (initialValues) {
       setValues({
         projectId: initialValues.projectId,
-        amount: initialValues.amount,
+        amount: String(initialValues.amount),
         dueDate: initialValues.dueDate,
         paidAt: initialValues.paidAt,
         status: initialValues.status,
@@ -60,10 +63,10 @@ export function PaymentForm({
     const { name, value } = event.target;
 
     setValues((previousValues) => {
-      const nextValues: PaymentFormValues = {
+      const nextValues: PaymentFormState = {
         ...previousValues,
-        [name]: name === 'amount' ? Number(value) : value,
-      } as PaymentFormValues;
+        [name]: value,
+      } as PaymentFormState;
 
       if (name === 'status') {
         nextValues.paidAt =
@@ -84,7 +87,9 @@ export function PaymentForm({
       return;
     }
 
-    if (values.amount <= 0) {
+    const amount = Number(values.amount);
+
+    if (!values.amount.trim() || Number.isNaN(amount) || amount <= 0) {
       alert('Informe um valor maior que zero.');
       return;
     }
@@ -101,6 +106,7 @@ export function PaymentForm({
 
     await onSubmit({
       ...values,
+      amount,
       paidAt: values.status === 'paid' ? values.paidAt : null,
     });
   }

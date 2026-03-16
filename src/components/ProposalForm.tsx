@@ -11,12 +11,17 @@ type ProposalFormProps = {
   isSubmitting?: boolean;
 };
 
-const emptyValues: ProposalInput = {
+type ProposalFormValues = Omit<ProposalInput, 'amount' | 'deliveryDays'> & {
+  amount: string;
+  deliveryDays: string;
+};
+
+const emptyValues: ProposalFormValues = {
   clientId: '',
   title: '',
   description: '',
-  amount: 0,
-  deliveryDays: 7,
+  amount: '',
+  deliveryDays: '7',
   recipientEmail: '',
   status: 'draft',
   notes: '',
@@ -29,7 +34,7 @@ export function ProposalForm({
   onCancel,
   isSubmitting = false,
 }: ProposalFormProps) {
-  const [values, setValues] = useState<ProposalInput>(emptyValues);
+  const [values, setValues] = useState<ProposalFormValues>(emptyValues);
 
   useEffect(() => {
     if (initialValues) {
@@ -37,8 +42,8 @@ export function ProposalForm({
         clientId: initialValues.clientId,
         title: initialValues.title,
         description: initialValues.description,
-        amount: initialValues.amount,
-        deliveryDays: initialValues.deliveryDays,
+        amount: String(initialValues.amount),
+        deliveryDays: String(initialValues.deliveryDays),
         recipientEmail: initialValues.recipientEmail,
         status: 'draft',
         notes: initialValues.notes,
@@ -74,8 +79,7 @@ export function ProposalForm({
 
       return {
         ...previousValues,
-        [name]:
-          name === 'amount' || name === 'deliveryDays' ? Number(value) : value,
+        [name]: value,
       };
     });
   }
@@ -93,12 +97,20 @@ export function ProposalForm({
       return;
     }
 
-    if (values.amount <= 0) {
+    const amount = Number(values.amount);
+
+    if (!values.amount.trim() || Number.isNaN(amount) || amount <= 0) {
       alert('Informe um valor maior que zero.');
       return;
     }
 
-    if (values.deliveryDays <= 0) {
+    const deliveryDays = Number(values.deliveryDays);
+
+    if (
+      !values.deliveryDays.trim() ||
+      Number.isNaN(deliveryDays) ||
+      deliveryDays <= 0
+    ) {
       alert('Informe um prazo válido em dias.');
       return;
     }
@@ -112,8 +124,8 @@ export function ProposalForm({
       clientId: values.clientId,
       title: values.title.trim(),
       description: values.description.trim(),
-      amount: values.amount,
-      deliveryDays: values.deliveryDays,
+      amount,
+      deliveryDays,
       recipientEmail: values.recipientEmail.trim(),
       status: 'draft',
       notes: values.notes.trim(),

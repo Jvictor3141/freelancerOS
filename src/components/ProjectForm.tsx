@@ -4,6 +4,9 @@ import type { Project, ProjectStatus } from '../types/project';
 import { projectStatusLabel } from '../utils/projectStatus';
 
 type ProjectFormValues = Omit<Project, 'id' | 'createdAt'>;
+type ProjectFormState = Omit<ProjectFormValues, 'value'> & {
+  value: string;
+};
 
 type ProjectFormProps = {
   clients: Client[];
@@ -13,16 +16,20 @@ type ProjectFormProps = {
   isSubmitting?: boolean;
 };
 
-const emptyValues: ProjectFormValues = {
+const emptyValues: ProjectFormState = {
   clientId: '',
   name: '',
   description: '',
-  value: 0,
+  value: '',
   deadline: '',
   status: 'in_progress',
 };
 
-const defaultStatusOptions: ProjectStatus[] = ['in_progress', 'review', 'completed'];
+const defaultStatusOptions: ProjectStatus[] = [
+  'in_progress',
+  'review',
+  'completed',
+];
 
 export function ProjectForm({
   clients,
@@ -31,7 +38,7 @@ export function ProjectForm({
   onCancel,
   isSubmitting = false,
 }: ProjectFormProps) {
-  const [values, setValues] = useState<ProjectFormValues>(emptyValues);
+  const [values, setValues] = useState<ProjectFormState>(emptyValues);
   const statusOptions =
     initialValues?.status === 'proposal'
       ? (['proposal', ...defaultStatusOptions] as ProjectStatus[])
@@ -43,7 +50,7 @@ export function ProjectForm({
         clientId: initialValues.clientId,
         name: initialValues.name,
         description: initialValues.description,
-        value: initialValues.value,
+        value: String(initialValues.value),
         deadline: initialValues.deadline,
         status: initialValues.status,
       });
@@ -65,7 +72,7 @@ export function ProjectForm({
 
     setValues((previousValues) => ({
       ...previousValues,
-      [name]: name === 'value' ? Number(value) : value,
+      [name]: value,
     }));
   }
 
@@ -82,7 +89,10 @@ export function ProjectForm({
       return;
     }
 
-    if (values.value < 0) {
+    const numericValue =
+      values.value.trim() === '' ? 0 : Number(values.value);
+
+    if (Number.isNaN(numericValue) || numericValue < 0) {
       alert('O valor do projeto não pode ser negativo.');
       return;
     }
@@ -91,7 +101,7 @@ export function ProjectForm({
       clientId: values.clientId,
       name: values.name.trim(),
       description: values.description.trim(),
-      value: Number(values.value),
+      value: numericValue,
       deadline: values.deadline,
       status: values.status,
     });
