@@ -22,7 +22,7 @@ export async function getPayments(): Promise<Payment[]> {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel carregar os pagamentos no banco.',
+        'Não foi possível carregar os pagamentos no banco.',
       ),
     );
   }
@@ -43,7 +43,7 @@ export async function createPayment(data: PaymentInput): Promise<Payment> {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel criar o pagamento no banco.',
+        'Não foi possível criar o pagamento no banco.',
       ),
     );
   }
@@ -69,7 +69,7 @@ export async function updatePayment(
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel atualizar o pagamento no banco.',
+        'Não foi possível atualizar o pagamento no banco.',
       ),
     );
   }
@@ -90,7 +90,7 @@ export async function deletePayment(id: string) {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel excluir o pagamento no banco.',
+        'Não foi possível excluir o pagamento no banco.',
       ),
     );
   }

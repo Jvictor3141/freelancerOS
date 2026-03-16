@@ -95,7 +95,7 @@ export function ProjectsPage() {
 
       return {
         ...project,
-        clientName: client?.name ?? 'Cliente nao encontrado',
+        clientName: client?.name ?? 'Cliente não encontrado',
         clientCompany: client?.company ?? '',
       };
     });
@@ -207,7 +207,7 @@ export function ProjectsPage() {
 
       closeModal();
     } catch (submitError) {
-      alert(getErrorMessage(submitError, 'Nao foi possivel salvar o projeto.'));
+      alert(getErrorMessage(submitError, 'Não foi possível salvar o projeto.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -226,7 +226,7 @@ export function ProjectsPage() {
       await removeProject(project.id);
     } catch (removeError) {
       alert(
-        getErrorMessage(removeError, 'Nao foi possivel excluir o projeto.'),
+        getErrorMessage(removeError, 'Não foi possível excluir o projeto.'),
       );
     }
   }
@@ -255,8 +255,8 @@ export function ProjectsPage() {
 
       {proposalError ? (
         <section className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800">
-          Nao foi possivel carregar o resumo comercial das propostas nesta
-          pagina. A operacao de projetos continua disponivel normalmente.
+          Não foi possível carregar o resumo comercial das propostas nesta
+          página. A operação de projetos continua disponível normalmente.
         </section>
       ) : null}
 
@@ -291,7 +291,7 @@ export function ProjectsPage() {
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Buscar projeto, descricao ou cliente"
+              placeholder="Buscar projeto, descrição ou cliente"
               className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
             />
 
@@ -384,7 +384,7 @@ export function ProjectsPage() {
                       {project.name}
                     </p>
                     <p className="mt-1 text-sm text-slate-500">
-                      {project.description || 'Sem descricao'}
+                      {project.description || 'Sem descrição'}
                     </p>
                   </div>
 
@@ -464,7 +464,7 @@ export function ProjectsPage() {
                   Status
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Acoes
+                  Ações
                 </th>
               </tr>
             </thead>
@@ -481,7 +481,7 @@ export function ProjectsPage() {
                         {project.name}
                       </p>
                       <p className="text-xs text-slate-500">
-                        {project.description || 'Sem descricao'}
+                        {project.description || 'Sem descrição'}
                       </p>
                     </div>
                   </td>
@@ -622,7 +622,7 @@ export function ProjectsPage() {
         title={selectedProject ? 'Editar projeto' : 'Novo projeto'}
         description={
           selectedProject
-            ? 'Atualize as informacoes do projeto.'
+            ? 'Atualize as informações do projeto.'
             : 'Preencha os dados para cadastrar um novo projeto.'
         }
         isOpen={isModalOpen}

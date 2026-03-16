@@ -78,12 +78,12 @@ export function ProjectForm({
     }
 
     if (!values.name.trim()) {
-      alert('O nome do projeto e obrigatorio.');
+      alert('O nome do projeto é obrigatório.');
       return;
     }
 
     if (values.value < 0) {
-      alert('O valor do projeto nao pode ser negativo.');
+      alert('O valor do projeto não pode ser negativo.');
       return;
     }
 
@@ -134,7 +134,7 @@ export function ProjectForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Descricao
+          Descrição
         </span>
         <textarea
           name="description"

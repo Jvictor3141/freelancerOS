@@ -69,12 +69,12 @@ async function getTableCount(
     .eq('user_id', userId);
 
   if (error) {
-    throw new Error(
-      getSupabaseErrorMessage(
-        error,
-        `Nao foi possivel verificar os dados de ${table} no Supabase.`,
-      ),
-    );
+      throw new Error(
+        getSupabaseErrorMessage(
+          error,
+          `Não foi possível verificar os dados de ${table} no Supabase.`,
+        ),
+      );
   }
 
   return count ?? 0;
@@ -100,7 +100,7 @@ async function migrateLegacyData(userId: string) {
     return;
   }
 
-  // A migracao local acontece uma unica vez por usuario autenticado.
+  // A migração local acontece uma única vez por usuário autenticado.
   if (migrationState !== 'started') {
     const counts = await Promise.all([
       getTableCount('clients', userId),
@@ -141,7 +141,7 @@ async function migrateLegacyData(userId: string) {
       throw new Error(
         getSupabaseErrorMessage(
           error,
-          'Nao foi possivel migrar os clientes salvos localmente.',
+          'Não foi possível migrar os clientes salvos localmente.',
         ),
       );
     }
@@ -173,7 +173,7 @@ async function migrateLegacyData(userId: string) {
       throw new Error(
         getSupabaseErrorMessage(
           error,
-          'Nao foi possivel migrar os projetos salvos localmente.',
+          'Não foi possível migrar os projetos salvos localmente.',
         ),
       );
     }
@@ -206,7 +206,7 @@ async function migrateLegacyData(userId: string) {
       throw new Error(
         getSupabaseErrorMessage(
           error,
-          'Nao foi possivel migrar os pagamentos salvos localmente.',
+          'Não foi possível migrar os pagamentos salvos localmente.',
         ),
       );
     }
@@ -215,7 +215,7 @@ async function migrateLegacyData(userId: string) {
   setMigrationState(userId, 'completed');
 }
 
-// Este helper garante sessao autenticada e roda a migracao local uma unica vez por usuario.
+// Este helper garante sessão autenticada e roda a migração local uma única vez por usuário.
 export async function ensureDatabaseBootstrap() {
   const userId = await getCurrentUserId();
 

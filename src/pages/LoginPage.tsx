@@ -23,19 +23,19 @@ const highlights = [
   {
     title: 'Clientes, projetos e pagamentos no mesmo fluxo',
     description:
-      'Pare de espalhar a operacao em planilhas soltas e centralize tudo no mesmo painel.',
+      'Pare de espalhar a operação em planilhas soltas e centralize tudo no mesmo painel.',
     icon: BriefcaseBusiness,
   },
   {
     title: 'Acesso protegido por dono dos dados',
     description:
-      'Cada registro fica vinculado ao seu usuario no Supabase com RLS ativa.',
+      'Cada registro fica vinculado ao seu usuário no Supabase com RLS ativa.',
     icon: ShieldCheck,
   },
   {
-    title: 'Financeiro visivel sem improviso',
+    title: 'Financeiro visível sem improviso',
     description:
-      'Recebimentos, pendencias e atrasos aparecem em um dashboard pronto para decisao.',
+      'Recebimentos, pendências e atrasos aparecem em um dashboard pronto para decisão.',
     icon: Wallet,
   },
 ];
@@ -85,7 +85,7 @@ export function LoginPage() {
       }
 
       if (password !== confirmPassword) {
-        setLocalError('A confirmacao de senha nao confere.');
+        setLocalError('A confirmação de senha não confere.');
         return;
       }
     }
@@ -109,7 +109,7 @@ export function LoginPage() {
     if (!email.trim()) {
       setPasswordResetFeedback({
         tone: 'error',
-        message: 'Informe o email da conta para receber o link de recuperacao.',
+        message: 'Informe o e-mail da conta para receber o link de recuperação.',
       });
       return;
     }
@@ -125,14 +125,14 @@ export function LoginPage() {
 
       setPasswordResetFeedback({
         tone: 'success',
-        message: `Link de recuperacao enviado para ${email.trim()}.`,
+        message: `Link de recuperação enviado para ${email.trim()}.`,
       });
     } catch (error) {
       setPasswordResetFeedback({
         tone: 'error',
         message: getErrorMessage(
           error,
-          'Nao foi possivel enviar o link de recuperacao.',
+          'Não foi possível enviar o link de recuperação.',
         ),
       });
     } finally {
@@ -151,7 +151,7 @@ export function LoginPage() {
                   to="/"
                   className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                 >
-                  Ver apresentacao
+                  Ver apresentação
                 </Link>
               </div>
 
@@ -259,7 +259,7 @@ export function LoginPage() {
                             </p>
                             <p className="mt-1 text-sm leading-6 text-slate-500">
                               Digite seu email acima e receba um link de
-                              recuperacao.
+                              recuperação.
                             </p>
                           </div>
 
@@ -270,8 +270,8 @@ export function LoginPage() {
                             }}
                             disabled={isPasswordResetSubmitting}
                             className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm shadow-slate-100 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
-                            aria-label="Enviar link de recuperacao"
-                            title="Enviar link de recuperacao"
+                            aria-label="Enviar link de recuperação"
+                            title="Enviar link de recuperação"
                           >
                             <Mail size={16} />
                           </button>
@@ -335,11 +335,11 @@ export function LoginPage() {
                   <FolderKanban size={18} />
                 </div>
                 <p className="text-sm font-semibold text-slate-900">
-                  Seu painel fica vinculado ao seu usuario
+                  Seu painel fica vinculado ao seu usuário
                 </p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
                   Depois do login, os dados carregados e gravados no Supabase
-                  ficam alinhados com as policies do banco por usuario.
+                  ficam alinhados com as políticas do banco por usuário.
                 </p>
               </div>
             </div>
@@ -363,12 +363,12 @@ export function LoginPage() {
                   Painel operacional
                 </p>
                 <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-                  Entre para gerenciar sua operacao sem virar refem de planilha
+                  Entre para gerenciar sua operação sem virar refém de planilha
                 </h1>
                 <p className="max-w-xl text-base leading-7 text-indigo-100/90 sm:text-lg">
                   Login e cadastro no mesmo fluxo, no mesmo tema do produto e
                   conectados direto ao Supabase com acesso protegido por
-                  usuario.
+                  usuário.
                 </p>
               </div>
             </div>

@@ -89,7 +89,7 @@ export function ProposalForm({
     }
 
     if (!values.title.trim()) {
-      alert('Informe o titulo da proposta.');
+      alert('Informe o título da proposta.');
       return;
     }
 
@@ -99,7 +99,7 @@ export function ProposalForm({
     }
 
     if (values.deliveryDays <= 0) {
-      alert('Informe um prazo valido em dias.');
+      alert('Informe um prazo válido em dias.');
       return;
     }
 
@@ -144,7 +144,7 @@ export function ProposalForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Titulo da proposta
+          Título da proposta
         </span>
         <input
           name="title"
@@ -190,7 +190,7 @@ export function ProposalForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Email do destinatario
+          E-mail do destinatário
         </span>
         <input
           name="recipientEmail"
@@ -211,13 +211,13 @@ export function ProposalForm({
           value={values.description}
           onChange={handleChange}
           className="min-h-32 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Descreva entregaveis, revisoes, etapas e limites da proposta..."
+          placeholder="Descreva entregáveis, revisões, etapas e limites da proposta..."
         />
       </label>
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Observacoes internas
+          Observações internas
         </span>
         <textarea
           name="notes"

@@ -107,10 +107,10 @@ export function ClientDetailsPage() {
 
         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-100">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-            Cliente nao encontrado
+            Cliente não encontrado
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            Esse cliente nao existe ou foi removido.
+            Esse cliente não existe ou foi removido.
           </p>
           <button
             type="button"
@@ -158,7 +158,7 @@ export function ClientDetailsPage() {
           <div className="max-w-xl rounded-3xl bg-slate-50 p-4 text-sm text-slate-600">
             <p className="font-medium text-slate-800">Notas</p>
             <p className="mt-2 leading-6">
-              {client.notes || 'Nenhuma observacao cadastrada para este cliente.'}
+              {client.notes || 'Nenhuma observação cadastrada para este cliente.'}
             </p>
           </div>
         </div>
@@ -199,7 +199,7 @@ export function ClientDetailsPage() {
           <div className="mb-4 inline-flex rounded-2xl bg-violet-100 p-3 text-violet-700">
             <CheckCircle2 size={18} />
           </div>
-          <p className="text-sm font-medium text-slate-500">Concluidos</p>
+          <p className="text-sm font-medium text-slate-500">Concluídos</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             {summary.completedProjects}
           </p>
@@ -223,7 +223,7 @@ export function ClientDetailsPage() {
                     <div>
                       <p className="font-semibold text-slate-900">{project.name}</p>
                       <p className="mt-1 text-sm text-slate-500">
-                        {project.description || 'Sem descricao'}
+                        {project.description || 'Sem descrição'}
                       </p>
                     </div>
 
@@ -259,7 +259,7 @@ export function ClientDetailsPage() {
           <div className="border-b border-slate-200 px-6 py-5">
             <p className="text-sm font-medium text-slate-500">Pagamentos</p>
             <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Historico financeiro
+              Histórico financeiro
             </h2>
           </div>
 

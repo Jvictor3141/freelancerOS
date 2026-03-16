@@ -50,7 +50,7 @@ async function getProposalById(
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel carregar a proposta atualizada.',
+        'Não foi possível carregar a proposta atualizada.',
       ),
     );
   }
@@ -71,7 +71,7 @@ export async function getProposals(): Promise<Proposal[]> {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel carregar as propostas no banco.',
+        'Não foi possível carregar as propostas no banco.',
       ),
     );
   }
@@ -92,7 +92,7 @@ export async function createProposal(data: ProposalInput): Promise<Proposal> {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel criar a proposta no banco.',
+        'Não foi possível criar a proposta no banco.',
       ),
     );
   }
@@ -118,7 +118,7 @@ export async function updateProposal(
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel atualizar a proposta no banco.',
+        'Não foi possível atualizar a proposta no banco.',
       ),
     );
   }
@@ -139,7 +139,7 @@ export async function deleteProposal(id: string) {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel excluir a proposta no banco.',
+        'Não foi possível excluir a proposta no banco.',
       ),
     );
   }
@@ -165,7 +165,7 @@ export async function sendProposal(id: string): Promise<Proposal> {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel marcar a proposta como enviada.',
+        'Não foi possível marcar a proposta como enviada.',
       ),
     );
   }
@@ -192,7 +192,7 @@ export async function rejectProposal(id: string): Promise<Proposal> {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel marcar a proposta como recusada.',
+        'Não foi possível marcar a proposta como recusada.',
       ),
     );
   }
@@ -220,7 +220,7 @@ export async function reopenProposal(id: string): Promise<Proposal> {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel reabrir a proposta.',
+        'Não foi possível reabrir a proposta.',
       ),
     );
   }
@@ -242,7 +242,7 @@ export async function acceptProposal(id: string): Promise<AcceptProposalResult> 
     const proposal = await getProposalById(id, userId);
 
     if (proposal.status === 'rejected') {
-      throw new Error('Nao e possivel aceitar uma proposta recusada.');
+      throw new Error('Não é possível aceitar uma proposta recusada.');
     }
 
     if (proposal.projectId) {
@@ -283,7 +283,7 @@ export async function acceptProposal(id: string): Promise<AcceptProposalResult> 
       throw new Error(
         getSupabaseErrorMessage(
           fallbackProjectError,
-          'Nao foi possivel gerar o projeto a partir da proposta.',
+          'Não foi possível gerar o projeto a partir da proposta.',
         ),
       );
     }
@@ -312,7 +312,7 @@ export async function acceptProposal(id: string): Promise<AcceptProposalResult> 
       throw new Error(
         getSupabaseErrorMessage(
           updatedProposalError,
-          'O projeto foi criado, mas a proposta nao conseguiu ser atualizada.',
+          'O projeto foi criado, mas a proposta não conseguiu ser atualizada.',
         ),
       );
     }
@@ -327,7 +327,7 @@ export async function acceptProposal(id: string): Promise<AcceptProposalResult> 
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel aceitar a proposta e gerar o projeto.',
+        'Não foi possível aceitar a proposta e gerar o projeto.',
       ),
     );
   }

@@ -53,7 +53,7 @@ export const useClientStore = create<ClientStore>((set) => ({
         loading: false,
         error: getClientStoreError(
           error,
-          'Nao foi possivel carregar os clientes.',
+          'Não foi possível carregar os clientes.',
         ),
         initialized: true,
       });
@@ -78,7 +78,7 @@ export const useClientStore = create<ClientStore>((set) => ({
     } catch (error) {
       const message = getClientStoreError(
         error,
-        'Nao foi possivel salvar o cliente.',
+        'Não foi possível salvar o cliente.',
       );
 
       set({ error: message });
@@ -104,7 +104,7 @@ export const useClientStore = create<ClientStore>((set) => ({
     } catch (error) {
       const message = getClientStoreError(
         error,
-        'Nao foi possivel atualizar o cliente.',
+        'Não foi possível atualizar o cliente.',
       );
 
       set({ error: message });
@@ -112,7 +112,7 @@ export const useClientStore = create<ClientStore>((set) => ({
     }
   },
 
-  // A exclusao de cliente dispara recarga de projetos e pagamentos porque o banco apaga os relacionados em cascata.
+  // A exclusão de cliente dispara recarga de projetos e pagamentos porque o banco apaga os relacionados em cascata.
   removeClient: async (id) => {
     set({ error: null });
 
@@ -132,7 +132,7 @@ export const useClientStore = create<ClientStore>((set) => ({
     } catch (error) {
       const message = getClientStoreError(
         error,
-        'Nao foi possivel excluir o cliente.',
+        'Não foi possível excluir o cliente.',
       );
 
       set({ error: message });
@@ -140,7 +140,7 @@ export const useClientStore = create<ClientStore>((set) => ({
     }
   },
 
-  // O reset limpa o estado em memoria quando a sessao muda ou o usuario sai do app.
+  // O reset limpa o estado em memória quando a sessão muda ou o usuário sai do app.
   resetStore: () => {
     set({
       clients: [],

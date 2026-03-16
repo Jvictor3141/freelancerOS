@@ -35,7 +35,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
   error: null,
   initialized: false,
 
-  // Este carregamento busca os projetos no banco e marca quando a primeira sincronizacao terminou.
+  // Este carregamento busca os projetos no banco e marca quando a primeira sincronização terminou.
   loadProjects: async () => {
     set({ loading: true, error: null });
 
@@ -52,7 +52,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
         loading: false,
         error: getProjectStoreError(
           error,
-          'Nao foi possivel carregar os projetos.',
+          'Não foi possível carregar os projetos.',
         ),
         initialized: true,
       });
@@ -77,7 +77,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
     } catch (error) {
       const message = getProjectStoreError(
         error,
-        'Nao foi possivel salvar o projeto.',
+        'Não foi possível salvar o projeto.',
       );
 
       set({ error: message });
@@ -105,7 +105,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
     } catch (error) {
       const message = getProjectStoreError(
         error,
-        'Nao foi possivel atualizar o projeto.',
+        'Não foi possível atualizar o projeto.',
       );
 
       set({ error: message });
@@ -113,7 +113,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
     }
   },
 
-  // A recarga de pagamentos mantem o estado consistente quando um projeto removido leva cobrancas junto.
+  // A recarga de pagamentos mantém o estado consistente quando um projeto removido leva cobranças junto.
   removeProject: async (id) => {
     set({ error: null });
 
@@ -130,7 +130,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
     } catch (error) {
       const message = getProjectStoreError(
         error,
-        'Nao foi possivel excluir o projeto.',
+        'Não foi possível excluir o projeto.',
       );
 
       set({ error: message });
@@ -138,7 +138,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
     }
   },
 
-  // O reset evita reaproveitar dados do usuario anterior quando a autenticacao muda.
+  // O reset evita reaproveitar dados do usuário anterior quando a autenticação muda.
   resetStore: () => {
     set({
       projects: [],

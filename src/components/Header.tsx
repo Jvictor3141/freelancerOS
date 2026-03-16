@@ -54,7 +54,7 @@ export function Header() {
       await logout();
       navigate('/login?mode=sign_in', { replace: true });
     } catch (error) {
-      alert(getErrorMessage(error, 'Nao foi possivel encerrar a sessao.'));
+      alert(getErrorMessage(error, 'Não foi possível encerrar a sessão.'));
     }
   }
 
@@ -63,7 +63,7 @@ export function Header() {
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 px-4 py-3 sm:px-6 lg:px-8 xl:items-center">
         <div className="min-w-0">
           <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950 lg:text-2xl">
-            Controle tudo sem virar refem de planilha
+            Controle tudo sem virar refém de planilha
           </h2>
           <p className="text-sm font-medium capitalize text-slate-500">
             {formattedDate}
@@ -77,7 +77,7 @@ export function Header() {
             </span>
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Sessao ativa
+                Sessão ativa
               </p>
               <p className="truncate text-sm font-semibold text-slate-900 sm:max-w-52">
                 {user?.email ?? 'Conta autenticada'}

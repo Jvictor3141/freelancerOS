@@ -11,8 +11,8 @@ if (!supabaseUrl || !supabaseKey) {
   );
 }
 
-// O cliente abaixo centraliza toda a comunicacao com o banco para que os services
-// usem a mesma sessao e a mesma configuracao de autenticacao.
+// O cliente abaixo centraliza toda a comunicação com o banco para que os services
+// usem a mesma sessão e a mesma configuração de autenticação.
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     persistSession: true,
@@ -26,7 +26,7 @@ type ErrorLike = {
   message?: string;
 };
 
-// Esta funcao transforma erros tecnicos do Supabase em mensagens objetivas para a UI.
+// Esta função transforma erros técnicos do Supabase em mensagens objetivas para a UI.
 export function getSupabaseErrorMessage(
   error: ErrorLike | null,
   fallback: string,
@@ -39,18 +39,18 @@ export function getSupabaseErrorMessage(
     error.message.includes('relation') &&
     error.message.includes('does not exist')
   ) {
-    return 'As tabelas do Supabase ainda nao existem. Execute o arquivo supabase/schema.sql antes de usar o app.';
+    return 'As tabelas do Supabase ainda não existem. Execute o arquivo supabase/schema.sql antes de usar o app.';
   }
 
   if (
     error.message.includes('function') &&
     error.message.includes('does not exist')
   ) {
-    return 'A funcao esperada no Supabase ainda nao existe. Atualize o banco com o arquivo supabase/schema.sql.';
+    return 'A função esperada no Supabase ainda não existe. Atualize o banco com o arquivo supabase/schema.sql.';
   }
 
   if (error.message.includes('schema cache')) {
-    return 'A funcao esperada no Supabase ainda nao esta disponivel no schema cache. Rode o SQL da funcao e tente novamente em alguns segundos.';
+    return 'A função esperada no Supabase ainda não está disponível no schema cache. Rode o SQL da função e tente novamente em alguns segundos.';
   }
 
   if (error.code === '23503') {
@@ -58,24 +58,24 @@ export function getSupabaseErrorMessage(
   }
 
   if (error.code === '23505') {
-    return 'Ja existe um registro com os mesmos dados unicos no banco.';
+    return 'Já existe um registro com os mesmos dados únicos no banco.';
   }
 
   if (
     error.code === '42501' ||
     error.message.includes('row-level security')
   ) {
-    return 'A sessao atual nao tem permissao para acessar esses dados. Verifique a autenticacao e o campo user_id das tabelas.';
+    return 'A sessão atual não tem permissão para acessar esses dados. Verifique a autenticação e o campo user_id das tabelas.';
   }
 
   if (error.message.includes('Anonymous sign-ins are disabled')) {
-    return 'O projeto precisa de uma sessao autenticada. Ative Anonymous Sign-Ins no Supabase Auth ou implemente login antes de usar o app.';
+    return 'O projeto precisa de uma sessão autenticada. Ative Anonymous Sign-Ins no Supabase Auth ou implemente login antes de usar o app.';
   }
 
   return error.message;
 }
 
-// Esta funcao padroniza erros vindos de qualquer camada para simplificar o tratamento nas stores.
+// Esta função padroniza erros vindos de qualquer camada para simplificar o tratamento nas stores.
 export function getErrorMessage(error: unknown, fallback: string) {
   if (error instanceof Error && error.message) {
     return error.message;

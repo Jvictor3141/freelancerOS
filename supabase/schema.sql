@@ -109,7 +109,7 @@ declare
   v_project public.projects%rowtype;
 begin
   if p_project_status not in ('in_progress', 'review', 'completed') then
-    raise exception 'Status de projeto invalido para aceite de proposta.';
+    raise exception 'Status de projeto inválido para aceite de proposta.';
   end if;
 
   select *
@@ -119,7 +119,7 @@ begin
     and user_id = auth.uid();
 
   if not found then
-    raise exception 'Proposta nao encontrada ou sem permissao.';
+    raise exception 'Proposta não encontrada ou sem permissão.';
   end if;
 
   if v_proposal.status = 'accepted' and v_proposal.project_id is not null then
@@ -135,7 +135,7 @@ begin
   end if;
 
   if v_proposal.status = 'rejected' then
-    raise exception 'Nao e possivel aceitar uma proposta recusada.';
+    raise exception 'Não é possível aceitar uma proposta recusada.';
   end if;
 
   insert into public.projects (

@@ -167,7 +167,7 @@ export function PaymentForm({
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Metodo
+          Método
           <select
             name="method"
             value={values.method}
@@ -175,8 +175,8 @@ export function PaymentForm({
             className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
           >
             <option value="pix">Pix</option>
-            <option value="card">Cartao</option>
-            <option value="bank_transfer">Transferencia</option>
+            <option value="card">Cartão</option>
+            <option value="bank_transfer">Transferência</option>
             <option value="cash">Dinheiro</option>
           </select>
         </label>
@@ -196,14 +196,14 @@ export function PaymentForm({
       ) : null}
 
       <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-        Observacoes
+        Observações
         <textarea
           name="notes"
           value={values.notes}
           onChange={handleChange}
           rows={4}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-          placeholder="Adicione observacoes sobre este pagamento"
+          placeholder="Adicione observações sobre este pagamento"
         />
       </label>
 

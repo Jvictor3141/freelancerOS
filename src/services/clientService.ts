@@ -22,7 +22,7 @@ export async function getClients(): Promise<Client[]> {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel carregar os clientes no banco.',
+        'Não foi possível carregar os clientes no banco.',
       ),
     );
   }
@@ -43,7 +43,7 @@ export async function createClient(data: ClientInput): Promise<Client> {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel criar o cliente no banco.',
+        'Não foi possível criar o cliente no banco.',
       ),
     );
   }
@@ -69,7 +69,7 @@ export async function updateClient(
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel atualizar o cliente no banco.',
+        'Não foi possível atualizar o cliente no banco.',
       ),
     );
   }
@@ -90,7 +90,7 @@ export async function deleteClient(id: string) {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel excluir o cliente no banco.',
+        'Não foi possível excluir o cliente no banco.',
       ),
     );
   }

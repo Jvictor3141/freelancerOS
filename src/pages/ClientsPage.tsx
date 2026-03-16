@@ -87,7 +87,7 @@ export function ClientsPage() {
 
       closeModal();
     } catch (submitError) {
-      alert(getErrorMessage(submitError, 'Nao foi possivel salvar o cliente.'));
+      alert(getErrorMessage(submitError, 'Não foi possível salvar o cliente.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -106,7 +106,7 @@ export function ClientsPage() {
       await removeClient(client.id);
     } catch (removeError) {
       alert(
-        getErrorMessage(removeError, 'Nao foi possivel excluir o cliente.'),
+        getErrorMessage(removeError, 'Não foi possível excluir o cliente.'),
       );
     }
   }
@@ -121,7 +121,7 @@ export function ClientsPage() {
         <p className="mt-2 text-sm text-slate-500">
           {loading
             ? 'Buscando a base de clientes no Supabase.'
-            : 'Preparando a sincronizacao inicial.'}
+            : 'Preparando a sincronização inicial.'}
         </p>
       </section>
     );
@@ -250,7 +250,7 @@ export function ClientsPage() {
                   Telefone
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Acoes
+                  Ações
                 </th>
               </tr>
             </thead>
@@ -341,7 +341,7 @@ export function ClientsPage() {
         title={selectedClient ? 'Editar cliente' : 'Novo cliente'}
         description={
           selectedClient
-            ? 'Atualize as informacoes do cliente.'
+            ? 'Atualize as informações do cliente.'
             : 'Preencha os dados para cadastrar um novo cliente.'
         }
         isOpen={isModalOpen}

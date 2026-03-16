@@ -25,7 +25,7 @@ export function buildProposalEmail(
     ? buildFreelancerSignatureLines(senderProfile)
     : [];
   const body = [
-    `Ola, ${clientName}.`,
+    `Olá, ${clientName}.`,
     '',
     freelancerIntro || null,
     freelancerIntro ? '' : null,
@@ -37,7 +37,7 @@ export function buildProposalEmail(
     'Escopo:',
     proposal.description || 'Escopo a definir.',
     '',
-    proposal.notes ? `Observacoes: ${proposal.notes}` : null,
+    proposal.notes ? `Observações: ${proposal.notes}` : null,
     '',
     'Se estiver de acordo, posso marcar a proposta como aceita e gerar o projeto no painel.',
     signatureLines.length > 0 ? '' : null,

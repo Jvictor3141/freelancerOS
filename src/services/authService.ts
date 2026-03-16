@@ -65,7 +65,7 @@ export async function updateFreelancerProfile(
   });
 }
 
-// Esta rotina garante uma sessao autenticada para que as policies com auth.uid() funcionem.
+// Esta rotina garante uma sessão autenticada para que as policies com auth.uid() funcionem.
 export async function ensureAuthenticatedSession(): Promise<User> {
   const {
     data: { session },
@@ -76,7 +76,7 @@ export async function ensureAuthenticatedSession(): Promise<User> {
     throw new Error(
       getSupabaseErrorMessage(
         sessionError,
-        'Nao foi possivel verificar a sessao atual do Supabase.',
+        'Não foi possível verificar a sessão atual do Supabase.',
       ),
     );
   }
@@ -87,11 +87,11 @@ export async function ensureAuthenticatedSession(): Promise<User> {
 
   if (!autoAnonymousAuth) {
     throw new Error(
-      'Nao existe sessao autenticada. Faça login antes de acessar os dados ou habilite VITE_SUPABASE_AUTO_ANON_AUTH.',
+      'Não existe sessão autenticada. Faça login antes de acessar os dados ou habilite VITE_SUPABASE_AUTO_ANON_AUTH.',
     );
   }
 
-  // O lock abaixo impede varias tentativas paralelas de criar uma sessao anonima na primeira carga.
+  // O lock abaixo impede várias tentativas paralelas de criar uma sessão anônima na primeira carga.
   if (!sessionPromise) {
     sessionPromise = (async () => {
       const { data, error } = await supabase.auth.signInAnonymously();
@@ -100,7 +100,7 @@ export async function ensureAuthenticatedSession(): Promise<User> {
         throw new Error(
           getSupabaseErrorMessage(
             error,
-            'Nao foi possivel iniciar uma sessao autenticada no Supabase.',
+            'Não foi possível iniciar uma sessão autenticada no Supabase.',
           ),
         );
       }
@@ -116,7 +116,7 @@ export async function ensureAuthenticatedSession(): Promise<User> {
   }
 }
 
-// O app usa esse helper para popular user_id sem expor detalhes de autenticacao aos services.
+// O app usa esse helper para popular user_id sem expor detalhes de autenticação aos services.
 export async function getCurrentUserId() {
   const user = await ensureAuthenticatedSession();
   return user.id;

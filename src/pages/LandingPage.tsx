@@ -13,21 +13,21 @@ import freelancerosLogo from '../assets/freelanceros-logo.svg';
 
 const featureCards = [
   {
-    title: 'Operacao em um unico painel',
+    title: 'Operação em um único painel',
     description:
       'Clientes, projetos, propostas e pagamentos ficam conectados no mesmo fluxo.',
     icon: FolderKanban,
   },
   {
-    title: 'Decisao com base no que esta acontecendo',
+    title: 'Decisão com base no que está acontecendo',
     description:
-      'Dashboard com visao clara de pipeline, entregas e financeiro sem depender de planilhas paralelas.',
+      'Dashboard com visão clara de pipeline, entregas e financeiro sem depender de planilhas paralelas.',
     icon: ChartNoAxesCombined,
   },
   {
     title: 'Acesso protegido por conta',
     description:
-      'Cada dado fica vinculado ao usuario autenticado, com policies do Supabase protegendo a base.',
+      'Cada dado fica vinculado ao usuário autenticado, com policies do Supabase protegendo a base.',
     icon: ShieldCheck,
   },
 ];
@@ -42,21 +42,21 @@ const workflowSteps = [
   {
     title: 'Converta em projetos',
     description:
-      'Transforme propostas em execucao com status, prazo, valor e proxima acao claros.',
+      'Transforme propostas em execução com status, prazo, valor e próxima ação claros.',
     icon: BriefcaseBusiness,
   },
   {
     title: 'Acompanhe os recebimentos',
     description:
-      'Controle pagamentos previstos, pendentes e concluidos sem improviso.',
+      'Controle pagamentos previstos, pendentes e concluídos sem improviso.',
     icon: CreditCard,
   },
 ];
 
 const metrics = [
   { value: '4 frentes', label: 'clientes, projetos, propostas e pagamentos' },
-  { value: '1 conta', label: 'dados isolados por usuario autenticado' },
-  { value: '0 planilhas soltas', label: 'operacao concentrada no mesmo lugar' },
+  { value: '1 conta', label: 'dados isolados por usuário autenticado' },
+  { value: '0 planilhas soltas', label: 'operação concentrada no mesmo lugar' },
 ];
 
 export function LandingPage() {
@@ -87,7 +87,7 @@ export function LandingPage() {
                 Fluxo
               </a>
               <a href="#seguranca" className="transition hover:text-slate-950">
-                Seguranca
+                Segurança
               </a>
             </nav>
 
@@ -117,12 +117,12 @@ export function LandingPage() {
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#635bff] text-white shadow-lg shadow-indigo-200">
                     <BadgeCheck size={18} />
                   </span>
-                  Sistema operacional para freelancers e operacoes enxutas
+                  Sistema operacional para freelancers e operações enxutas
                 </div>
 
                 <div className="max-w-3xl space-y-4">
                   <h1 className="text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
-                    Apresente, organize e acompanhe seu negocio em um unico
+                    Apresente, organize e acompanhe seu negócio em um único
                     lugar.
                   </h1>
                   <p className="max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
@@ -176,7 +176,7 @@ export function LandingPage() {
                     <div className="flex items-center justify-between gap-4 rounded-[28px] border border-white/10 bg-white/8 p-4 backdrop-blur">
                       <div>
                         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/60">
-                          Visao central
+                          Visão central
                         </p>
                         <p className="mt-2 text-lg font-semibold">
                           Painel operacional pronto para uso
@@ -196,7 +196,7 @@ export function LandingPage() {
                           Propostas e projetos
                         </p>
                         <p className="mt-3 text-sm leading-6 text-white/70">
-                          Entenda o que esta em negociacao, execucao ou pronto
+                          Entenda o que está em negociação, execução ou pronto
                           para faturar.
                         </p>
                       </article>
@@ -209,7 +209,7 @@ export function LandingPage() {
                           Receitas sob controle
                         </p>
                         <p className="mt-3 text-sm leading-6 text-white/70">
-                          Evite esquecimentos e acompanhe pendencias com mais
+                          Evite esquecimentos e acompanhe pendências com mais
                           clareza.
                         </p>
                       </article>
@@ -276,8 +276,8 @@ export function LandingPage() {
                 </h2>
                 <p className="text-sm leading-7 text-slate-600 sm:text-base">
                   Em vez de abrir uma ferramenta para cada parte do processo, o
-                  FreelancerOS junta cadastro, execucao e recebimento em uma
-                  mesma experiencia.
+                  FreelancerOS junta cadastro, execução e recebimento em uma
+                  mesma experiência.
                 </p>
               </div>
 
@@ -313,14 +313,14 @@ export function LandingPage() {
               <article className="overflow-hidden rounded-[36px] border border-slate-200 bg-slate-950 p-6 text-white shadow-[0_28px_80px_rgba(15,23,42,0.14)] sm:p-8">
                 <div className="space-y-4">
                   <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/55">
-                    Seguranca e estrutura
+                    Segurança e estrutura
                   </p>
                   <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
                     O acesso ao painel depende da conta autenticada.
                   </h2>
                   <p className="max-w-2xl text-sm leading-7 text-white/72 sm:text-base">
-                    O projeto usa Supabase para sessao e armazenamento, mantendo
-                    os dados vinculados ao usuario logado e respeitando as
+                    O projeto usa Supabase para sessão e armazenamento, mantendo
+                    os dados vinculados ao usuário logado e respeitando as
                     regras de acesso do banco.
                   </p>
                 </div>
@@ -332,11 +332,11 @@ export function LandingPage() {
                     <ShieldCheck size={20} />
                   </div>
                   <h3 className="mt-5 text-xl font-semibold tracking-tight text-slate-950">
-                    Dados vinculados ao usuario
+                    Dados vinculados ao usuário
                   </h3>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Cada sessao carrega apenas o que pertence a conta ativa,
-                    reduzindo mistura de dados entre ambientes ou usuarios.
+                    Cada sessão carrega apenas o que pertence à conta ativa,
+                    reduzindo mistura de dados entre ambientes ou usuários.
                   </p>
                 </article>
 
@@ -348,7 +348,7 @@ export function LandingPage() {
                     Fluxo consistente do login ao dashboard
                   </h3>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
-                    Quem nao esta autenticado conhece o projeto pela landing. Ao
+                    Quem não está autenticado conhece o projeto pela landing. Ao
                     entrar, o sistema leva direto ao painel principal.
                   </p>
                 </article>
@@ -362,11 +362,11 @@ export function LandingPage() {
                     Pronto para entrar
                   </p>
                   <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-                    Acesse o FreelancerOS e centralize a apresentacao do seu
+                    Acesse o FreelancerOS e centralize a apresentação do seu
                     trabalho.
                   </h2>
                   <p className="text-sm leading-7 text-white/80 sm:text-base">
-                    Se voce ja tem conta, entre no painel. Se ainda nao tem,
+                    Se você já tem conta, entre no painel. Se ainda não tem,
                     abra o fluxo de cadastro em um clique.
                   </p>
                 </div>

@@ -101,8 +101,8 @@ export function PaymentsPage() {
 
       return {
         ...payment,
-        projectName: project?.name ?? 'Projeto nao encontrado',
-        clientName: client?.name ?? 'Cliente nao encontrado',
+        projectName: project?.name ?? 'Projeto não encontrado',
+        clientName: client?.name ?? 'Cliente não encontrado',
       };
     });
   }, [payments, projects, clients]);
@@ -160,7 +160,7 @@ export function PaymentsPage() {
       closeModal();
     } catch (submitError) {
       alert(
-        getErrorMessage(submitError, 'Nao foi possivel salvar o pagamento.'),
+        getErrorMessage(submitError, 'Não foi possível salvar o pagamento.'),
       );
     } finally {
       setIsSubmitting(false);
@@ -178,7 +178,7 @@ export function PaymentsPage() {
       await removePayment(payment.id);
     } catch (removeError) {
       alert(
-        getErrorMessage(removeError, 'Nao foi possivel excluir o pagamento.'),
+        getErrorMessage(removeError, 'Não foi possível excluir o pagamento.'),
       );
     }
   }
@@ -190,7 +190,7 @@ export function PaymentsPage() {
       alert(
         getErrorMessage(
           markError,
-          'Nao foi possivel marcar o pagamento como pago.',
+          'Não foi possível marcar o pagamento como pago.',
         ),
       );
     }
@@ -380,7 +380,7 @@ export function PaymentsPage() {
                   Status
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  Acoes
+                  Ações
                 </th>
               </tr>
             </thead>

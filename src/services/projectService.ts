@@ -22,7 +22,7 @@ export async function getProjects(): Promise<Project[]> {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel carregar os projetos no banco.',
+        'Não foi possível carregar os projetos no banco.',
       ),
     );
   }
@@ -43,7 +43,7 @@ export async function createProject(data: ProjectInput): Promise<Project> {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel criar o projeto no banco.',
+        'Não foi possível criar o projeto no banco.',
       ),
     );
   }
@@ -69,7 +69,7 @@ export async function updateProject(
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel atualizar o projeto no banco.',
+        'Não foi possível atualizar o projeto no banco.',
       ),
     );
   }
@@ -90,7 +90,7 @@ export async function deleteProject(id: string) {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Nao foi possivel excluir o projeto no banco.',
+        'Não foi possível excluir o projeto no banco.',
       ),
     );
   }

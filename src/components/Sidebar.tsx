@@ -28,11 +28,11 @@ export function Sidebar() {
           Conta conectada
         </p>
         <h2 className="mt-2 break-all text-sm font-semibold text-slate-900">
-          {user?.email ?? 'Usuario autenticado'}
+          {user?.email ?? 'Usuário autenticado'}
         </h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">
           Seus dados ficam vinculados a essa conta e passam pelas regras de
-          seguranca do Supabase.
+          segurança do Supabase.
         </p>
       </div>
     </aside>

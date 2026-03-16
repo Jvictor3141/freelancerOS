@@ -48,7 +48,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
   error: null,
   initialized: false,
 
-  // O carregamento inicial agora busca os pagamentos remotos e informa a UI quando a sincronizacao acabou.
+  // O carregamento inicial agora busca os pagamentos remotos e informa a UI quando a sincronização acabou.
   loadPayments: async () => {
     set({ loading: true, error: null });
 
@@ -65,7 +65,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
         loading: false,
         error: getPaymentStoreError(
           error,
-          'Nao foi possivel carregar os pagamentos.',
+          'Não foi possível carregar os pagamentos.',
         ),
         initialized: true,
       });
@@ -90,7 +90,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     } catch (error) {
       const message = getPaymentStoreError(
         error,
-        'Nao foi possivel salvar o pagamento.',
+        'Não foi possível salvar o pagamento.',
       );
 
       set({ error: message });
@@ -118,7 +118,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     } catch (error) {
       const message = getPaymentStoreError(
         error,
-        'Nao foi possivel atualizar o pagamento.',
+        'Não foi possível atualizar o pagamento.',
       );
 
       set({ error: message });
@@ -140,7 +140,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     } catch (error) {
       const message = getPaymentStoreError(
         error,
-        'Nao foi possivel excluir o pagamento.',
+        'Não foi possível excluir o pagamento.',
       );
 
       set({ error: message });
@@ -148,7 +148,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     }
   },
 
-  // A marcacao manual reaproveita o mesmo update remoto para manter banco e UI alinhados.
+  // A marcação manual reaproveita o mesmo update remoto para manter banco e UI alinhados.
   markAsPaid: async (id) => {
     set({ error: null });
 
@@ -179,7 +179,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     } catch (error) {
       const message = getPaymentStoreError(
         error,
-        'Nao foi possivel marcar o pagamento como pago.',
+        'Não foi possível marcar o pagamento como pago.',
       );
 
       set({ error: message });
@@ -187,7 +187,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     }
   },
 
-  // Esta rotina corrige status vencidos no banco logo apos o carregamento para o dashboard usar dados consistentes.
+  // Esta rotina corrige status vencidos no banco logo após o carregamento para o dashboard usar dados consistentes.
   markAsOverdueIfNeeded: async () => {
     set({ error: null });
 
@@ -230,7 +230,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     } catch (error) {
       const message = getPaymentStoreError(
         error,
-        'Nao foi possivel atualizar os pagamentos vencidos.',
+        'Não foi possível atualizar os pagamentos vencidos.',
       );
 
       set({ error: message });
@@ -238,7 +238,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     }
   },
 
-  // O reset limpa pagamentos e selecoes quando a sessao troca para evitar flash de dados antigos.
+  // O reset limpa pagamentos e seleções quando a sessão troca para evitar flash de dados antigos.
   resetStore: () => {
     set({
       payments: [],

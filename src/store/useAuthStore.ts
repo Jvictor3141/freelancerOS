@@ -102,7 +102,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   error: null,
   notice: null,
 
-  // A inicializacao observa a sessao do Supabase para o app reagir a login, logout e refresh de token.
+  // A inicialização observa a sessão do Supabase para o app reagir a login, logout e refresh de token.
   initialize: async () => {
     const {
       data: { subscription },
@@ -128,7 +128,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         loading: false,
         error: getAuthStoreError(
           error,
-          'Nao foi possivel carregar a sessao atual.',
+          'Não foi possível carregar a sessão atual.',
         ),
       });
     } else {
@@ -151,7 +151,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (error) {
       const message = getAuthStoreError(
         error,
-        'Nao foi possivel entrar com essa conta.',
+        'Não foi possível entrar com essa conta.',
       );
 
       set({ loading: false, error: message });
@@ -170,7 +170,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (error) {
       const message = getAuthStoreError(
         error,
-        'Nao foi possivel criar a conta.',
+        'Não foi possível criar a conta.',
       );
 
       set({ loading: false, error: message });
@@ -181,7 +181,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
     set({
       notice: data.session
-        ? 'Conta criada e sessao iniciada com sucesso.'
+        ? 'Conta criada e sessão iniciada com sucesso.'
         : 'Conta criada. Confirme seu email para entrar no app.',
     });
   },
@@ -194,7 +194,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (error) {
       const message = getAuthStoreError(
         error,
-        'Nao foi possivel encerrar a sessao de recuperacao.',
+        'Não foi possível encerrar a sessão de recuperação.',
       );
 
       set({ loading: false, error: message });
@@ -217,7 +217,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (error) {
       const message = getAuthStoreError(
         error,
-        'Nao foi possivel sair do fluxo de recuperacao.',
+        'Não foi possível sair do fluxo de recuperação.',
       );
 
       set({ loading: false, error: message });
@@ -238,7 +238,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (error) {
       const message = getAuthStoreError(
         error,
-        'Nao foi possivel encerrar a sessao.',
+        'Não foi possível encerrar a sessão.',
       );
 
       set({ loading: false, error: message });

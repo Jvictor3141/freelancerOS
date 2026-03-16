@@ -131,14 +131,14 @@ export function DashboardPage() {
           <div className="flex h-full flex-col justify-between gap-6">
             <div className="space-y-2">
               <p className="text-sm font-medium text-indigo-100">
-                Visao financeira
+                Visão financeira
               </p>
               <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                Entradas de dinheiro e saude do negocio
+                Entradas de dinheiro e saúde do negócio
               </h2>
               <p className="max-w-2xl text-sm leading-6 text-indigo-100/90">
-                Um painel direto para entender o que entrou, o que ainda esta
-                pendente e onde estao os gargalos financeiros.
+                Um painel direto para entender o que entrou, o que ainda está
+                pendente e onde estão os gargalos financeiros.
               </p>
             </div>
 
@@ -180,7 +180,7 @@ export function DashboardPage() {
           <div className="mb-5">
             <p className="text-sm font-medium text-slate-500">Alertas</p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Clientes que precisam de atencao
+              Clientes que precisam de atenção
             </h3>
           </div>
 
@@ -222,7 +222,7 @@ export function DashboardPage() {
               ))
             ) : (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-                Nenhum cliente com cobranca pendente ou atrasada.
+                Nenhum cliente com cobrança pendente ou atrasada.
               </div>
             )}
           </div>
@@ -252,7 +252,7 @@ export function DashboardPage() {
             {metrics.projectsInProgress}
           </p>
           <p className="mt-2 text-sm text-slate-500">
-            Em andamento ou revisao
+            Em andamento ou revisão
           </p>
         </div>
 
@@ -260,7 +260,7 @@ export function DashboardPage() {
           <div className="mb-4 inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-700">
             <CheckCircle2 size={18} />
           </div>
-          <p className="text-sm font-medium text-slate-500">Concluidos</p>
+          <p className="text-sm font-medium text-slate-500">Concluídos</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             {metrics.completedProjects}
           </p>
@@ -273,12 +273,12 @@ export function DashboardPage() {
           <div className="mb-4 inline-flex rounded-2xl bg-violet-100 p-3 text-violet-700">
             <ArrowUpRight size={18} />
           </div>
-          <p className="text-sm font-medium text-slate-500">Ticket medio</p>
+          <p className="text-sm font-medium text-slate-500">Ticket médio</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             {formatCurrency(metrics.averageTicket)}
           </p>
           <p className="mt-2 text-sm text-slate-500">
-            Valor medio por projeto
+            Valor médio por projeto
           </p>
         </div>
       </section>
@@ -291,7 +291,7 @@ export function DashboardPage() {
                 Entradas de dinheiro
               </p>
               <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-                Recebimentos dos ultimos 6 meses
+                Recebimentos dos últimos 6 meses
               </h3>
             </div>
 
@@ -368,7 +368,7 @@ export function DashboardPage() {
               Atividade recente
             </p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Ultimos projetos criados
+              Últimos projetos criados
             </h3>
           </div>
 

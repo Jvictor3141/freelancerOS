@@ -22,7 +22,7 @@ export const navigationItems: NavigationItem[] = [
   { label: 'Projetos', to: '/projetos', icon: BriefcaseBusiness },
   { label: 'Pagamentos', to: '/pagamentos', icon: CreditCard },
   { label: 'Propostas', to: '/propostas', icon: FileText },
-  { label: 'Configuracoes', to: '/configuracoes', icon: Settings },
+  { label: 'Configurações', to: '/configuracoes', icon: Settings },
 ];
 
 type NavigationListProps = {

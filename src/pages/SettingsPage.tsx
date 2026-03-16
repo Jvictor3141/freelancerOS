@@ -56,7 +56,7 @@ const themeOptions: ThemeOption[] = [
   {
     value: 'indigo',
     label: 'Studio',
-    description: 'Visual frio, nitido e com cara de produto premium.',
+    description: 'Visual frio, nítido e com cara de produto premium.',
     previewClassName:
       'bg-[linear-gradient(135deg,#635bff_0%,#7c73ff_52%,#dbeafe_100%)]',
   },
@@ -210,14 +210,14 @@ export function SettingsPage() {
       setProfileFeedback({
         tone: 'success',
         message:
-          'Perfil comercial salvo. As proximas propostas ja podem sair com sua assinatura e posicionamento.',
+          'Perfil comercial salvo. As próximas propostas já podem sair com sua assinatura e posicionamento.',
       });
     } catch (error) {
       setProfileFeedback({
         tone: 'error',
         message: getErrorMessage(
           error,
-          'Nao foi possivel salvar o perfil profissional.',
+          'Não foi possível salvar o perfil profissional.',
         ),
       });
     } finally {
@@ -229,7 +229,7 @@ export function SettingsPage() {
     if (!user?.email) {
       setSecurityFeedback({
         tone: 'error',
-        message: 'A conta atual nao possui um email valido para recuperacao.',
+        message: 'A conta atual não possui um e-mail válido para recuperação.',
       });
       return;
     }
@@ -246,14 +246,14 @@ export function SettingsPage() {
 
       setSecurityFeedback({
         tone: 'success',
-        message: `Link de recuperacao enviado para ${user.email}.`,
+        message: `Link de recuperação enviado para ${user.email}.`,
       });
     } catch (error) {
       setSecurityFeedback({
         tone: 'error',
         message: getErrorMessage(
           error,
-          'Nao foi possivel enviar o link de recuperacao.',
+          'Não foi possível enviar o link de recuperação.',
         ),
       });
     } finally {
@@ -275,7 +275,7 @@ export function SettingsPage() {
     if (newPassword !== confirmPassword) {
       setSecurityFeedback({
         tone: 'error',
-        message: 'A confirmacao da nova senha nao confere.',
+        message: 'A confirmação da nova senha não confere.',
       });
       return;
     }
@@ -295,14 +295,14 @@ export function SettingsPage() {
       setSecurityFeedback({
         tone: 'success',
         message:
-          'Senha atualizada com sucesso. Se voce abriu o app por um link de recuperacao, ele ja pode ser descartado.',
+          'Senha atualizada com sucesso. Se você abriu o app por um link de recuperação, ele já pode ser descartado.',
       });
     } catch (error) {
       setSecurityFeedback({
         tone: 'error',
         message: getErrorMessage(
           error,
-          'Nao foi possivel atualizar a senha da conta.',
+          'Não foi possível atualizar a senha da conta.',
         ),
       });
     } finally {
@@ -319,14 +319,14 @@ export function SettingsPage() {
               <Sparkles size={18} />
             </div>
             <p className="text-sm font-medium text-slate-500">
-              Aparencia, conta e posicionamento
+              Aparência, conta e posicionamento
             </p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
               Configure o painel para parecer seu
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
               Os cards abaixo viram atalhos reais: tema abre em modal,
-              seguranca abre em modal e a identidade profissional tambem fica
+              segurança abre em modal e a identidade profissional também fica
               concentrada em modal.
             </p>
 
@@ -345,7 +345,7 @@ export function SettingsPage() {
                 value={
                   profileValues.businessName ||
                   profileValues.displayName ||
-                  'Nao configurada'
+                  'Não configurada'
                 }
                 hint="Abrir perfil"
                 onClick={() => setProfileModalOpen(true)}
@@ -355,7 +355,7 @@ export function SettingsPage() {
                 icon={<ShieldCheck size={18} />}
                 label="Conta"
                 value={user?.email ?? 'Conta autenticada'}
-                hint="Abrir seguranca"
+                hint="Abrir segurança"
                 onClick={() => setSecurityModalOpen(true)}
               />
             </div>
@@ -383,13 +383,13 @@ export function SettingsPage() {
                     Proposta comercial
                   </p>
                   <p className="mt-1 text-sm text-slate-500">
-                    Assunto de email + assinatura comercial
+                    Assunto de e-mail + assinatura comercial
                   </p>
                 </div>
               </div>
 
               <div className="mt-5 rounded-3xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">
-                <p>Ola, cliente.</p>
+                <p>Olá, cliente.</p>
                 {profileIntro ? <p className="mt-3">{profileIntro}</p> : null}
                 <p className="mt-3">
                   Segue a proposta do projeto "Landing Page".
@@ -415,7 +415,7 @@ export function SettingsPage() {
 
       <Modal
         title="Identidade profissional"
-        description="Edite sua apresentacao comercial sem deixar a tela principal carregada."
+        description="Edite sua apresentação comercial sem deixar a tela principal carregada."
         isOpen={isProfileModalOpen}
         onClose={() => setProfileModalOpen(false)}
       >
@@ -424,20 +424,20 @@ export function SettingsPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                Nome de exibicao
+                Nome de exibição
               </span>
               <input
                 name="displayName"
                 value={profileValues.displayName}
                 onChange={handleProfileFieldChange}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="Seu nome ou nome artistico"
+                placeholder="Seu nome ou nome artístico"
               />
             </label>
 
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                Nome do estudio ou empresa
+                Nome do estúdio ou empresa
               </span>
               <input
                 name="businessName"
@@ -463,14 +463,14 @@ export function SettingsPage() {
 
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                Cidade ou base de operacao
+                Cidade ou base de operação
               </span>
               <input
                 name="city"
                 value={profileValues.city}
                 onChange={handleProfileFieldChange}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="Ex.: Sao Paulo, SP"
+                placeholder="Ex.: São Paulo, SP"
               />
             </label>
 
@@ -503,14 +503,14 @@ export function SettingsPage() {
 
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-slate-700">
-              Como voce se apresenta ao cliente
+              Como você se apresenta ao cliente
             </span>
             <textarea
               name="bio"
               value={profileValues.bio}
               onChange={handleProfileFieldChange}
               className="min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-              placeholder="Ex.: Ajudo negocios a transformar operacao, branding e conversao em interfaces mais claras."
+              placeholder="Ex.: Ajudo negócios a transformar operação, branding e conversão em interfaces mais claras."
             />
           </label>
 
@@ -523,8 +523,8 @@ export function SettingsPage() {
               value={profileValues.proposalSignature}
               onChange={handleProfileFieldChange}
               className="min-h-24 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-              placeholder="Ex.: Fico a disposicao para alinhar ajustes e iniciar assim que houver sinal verde."
-            />
+                placeholder="Ex.: Fico à disposição para alinhar ajustes e iniciar assim que houver sinal verde."
+              />
           </label>
 
           <FeedbackBanner feedback={profileFeedback} />
@@ -542,14 +542,14 @@ export function SettingsPage() {
 
       <Modal
         title="Tema do painel"
-        description="Troque o clima visual do workspace sem ocupar espaco fixo na pagina."
+        description="Troque o clima visual do workspace sem ocupar espaço fixo na página."
         isOpen={isThemeModalOpen}
         onClose={() => setThemeModalOpen(false)}
       >
         <div className="space-y-5">
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-            O tema altera fundo, destaques e botoes principais. A troca e
-            instantanea e fica salva neste navegador.
+            O tema altera fundo, destaques e botões principais. A troca é
+            instantânea e fica salva neste navegador.
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
@@ -582,25 +582,25 @@ export function SettingsPage() {
       </Modal>
 
       <Modal
-        title="Seguranca da conta"
-        description="Recuperacao e troca de senha concentradas em um unico fluxo."
+        title="Segurança da conta"
+        description="Recuperação e troca de senha concentradas em um único fluxo."
         isOpen={isSecurityModalOpen}
         onClose={() => setSecurityModalOpen(false)}
       >
         <div className="space-y-5">
           {isRecoveryFlow ? (
             <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              Link de recuperacao identificado. Defina sua nova senha abaixo
+              Link de recuperação identificado. Defina sua nova senha abaixo
               para concluir o processo.
             </div>
           ) : null}
 
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-sm font-semibold text-slate-900">
-              Email da conta
+              E-mail da conta
             </p>
             <p className="mt-1 break-all text-sm text-slate-600">
-              {user?.email ?? 'Email indisponivel'}
+              {user?.email ?? 'E-mail indisponível'}
             </p>
             <button
               type="button"
@@ -611,7 +611,7 @@ export function SettingsPage() {
               className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-70"
             >
               <Mail size={16} />
-              Enviar link de recuperacao
+              Enviar link de recuperação
             </button>
           </div>
 
@@ -625,7 +625,7 @@ export function SettingsPage() {
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="Minimo de 6 caracteres"
+                placeholder="Mínimo de 6 caracteres"
               />
             </label>
 

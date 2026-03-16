@@ -120,7 +120,7 @@ export function ProposalsPage() {
 
       return {
         ...proposal,
-        clientName: client?.name ?? 'Cliente nao encontrado',
+        clientName: client?.name ?? 'Cliente não encontrado',
         clientCompany: client?.company ?? '',
       };
     });
@@ -220,7 +220,7 @@ export function ProposalsPage() {
       closeModal();
     } catch (submitError) {
       alert(
-        getErrorMessage(submitError, 'Nao foi possivel salvar a proposta.'),
+        getErrorMessage(submitError, 'Não foi possível salvar a proposta.'),
       );
     } finally {
       setIsSubmitting(false);
@@ -240,14 +240,14 @@ export function ProposalsPage() {
       await removeProposal(proposal.id);
     } catch (removeError) {
       alert(
-        getErrorMessage(removeError, 'Nao foi possivel excluir a proposta.'),
+        getErrorMessage(removeError, 'Não foi possível excluir a proposta.'),
       );
     }
   }
 
   async function handleSendProposal(proposal: Proposal) {
     if (!proposal.recipientEmail.trim()) {
-      alert('Defina um email valido antes de enviar a proposta.');
+      alert('Defina um e-mail válido antes de enviar a proposta.');
       return;
     }
 
@@ -269,7 +269,7 @@ export function ProposalsPage() {
       );
     } catch (sendError) {
       alert(
-        getErrorMessage(sendError, 'Nao foi possivel enviar a proposta.'),
+        getErrorMessage(sendError, 'Não foi possível enviar a proposta.'),
       );
     }
   }
@@ -290,7 +290,7 @@ export function ProposalsPage() {
       alert(
         getErrorMessage(
           acceptError,
-          'Nao foi possivel aceitar a proposta e gerar o projeto.',
+          'Não foi possível aceitar a proposta e gerar o projeto.',
         ),
       );
     }
@@ -311,7 +311,7 @@ export function ProposalsPage() {
       alert(
         getErrorMessage(
           rejectError,
-          'Nao foi possivel marcar a proposta como recusada.',
+          'Não foi possível marcar a proposta como recusada.',
         ),
       );
     }
@@ -324,7 +324,7 @@ export function ProposalsPage() {
       alert(
         getErrorMessage(
           reopenError,
-          'Nao foi possivel reabrir a proposta.',
+          'Não foi possível reabrir a proposta.',
         ),
       );
     }
@@ -410,12 +410,12 @@ export function ProposalsPage() {
         </article>
 
         <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-          <p className="text-sm font-medium text-slate-500">Acao rapida</p>
+          <p className="text-sm font-medium text-slate-500">Ação rápida</p>
           <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
             Nova proposta operacional
           </h3>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            Crie a proposta, envie por email direto do app e, quando houver
+            Crie a proposta, envie por e-mail direto do app e, quando houver
             aceite, transforme em projeto com um clique.
           </p>
 
@@ -444,7 +444,7 @@ export function ProposalsPage() {
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar por titulo, cliente ou email"
+            placeholder="Buscar por título, cliente ou e-mail"
             className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
           />
 
@@ -477,7 +477,7 @@ export function ProposalsPage() {
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Buscar por titulo, cliente ou email"
+            placeholder="Buscar por título, cliente ou e-mail"
             className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
           />
 
@@ -517,7 +517,7 @@ export function ProposalsPage() {
       <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
         <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
           <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-            Propostas da operacao
+            Propostas da operação
           </h3>
           <p className="text-sm font-medium text-slate-500">
             {filteredProposals.length} proposta(s) encontrada(s)
@@ -566,7 +566,7 @@ export function ProposalsPage() {
                     {proposal.clientCompany || '-'}
                   </p>
                   <p className="break-all">
-                    <span className="font-medium text-slate-900">Email:</span>{' '}
+                    <span className="font-medium text-slate-900">E-mail:</span>{' '}
                     {proposal.recipientEmail}
                   </p>
                   <p>
@@ -602,7 +602,7 @@ export function ProposalsPage() {
                 {proposal.notes ? (
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
                     <span className="font-medium text-slate-900">
-                      Observacoes:
+                      Observações:
                     </span>{' '}
                     {proposal.notes}
                   </div>

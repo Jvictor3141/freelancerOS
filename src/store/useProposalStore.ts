@@ -59,7 +59,7 @@ export const useProposalStore = create<ProposalStore>((set) => ({
         loading: false,
         error: getProposalStoreError(
           error,
-          'Nao foi possivel carregar as propostas.',
+          'Não foi possível carregar as propostas.',
         ),
         initialized: true,
       });
@@ -84,7 +84,7 @@ export const useProposalStore = create<ProposalStore>((set) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Nao foi possivel salvar a proposta.',
+        'Não foi possível salvar a proposta.',
       );
 
       set({ error: message });
@@ -112,7 +112,7 @@ export const useProposalStore = create<ProposalStore>((set) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Nao foi possivel atualizar a proposta.',
+        'Não foi possível atualizar a proposta.',
       );
 
       set({ error: message });
@@ -134,7 +134,7 @@ export const useProposalStore = create<ProposalStore>((set) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Nao foi possivel excluir a proposta.',
+        'Não foi possível excluir a proposta.',
       );
 
       set({ error: message });
@@ -162,7 +162,7 @@ export const useProposalStore = create<ProposalStore>((set) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Nao foi possivel enviar a proposta.',
+        'Não foi possível enviar a proposta.',
       );
 
       set({ error: message });
@@ -188,7 +188,7 @@ export const useProposalStore = create<ProposalStore>((set) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Nao foi possivel aceitar a proposta.',
+        'Não foi possível aceitar a proposta.',
       );
 
       set({ error: message });
@@ -216,7 +216,7 @@ export const useProposalStore = create<ProposalStore>((set) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Nao foi possivel recusar a proposta.',
+        'Não foi possível recusar a proposta.',
       );
 
       set({ error: message });
@@ -244,7 +244,7 @@ export const useProposalStore = create<ProposalStore>((set) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Nao foi possivel reabrir a proposta.',
+        'Não foi possível reabrir a proposta.',
       );
 
       set({ error: message });

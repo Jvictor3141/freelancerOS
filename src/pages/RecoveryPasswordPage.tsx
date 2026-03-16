@@ -41,7 +41,7 @@ export function RecoveryPasswordPage() {
 
     if (!isRecoveryMode) {
       setLocalError(
-        'Esse link nao esta mais ativo. Solicite uma nova recuperacao de senha.',
+        'Esse link não está mais ativo. Solicite uma nova recuperação de senha.',
       );
       return;
     }
@@ -52,7 +52,7 @@ export function RecoveryPasswordPage() {
     }
 
     if (password !== confirmPassword) {
-      setLocalError('A confirmacao da nova senha nao confere.');
+      setLocalError('A confirmação da nova senha não confere.');
       return;
     }
 
@@ -68,7 +68,7 @@ export function RecoveryPasswordPage() {
       await completePasswordRecovery();
     } catch (error) {
       setLocalError(
-        getErrorMessage(error, 'Nao foi possivel atualizar a senha da conta.'),
+        getErrorMessage(error, 'Não foi possível atualizar a senha da conta.'),
       );
     }
   }
@@ -83,7 +83,7 @@ export function RecoveryPasswordPage() {
       setLocalError(
         getErrorMessage(
           error,
-          'Nao foi possivel sair do fluxo de recuperacao.',
+          'Não foi possível sair do fluxo de recuperação.',
         ),
       );
     }
@@ -114,14 +114,14 @@ export function RecoveryPasswordPage() {
 
                     <div className="space-y-3">
                       <p className="text-sm font-medium text-slate-500">
-                        Recuperacao indisponivel
+                        Recuperação indisponível
                       </p>
                       <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-                        Link invalido ou expirado
+                        Link inválido ou expirado
                       </h1>
                       <p className="text-sm leading-6 text-slate-500">
-                        Para proteger a conta, o acesso ao painel nao e liberado
-                        por esse link. Solicite uma nova recuperacao pela tela
+                        Para proteger a conta, o acesso ao painel não é liberado
+                        por esse link. Solicite uma nova recuperação pela tela
                         de login.
                       </p>
                     </div>
@@ -141,20 +141,20 @@ export function RecoveryPasswordPage() {
                   <div className="space-y-5">
                     <div className="space-y-3">
                       <p className="text-sm font-medium text-slate-500">
-                        Fluxo protegido de recuperacao
+                        Fluxo protegido de recuperação
                       </p>
                       <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
                         Defina sua nova senha
                       </h1>
                       <p className="text-sm leading-6 text-slate-500">
-                        Essa sessao temporaria existe apenas para redefinir a
-                        senha. O painel continua bloqueado ate a conclusao do
+                        Essa sessão temporária existe apenas para redefinir a
+                        senha. O painel continua bloqueado até a conclusão do
                         processo.
                       </p>
                     </div>
 
                     <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                      Sessao de recuperacao vinculada a {user.email}.
+                      Sessão de recuperação vinculada a {user.email}.
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -166,7 +166,7 @@ export function RecoveryPasswordPage() {
                           type="password"
                           value={password}
                           onChange={(event) => setPassword(event.target.value)}
-                          placeholder="Minimo de 6 caracteres"
+                          placeholder="Mínimo de 6 caracteres"
                           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#635bff] focus:bg-white"
                         />
                       </label>
@@ -187,8 +187,8 @@ export function RecoveryPasswordPage() {
                       </label>
 
                       <div className="rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm leading-6 text-slate-500">
-                        Depois de atualizar a senha, a sessao temporaria sera
-                        encerrada automaticamente e um novo login sera exigido.
+                        Depois de atualizar a senha, a sessão temporária será
+                        encerrada automaticamente e um novo login será exigido.
                       </div>
 
                       {localError ? (
@@ -226,7 +226,7 @@ export function RecoveryPasswordPage() {
                         disabled={loading}
                         className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
                       >
-                        Cancelar recuperacao
+                        Cancelar recuperação
                       </button>
                     </form>
                   </div>
@@ -244,7 +244,7 @@ export function RecoveryPasswordPage() {
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[#635bff] shadow-lg shadow-indigo-950/20">
                     <KeyRound size={20} />
                   </span>
-                  Recuperacao segura
+                  Recuperação segura
                 </div>
 
                 <div className="max-w-2xl space-y-4">
@@ -252,11 +252,11 @@ export function RecoveryPasswordPage() {
                     Acesso isolado
                   </p>
                   <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-                    A redefinicao acontece fora do painel principal
+                    A redefinição acontece fora do painel principal
                   </h2>
                   <p className="max-w-xl text-base leading-7 text-indigo-100/90 sm:text-lg">
-                    Mesmo com o link valido, essa sessao temporaria nao libera
-                    clientes, projetos, pagamentos ou configuracoes ate a senha
+                    Mesmo com o link válido, essa sessão temporária não libera
+                    clientes, projetos, pagamentos ou configurações até a senha
                     ser trocada e o login normal ser feito de novo.
                   </p>
                 </div>
@@ -271,7 +271,7 @@ export function RecoveryPasswordPage() {
                     Painel bloqueado durante o recovery
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-indigo-100/90">
-                    A sessao do link nao serve como login normal. Ela existe
+                    A sessão do link não serve como login normal. Ela existe
                     apenas para concluir a troca da senha.
                   </p>
                 </article>
@@ -281,11 +281,11 @@ export function RecoveryPasswordPage() {
                     <KeyRound size={18} />
                   </div>
                   <h3 className="text-lg font-semibold tracking-tight">
-                    Encerramento obrigatorio ao finalizar
+                    Encerramento obrigatório ao finalizar
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-indigo-100/90">
-                    Assim que a nova senha e salva, a sessao temporaria e
-                    encerrada e o sistema volta a exigir login padrao.
+                    Assim que a nova senha é salva, a sessão temporária é
+                    encerrada e o sistema volta a exigir login padrão.
                   </p>
                 </article>
               </div>

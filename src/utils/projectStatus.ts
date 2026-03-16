@@ -3,8 +3,8 @@ import type { ProjectStatus } from '../types/project';
 export const projectStatusLabel: Record<ProjectStatus, string> = {
   proposal: 'Proposta',
   in_progress: 'Em andamento',
-  review: 'Em revisao',
-  completed: 'Concluido',
+  review: 'Em revisão',
+  completed: 'Concluído',
 };
 
 export const projectStatusClassName: Record<ProjectStatus, string> = {
