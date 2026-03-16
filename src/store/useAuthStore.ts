@@ -94,6 +94,23 @@ function applySession(
   });
 }
 
+function isExistingAccountSignUpResult(
+  user: User | null,
+  email: string,
+  hasSession: boolean,
+) {
+  if (hasSession || !user?.email) {
+    return false;
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  const identities = Array.isArray(user.identities) ? user.identities : [];
+
+  return (
+    user.email.toLowerCase() === normalizedEmail && identities.length === 0
+  );
+}
+
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   initialized: false,
@@ -165,13 +182,28 @@ export const useAuthStore = create<AuthStore>((set) => ({
     persistRecoveryMode(false);
     set({ loading: true, error: null, notice: null });
 
-    const { data, error } = await signUpService(email, password);
+    const normalizedEmail = email.trim().toLowerCase();
+    const { data, error } = await signUpService(normalizedEmail, password);
 
     if (error) {
       const message = getAuthStoreError(
         error,
         'Não foi possível criar a conta.',
       );
+
+      set({ loading: false, error: message });
+      throw new Error(message);
+    }
+
+    if (
+      isExistingAccountSignUpResult(
+        data.user ?? null,
+        normalizedEmail,
+        Boolean(data.session),
+      )
+    ) {
+      const message =
+        'Já existe uma conta ativa com esse e-mail. Entre no app ou use a recuperação de senha.';
 
       set({ loading: false, error: message });
       throw new Error(message);
