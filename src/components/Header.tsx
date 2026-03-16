@@ -52,6 +52,7 @@ export function Header() {
     try {
       setIsAccountMenuOpen(false);
       await logout();
+      navigate('/login?mode=sign_in', { replace: true });
     } catch (error) {
       alert(getErrorMessage(error, 'Nao foi possivel encerrar a sessao.'));
     }

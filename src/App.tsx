@@ -1,7 +1,8 @@
 import { Suspense, lazy, useEffect, useRef } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { RouteTransition } from './components/RouteTransition';
 import { DashboardLayout } from './layout/DashboardLayout';
+import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RecoveryPasswordPage } from './pages/RecoveryPasswordPage';
 import { usePreferencesStore } from './store/usePreferencesStore';
@@ -112,7 +113,20 @@ function App() {
   }
 
   if (!user) {
-    return <LoginPage />;
+    return (
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="*"
+          element={<Navigate to="/login?mode=sign_in" replace />}
+        />
+      </Routes>
+    );
+  }
+
+  if (location.pathname === '/' || location.pathname === '/login') {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
@@ -127,13 +141,14 @@ function App() {
       >
         <RouteTransition>
           <Routes>
-            <Route path="/" element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/clientes" element={<ClientsPage />} />
             <Route path="/clients/:id" element={<ClientDetailsPage />} />
             <Route path="/projetos" element={<ProjectsPage />} />
             <Route path="/pagamentos" element={<PaymentsPage />} />
             <Route path="/propostas" element={<ProposalsPage />} />
             <Route path="/configuracoes" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </RouteTransition>
       </Suspense>

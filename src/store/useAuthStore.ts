@@ -75,8 +75,8 @@ function clearRecoveryLocation() {
   }
 
   const nextUrl = new URL(window.location.href);
-  nextUrl.pathname = '/';
-  nextUrl.search = '';
+  nextUrl.pathname = '/login';
+  nextUrl.search = 'mode=sign_in';
   nextUrl.hash = '';
   window.history.replaceState({}, document.title, nextUrl.toString());
 }

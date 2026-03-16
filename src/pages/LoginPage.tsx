@@ -7,12 +7,17 @@ import {
   ShieldCheck,
   Wallet,
 } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
 import freelancerosLogo from '../assets/freelanceros-logo.svg';
 import { getErrorMessage } from '../lib/supabase';
 import { requestPasswordReset } from '../services/authService';
 import { useAuthStore } from '../store/useAuthStore';
 
 type AuthMode = 'sign_in' | 'sign_up';
+
+function getAuthModeFromSearchParams(searchParams: URLSearchParams): AuthMode {
+  return searchParams.get('mode') === 'sign_up' ? 'sign_up' : 'sign_in';
+}
 
 const highlights = [
   {
@@ -38,8 +43,8 @@ const highlights = [
 export function LoginPage() {
   const { loading, error, notice, signIn, signUp, clearFeedback } =
     useAuthStore();
-
-  const [mode, setMode] = useState<AuthMode>('sign_in');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const mode = getAuthModeFromSearchParams(searchParams);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -56,6 +61,12 @@ export function LoginPage() {
     setLocalError(null);
     setPasswordResetFeedback(null);
   }, [mode, clearFeedback]);
+
+  function handleModeChange(nextMode: AuthMode) {
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.set('mode', nextMode);
+    setSearchParams(nextSearchParams, { replace: true });
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -135,6 +146,15 @@ export function LoginPage() {
         <section className="flex items-center bg-[linear-gradient(180deg,rgba(248,250,252,0.88),rgba(255,255,255,0.98))] px-5 py-8 sm:px-8 lg:px-10">
           <div className="mx-auto w-full max-w-md">
             <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)] sm:p-8">
+              <div className="mb-4">
+                <Link
+                  to="/"
+                  className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                >
+                  Ver apresentacao
+                </Link>
+              </div>
+
               <div className="mb-6 flex justify-center">
                 <img
                   src={freelancerosLogo}
@@ -164,7 +184,7 @@ export function LoginPage() {
               <div className="mt-6 grid grid-cols-2 rounded-2xl bg-slate-100 p-1">
                 <button
                   type="button"
-                  onClick={() => setMode('sign_in')}
+                  onClick={() => handleModeChange('sign_in')}
                   className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${
                     mode === 'sign_in'
                       ? 'bg-white text-slate-950 shadow-sm'
@@ -175,7 +195,7 @@ export function LoginPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setMode('sign_up')}
+                  onClick={() => handleModeChange('sign_up')}
                   className={`rounded-2xl px-4 py-3 text-sm font-semibold transition ${
                     mode === 'sign_up'
                       ? 'bg-white text-slate-950 shadow-sm'

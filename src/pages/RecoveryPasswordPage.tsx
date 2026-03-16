@@ -128,7 +128,9 @@ export function RecoveryPasswordPage() {
 
                     <button
                       type="button"
-                      onClick={() => navigate('/', { replace: true })}
+                      onClick={() =>
+                        navigate('/login?mode=sign_in', { replace: true })
+                      }
                       className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
                     >
                       Voltar para o login

@@ -17,7 +17,7 @@ export type NavigationItem = {
 };
 
 export const navigationItems: NavigationItem[] = [
-  { label: 'Dashboard', to: '/', icon: Home },
+  { label: 'Dashboard', to: '/dashboard', icon: Home },
   { label: 'Clientes', to: '/clientes', icon: Users },
   { label: 'Projetos', to: '/projetos', icon: BriefcaseBusiness },
   { label: 'Pagamentos', to: '/pagamentos', icon: CreditCard },
@@ -40,7 +40,7 @@ function BottomNavigationLink({ item }: BottomNavigationLinkProps) {
   return (
     <NavLink
       to={item.to}
-      end={item.to === '/'}
+      end={item.to === '/dashboard'}
       aria-label={item.label}
       title={item.label}
       className={({ isActive }) =>
@@ -66,7 +66,7 @@ export function NavigationList({
         <NavLink
           key={to}
           to={to}
-          end={to === '/'}
+          end={to === '/dashboard'}
           onClick={onNavigate}
           className={({ isActive }) =>
             `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all ${
