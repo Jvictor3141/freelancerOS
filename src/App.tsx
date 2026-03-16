@@ -31,6 +31,9 @@ const PaymentsPage = lazy(async () => ({
 const ProposalsPage = lazy(async () => ({
   default: (await import('./pages/ProposalsPage')).ProposalsPage,
 }));
+const SharedProposalPage = lazy(async () => ({
+  default: (await import('./pages/SharedProposalPage')).SharedProposalPage,
+}));
 const SettingsPage = lazy(async () => ({
   default: (await import('./pages/SettingsPage')).SettingsPage,
 }));
@@ -58,6 +61,9 @@ function App() {
   const theme = usePreferencesStore((state) => state.theme);
   const previousUserIdRef = useRef<string | null>(null);
   const isRecoveryRoute = location.pathname === '/redefinir-senha';
+  const isSharedProposalRoute = location.pathname.startsWith(
+    '/propostas/compartilhadas/',
+  );
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -111,6 +117,31 @@ function App() {
 
   if (isRecoveryMode || isRecoveryRoute) {
     return <RecoveryPasswordPage />;
+  }
+
+  if (isSharedProposalRoute) {
+    return (
+      <Suspense
+        fallback={
+          <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8">
+            <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
+              <LoadingState
+                title="Carregando proposta compartilhada"
+                description="Validando o link seguro e preparando a visualização."
+              />
+            </div>
+          </div>
+        }
+      >
+        <Routes>
+          <Route
+            path="/propostas/compartilhadas/:shareId"
+            element={<SharedProposalPage />}
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
+    );
   }
 
   if (!user) {

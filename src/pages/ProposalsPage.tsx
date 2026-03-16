@@ -2,13 +2,17 @@ import {
   ArrowRight,
   CheckCircle2,
   Clock3,
+  Copy,
+  ExternalLink,
   ListFilter,
+  Link2,
   Mail,
   PencilLine,
   Plus,
   RotateCcw,
   Send,
   Trash2,
+  X,
   XCircle,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -20,6 +24,7 @@ import { getErrorMessage } from '../lib/supabase';
 import { useAuthStore } from '../store/useAuthStore';
 import { useClientStore } from '../store/useClientStore';
 import { useProposalStore } from '../store/useProposalStore';
+import type { ProposalSecureShareLink } from '../types/sharedProposal';
 import type { Proposal, ProposalStatus } from '../types/proposal';
 import { getFreelancerProfileFromUser } from '../utils/freelancerProfile';
 import { buildMailtoLink, buildProposalEmail } from '../utils/proposalEmail';
@@ -36,6 +41,17 @@ const statusOptions: Array<ProposalStatus | 'all'> = [
   'rejected',
 ];
 
+const shareExpirationOptions = [
+  { value: 1, label: '1 dia' },
+  { value: 3, label: '3 dias' },
+  { value: 7, label: '7 dias' },
+  { value: 14, label: '14 dias' },
+  { value: 30, label: '30 dias' },
+];
+
+const dismissedProposalResponseNotificationsStoragePrefix =
+  'dismissed-proposal-response-notifications';
+
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
     style: 'currency',
@@ -49,6 +65,71 @@ function formatDate(value: string | null) {
   }
 
   return new Date(value).toLocaleDateString('pt-BR');
+}
+
+function formatDateTime(value: string | null) {
+  if (!value) {
+    return '-';
+  }
+
+  return new Date(value).toLocaleString('pt-BR', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+}
+
+function buildClientResponseNotificationId(
+  proposal: Pick<Proposal, 'id' | 'clientRespondedAt'>,
+) {
+  return `${proposal.id}:${proposal.clientRespondedAt ?? 'pending'}`;
+}
+
+function getDismissedClientResponseNotificationsStorageKey(
+  userId: string | null,
+) {
+  return `${dismissedProposalResponseNotificationsStoragePrefix}:${userId ?? 'anonymous'}`;
+}
+
+function readDismissedClientResponseNotificationIds(userId: string | null) {
+  if (typeof window === 'undefined') {
+    return [];
+  }
+
+  try {
+    const rawValue = window.localStorage.getItem(
+      getDismissedClientResponseNotificationsStorageKey(userId),
+    );
+
+    if (!rawValue) {
+      return [];
+    }
+
+    const parsedValue = JSON.parse(rawValue);
+
+    if (!Array.isArray(parsedValue)) {
+      return [];
+    }
+
+    return parsedValue.filter(
+      (value): value is string => typeof value === 'string',
+    );
+  } catch {
+    return [];
+  }
+}
+
+function writeDismissedClientResponseNotificationIds(
+  userId: string | null,
+  notificationIds: string[],
+) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(
+    getDismissedClientResponseNotificationsStorageKey(userId),
+    JSON.stringify(notificationIds),
+  );
 }
 
 function getProposalActionButtonClassName(
@@ -89,6 +170,7 @@ export function ProposalsPage() {
     editProposal,
     removeProposal,
     sendProposalToClient,
+    generateSecureShareLink,
     acceptProposalAndGenerateProject,
     rejectProposalById,
     reopenProposalById,
@@ -97,11 +179,21 @@ export function ProposalsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isGeneratingShareLink, setIsGeneratingShareLink] = useState(false);
+  const [shareTargetProposal, setShareTargetProposal] =
+    useState<Proposal | null>(null);
+  const [shareExpiresInDays, setShareExpiresInDays] = useState(7);
+  const [generatedShareLink, setGeneratedShareLink] =
+    useState<ProposalSecureShareLink | null>(null);
+  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] =
     useState<ProposalStatus | 'all'>('all');
   const [statusFilterDraft, setStatusFilterDraft] =
     useState<ProposalStatus | 'all'>('all');
+  const [dismissedClientResponseNotificationIds, setDismissedClientResponseNotificationIds] =
+    useState<string[]>([]);
 
   const combinedError = proposalError ?? clientError;
   const hasActiveFilters = search.trim() !== '' || statusFilter !== 'all';
@@ -113,6 +205,12 @@ export function ProposalsPage() {
     void loadClients();
     void loadProposals();
   }, [loadClients, loadProposals]);
+
+  useEffect(() => {
+    setDismissedClientResponseNotificationIds(
+      readDismissedClientResponseNotificationIds(user?.id ?? null),
+    );
+  }, [user?.id]);
 
   const proposalsWithClient = useMemo(() => {
     return proposals.map((proposal) => {
@@ -143,6 +241,35 @@ export function ProposalsPage() {
       return matchesSearch && matchesStatus;
     });
   }, [proposalsWithClient, search, statusFilter]);
+
+  const clientResponseNotifications = useMemo(() => {
+    return proposalsWithClient
+      .filter(
+        (proposal) =>
+          proposal.clientRespondedAt &&
+          proposal.clientResponseChannel === 'shared_link' &&
+          (proposal.status === 'accepted' || proposal.status === 'rejected'),
+      )
+      .sort((firstProposal, secondProposal) => {
+        return (
+          new Date(secondProposal.clientRespondedAt ?? 0).getTime() -
+          new Date(firstProposal.clientRespondedAt ?? 0).getTime()
+        );
+      })
+      .slice(0, 4);
+  }, [proposalsWithClient]);
+
+  const visibleClientResponseNotifications = useMemo(() => {
+    const dismissedNotificationIds = new Set(
+      dismissedClientResponseNotificationIds,
+    );
+
+    return clientResponseNotifications.filter((proposal) => {
+      return !dismissedNotificationIds.has(
+        buildClientResponseNotificationId(proposal),
+      );
+    });
+  }, [clientResponseNotifications, dismissedClientResponseNotificationIds]);
 
   const metrics = useMemo(() => {
     const draftCount = proposals.filter((proposal) => proposal.status === 'draft').length;
@@ -186,6 +313,22 @@ export function ProposalsPage() {
     setIsModalOpen(false);
   }
 
+  function openShareModal(proposal: Proposal) {
+    setShareTargetProposal(proposal);
+    setShareExpiresInDays(7);
+    setGeneratedShareLink(null);
+    setShareFeedback(null);
+    setIsShareModalOpen(true);
+  }
+
+  function closeShareModal() {
+    setShareTargetProposal(null);
+    setGeneratedShareLink(null);
+    setShareFeedback(null);
+    setShareExpiresInDays(7);
+    setIsShareModalOpen(false);
+  }
+
   function resetAllFilters() {
     setSearch('');
     setStatusFilter('all');
@@ -205,6 +348,22 @@ export function ProposalsPage() {
   function clearFilterModal() {
     setStatusFilterDraft('all');
     setStatusFilter('all');
+  }
+
+  function handleDismissClientResponseNotification(
+    proposal: Pick<Proposal, 'id' | 'clientRespondedAt'>,
+  ) {
+    const notificationId = buildClientResponseNotificationId(proposal);
+
+    setDismissedClientResponseNotificationIds((currentNotificationIds) => {
+      if (currentNotificationIds.includes(notificationId)) {
+        return currentNotificationIds;
+      }
+
+      const nextNotificationIds = [...currentNotificationIds, notificationId];
+      writeDismissedClientResponseNotificationIds(user?.id ?? null, nextNotificationIds);
+      return nextNotificationIds;
+    });
   }
 
   async function handleProposalSubmit(values: ProposalInput) {
@@ -241,6 +400,48 @@ export function ProposalsPage() {
     } catch (removeError) {
       alert(
         getErrorMessage(removeError, 'Não foi possível excluir a proposta.'),
+      );
+    }
+  }
+
+  async function handleShareLinkGeneration() {
+    if (!shareTargetProposal) {
+      return;
+    }
+
+    setIsGeneratingShareLink(true);
+    setShareFeedback(null);
+
+    try {
+      const shareLink = await generateSecureShareLink(
+        shareTargetProposal.id,
+        shareExpiresInDays,
+      );
+
+      setGeneratedShareLink(shareLink);
+    } catch (shareError) {
+      alert(
+        getErrorMessage(
+          shareError,
+          'Não foi possível gerar o link seguro da proposta.',
+        ),
+      );
+    } finally {
+      setIsGeneratingShareLink(false);
+    }
+  }
+
+  async function handleCopyShareLink() {
+    if (!generatedShareLink) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(generatedShareLink.url);
+      setShareFeedback('Link copiado para a área de transferência.');
+    } catch {
+      setShareFeedback(
+        'Não foi possível copiar automaticamente. Copie o link manualmente.',
       );
     }
   }
@@ -439,6 +640,80 @@ export function ProposalsPage() {
         </article>
       </section>
 
+      {visibleClientResponseNotifications.length > 0 ? (
+        <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500">
+                Respostas do cliente
+              </p>
+              <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+                Portal compartilhado com atividade recente
+              </h3>
+            </div>
+            <p className="text-sm text-slate-500">
+              {visibleClientResponseNotifications.length} aviso(s) ativo(s)
+            </p>
+          </div>
+
+          <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {visibleClientResponseNotifications.map((proposal) => (
+              <article
+                key={`${proposal.id}-${proposal.clientRespondedAt}`}
+                className={`rounded-3xl border p-4 ${
+                  proposal.status === 'accepted'
+                    ? 'border-emerald-200 bg-emerald-50/70'
+                    : 'border-rose-200 bg-rose-50/70'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="text-base font-semibold text-slate-950">
+                        {proposal.title}
+                      </h4>
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                          proposal.status === 'accepted'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-rose-100 text-rose-700'
+                        }`}
+                      >
+                        {proposal.status === 'accepted' ? 'Aceita' : 'Recusada'}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {proposal.clientName}
+                      {proposal.clientCompany
+                        ? ` · ${proposal.clientCompany}`
+                        : ''}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDismissClientResponseNotification(proposal)}
+                    aria-label={`Remover aviso da proposta ${proposal.title}`}
+                    title="Remover aviso"
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-500 transition hover:bg-white hover:text-slate-700"
+                  >
+                    <X size={15} />
+                  </button>
+                </div>
+
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  Resposta em{' '}
+                  <span className="font-semibold text-slate-900">
+                    {formatDateTime(proposal.clientRespondedAt)}
+                  </span>
+                  .
+                </p>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
         <div className="hidden gap-4 lg:grid lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.9fr)_minmax(0,0.75fr)]">
           <input
@@ -608,6 +883,22 @@ export function ProposalsPage() {
                   </div>
                 ) : null}
 
+                {proposal.clientRespondedAt &&
+                proposal.clientResponseChannel === 'shared_link' ? (
+                  <div
+                    className={`rounded-2xl border px-4 py-3 text-sm ${
+                      proposal.status === 'accepted'
+                        ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                        : 'border-rose-200 bg-rose-50 text-rose-800'
+                    }`}
+                  >
+                    {proposal.status === 'accepted'
+                      ? 'Cliente aceitou'
+                      : 'Cliente recusou'}{' '}
+                    essa proposta em {formatDateTime(proposal.clientRespondedAt)}.
+                  </div>
+                ) : null}
+
                 <div className="inline-flex max-w-full flex-nowrap items-center gap-2">
                   {proposal.status !== 'accepted' ? (
                     <button
@@ -618,6 +909,18 @@ export function ProposalsPage() {
                       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName('neutral')}`}
                     >
                       <PencilLine size={15} className="lg:h-4.25 lg:w-4.25" />
+                    </button>
+                  ) : null}
+
+                  {proposal.status !== 'accepted' ? (
+                    <button
+                      type="button"
+                      onClick={() => openShareModal(proposal)}
+                      aria-label={`Gerar link seguro da proposta ${proposal.title}`}
+                      title="Gerar link seguro"
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName('info')}`}
+                    >
+                      <Link2 size={15} className="lg:h-4.25 lg:w-4.25" />
                     </button>
                   ) : null}
 
@@ -793,6 +1096,128 @@ export function ProposalsPage() {
           onSubmit={handleProposalSubmit}
           isSubmitting={isSubmitting}
         />
+      </Modal>
+
+      <Modal
+        title="Link seguro da proposta"
+        description="Gere um link protegido por token e compartilhe apenas a visualização pública dessa proposta."
+        isOpen={isShareModalOpen}
+        onClose={closeShareModal}
+      >
+        <div className="space-y-5">
+          {shareTargetProposal ? (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+              <p className="font-semibold text-slate-900">
+                {shareTargetProposal.title}
+              </p>
+              <p className="mt-2 leading-6">
+                O token aparece somente após a geração. Se você perder esse
+                link, será preciso gerar um novo.
+              </p>
+            </div>
+          ) : null}
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-medium text-slate-700">
+              Expiração do link
+            </span>
+            <select
+              value={shareExpiresInDays}
+              onChange={(event) => setShareExpiresInDays(Number(event.target.value))}
+              disabled={isGeneratingShareLink}
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
+            >
+              {shareExpirationOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {generatedShareLink ? (
+            <div className="space-y-4 rounded-[26px] border border-slate-200 bg-slate-50/80 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Link gerado com sucesso
+                  </p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Expira em {formatDateTime(generatedShareLink.expiresAt)}.
+                  </p>
+                </div>
+
+                <a
+                  href={generatedShareLink.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm shadow-slate-100 transition hover:bg-slate-50"
+                  aria-label="Abrir visualização compartilhada"
+                  title="Abrir visualização compartilhada"
+                >
+                  <ExternalLink size={16} />
+                </a>
+              </div>
+
+              <textarea
+                readOnly
+                value={generatedShareLink.url}
+                className="min-h-28 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 outline-none"
+              />
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handleCopyShareLink();
+                  }}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  <Copy size={16} />
+                  Copiar link
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGeneratedShareLink(null);
+                    setShareFeedback(null);
+                  }}
+                  className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
+                >
+                  Gerar novo link
+                </button>
+              </div>
+
+              {shareFeedback ? (
+                <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                  {shareFeedback}
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={closeShareModal}
+              disabled={isGeneratingShareLink}
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Fechar
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                void handleShareLinkGeneration();
+              }}
+              disabled={isGeneratingShareLink}
+              className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isGeneratingShareLink ? 'Gerando...' : 'Gerar link seguro'}
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

@@ -10,7 +10,14 @@ export type ProjectInput = Omit<Project, 'id' | 'createdAt'>;
 export type PaymentInput = Omit<Payment, 'id' | 'createdAt'>;
 export type ProposalInput = Omit<
   Proposal,
-  'id' | 'projectId' | 'sentAt' | 'acceptedAt' | 'rejectedAt' | 'createdAt'
+  | 'id'
+  | 'projectId'
+  | 'sentAt'
+  | 'acceptedAt'
+  | 'rejectedAt'
+  | 'clientRespondedAt'
+  | 'clientResponseChannel'
+  | 'createdAt'
 >;
 
 export type ClientRecord = {
@@ -63,6 +70,8 @@ export type ProposalRecord = {
   sent_at: string | null;
   accepted_at: string | null;
   rejected_at: string | null;
+  client_responded_at: string | null;
+  client_response_channel: Proposal['clientResponseChannel'] | null;
   notes: string | null;
   created_at: string;
 };
@@ -149,6 +158,8 @@ export function mapProposalRecord(record: ProposalRecord): Proposal {
     sentAt: record.sent_at,
     acceptedAt: record.accepted_at,
     rejectedAt: record.rejected_at,
+    clientRespondedAt: record.client_responded_at,
+    clientResponseChannel: record.client_response_channel,
     notes: record.notes ?? '',
     createdAt: record.created_at,
   };

@@ -1,4 +1,5 @@
 export type ProposalStatus = 'draft' | 'sent' | 'accepted' | 'rejected';
+export type ProposalResponseChannel = 'shared_link';
 
 export type Proposal = {
   id: string;
@@ -13,6 +14,8 @@ export type Proposal = {
   sentAt: string | null;
   acceptedAt: string | null;
   rejectedAt: string | null;
+  clientRespondedAt: string | null;
+  clientResponseChannel: ProposalResponseChannel | null;
   notes: string;
   createdAt: string;
 };

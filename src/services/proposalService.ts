@@ -11,6 +11,7 @@ import {
 import type { Project } from '../types/project';
 import type { Proposal } from '../types/proposal';
 import { ensureDatabaseBootstrap } from './bootstrapService';
+export { createProposalSecureShareLink } from './proposalShareService';
 
 type AcceptProposalResult = {
   proposal: Proposal;
@@ -155,6 +156,8 @@ export async function sendProposal(id: string): Promise<Proposal> {
       sent_at: new Date().toISOString(),
       accepted_at: null,
       rejected_at: null,
+      client_responded_at: null,
+      client_response_channel: null,
     })
     .eq('id', id)
     .eq('user_id', userId)
@@ -182,6 +185,8 @@ export async function rejectProposal(id: string): Promise<Proposal> {
       status: 'rejected',
       rejected_at: new Date().toISOString(),
       accepted_at: null,
+      client_responded_at: null,
+      client_response_channel: null,
     })
     .eq('id', id)
     .eq('user_id', userId)
@@ -210,6 +215,8 @@ export async function reopenProposal(id: string): Promise<Proposal> {
       sent_at: null,
       accepted_at: null,
       rejected_at: null,
+      client_responded_at: null,
+      client_response_channel: null,
     })
     .eq('id', id)
     .eq('user_id', userId)
@@ -296,6 +303,8 @@ export async function acceptProposal(id: string): Promise<AcceptProposalResult> 
         accepted_at: acceptedAt,
         rejected_at: null,
         project_id: fallbackProject.id,
+        client_responded_at: null,
+        client_response_channel: null,
       })
       .eq('id', id)
       .eq('user_id', userId)

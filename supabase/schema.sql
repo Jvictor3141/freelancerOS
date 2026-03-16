@@ -50,8 +50,30 @@ create table if not exists public.proposals (
   sent_at timestamptz,
   accepted_at timestamptz,
   rejected_at timestamptz,
+  client_responded_at timestamptz,
+  client_response_channel text check (
+    client_response_channel in ('shared_link') or client_response_channel is null
+  ),
   notes text not null default '',
   created_at timestamptz not null default timezone('utc', now())
+);
+
+create unique index if not exists proposals_id_user_id_unique_idx on public.proposals (id, user_id);
+
+create table if not exists public.proposal_share_links (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null default auth.uid(),
+  proposal_id uuid not null unique,
+  token_hash text not null,
+  expires_at timestamptz not null,
+  last_viewed_at timestamptz,
+  revoked_at timestamptz,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now()),
+  constraint proposal_share_links_proposal_owner_fk
+    foreign key (proposal_id, user_id)
+    references public.proposals (id, user_id)
+    on delete cascade
 );
 
 create index if not exists clients_user_id_idx on public.clients (user_id);
@@ -65,11 +87,14 @@ create index if not exists proposals_client_id_idx on public.proposals (client_i
 create index if not exists proposals_status_idx on public.proposals (status);
 create unique index if not exists proposals_project_id_unique_idx on public.proposals (project_id)
 where project_id is not null;
+create index if not exists proposal_share_links_user_id_idx on public.proposal_share_links (user_id);
+create index if not exists proposal_share_links_expires_at_idx on public.proposal_share_links (expires_at);
 
 alter table public.clients enable row level security;
 alter table public.projects enable row level security;
 alter table public.payments enable row level security;
 alter table public.proposals enable row level security;
+alter table public.proposal_share_links enable row level security;
 
 drop policy if exists "Users manage own clients" on public.clients;
 create policy "Users manage own clients" on public.clients
@@ -91,6 +116,12 @@ with check (auth.uid() = user_id);
 
 drop policy if exists "Users manage own proposals" on public.proposals;
 create policy "Users manage own proposals" on public.proposals
+for all
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+drop policy if exists "Users manage own proposal share links" on public.proposal_share_links;
+create policy "Users manage own proposal share links" on public.proposal_share_links
 for all
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
@@ -164,6 +195,8 @@ begin
     status = 'accepted',
     accepted_at = timezone('utc', now()),
     rejected_at = null,
+    client_responded_at = null,
+    client_response_channel = null,
     project_id = v_project.id
   where id = v_proposal.id
     and user_id = auth.uid();

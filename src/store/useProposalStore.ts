@@ -6,12 +6,14 @@ import {
   createProposal as createProposalService,
   deleteProposal as deleteProposalService,
   getProposals,
+  createProposalSecureShareLink as createProposalSecureShareLinkService,
   rejectProposal as rejectProposalService,
   reopenProposal as reopenProposalService,
   sendProposal as sendProposalService,
   updateProposal as updateProposalService,
 } from '../services/proposalService';
 import type { Proposal } from '../types/proposal';
+import type { ProposalSecureShareLink } from '../types/sharedProposal';
 import { useProjectStore } from './useProjectStore';
 
 type ProposalStore = {
@@ -26,6 +28,10 @@ type ProposalStore = {
   editProposal: (id: string, data: ProposalInput) => Promise<Proposal>;
   removeProposal: (id: string) => Promise<void>;
   sendProposalToClient: (id: string) => Promise<Proposal>;
+  generateSecureShareLink: (
+    id: string,
+    expiresInDays: number,
+  ) => Promise<ProposalSecureShareLink>;
   acceptProposalAndGenerateProject: (id: string) => Promise<void>;
   rejectProposalById: (id: string) => Promise<Proposal>;
   reopenProposalById: (id: string) => Promise<Proposal>;
@@ -163,6 +169,29 @@ export const useProposalStore = create<ProposalStore>((set) => ({
       const message = getProposalStoreError(
         error,
         'Não foi possível enviar a proposta.',
+      );
+
+      set({ error: message });
+      throw new Error(message);
+    }
+  },
+
+  generateSecureShareLink: async (id, expiresInDays) => {
+    set({ error: null });
+
+    try {
+      const shareLink = await createProposalSecureShareLinkService(
+        id,
+        expiresInDays,
+      );
+
+      await useProposalStore.getState().loadProposals();
+
+      return shareLink;
+    } catch (error) {
+      const message = getProposalStoreError(
+        error,
+        'Não foi possível gerar o link seguro da proposta.',
       );
 
       set({ error: message });
