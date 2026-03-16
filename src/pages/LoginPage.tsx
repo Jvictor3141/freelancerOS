@@ -8,7 +8,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
-import freelancerosLogo from '../assets/freelanceros-logo.svg';
+import { BrandLogo } from '../components/BrandLogo';
 import { getErrorMessage } from '../lib/supabase';
 import { requestPasswordReset } from '../services/authService';
 import { useAuthStore } from '../store/useAuthStore';
@@ -156,11 +156,7 @@ export function LoginPage() {
               </div>
 
               <div className="mb-6 flex justify-center">
-                <img
-                  src={freelancerosLogo}
-                  alt="FreelancerOS"
-                  className="h-auto w-full max-w-110"
-                />
+                <BrandLogo variant="lockup" className="h-12 w-auto sm:h-14" />
               </div>
 
               <div className="min-h-35">
@@ -352,8 +348,8 @@ export function LoginPage() {
           <div className="relative flex h-full flex-col justify-between gap-10">
             <div className="space-y-6">
               <div className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
-                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[#635bff] shadow-lg shadow-indigo-950/20">
-                  <BriefcaseBusiness size={20} />
+                <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-lg shadow-indigo-950/20">
+                  <BrandLogo variant="mark" className="h-5 w-5" alt="" />
                 </span>
                 FreelancerOS
               </div>

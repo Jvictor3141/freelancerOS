@@ -1,6 +1,7 @@
 import { LogOut, Plus, ShieldCheck, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BrandLogo } from './BrandLogo';
 import { getErrorMessage } from '../lib/supabase';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -62,8 +63,17 @@ export function Header() {
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/85 backdrop-blur">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 px-4 py-3 sm:px-6 lg:px-8 xl:items-center">
         <div className="min-w-0">
+          <div className="mb-3 flex items-center justify-between gap-3 xl:hidden">
+            <BrandLogo variant="lockup" className="h-7 w-auto" />
+            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+              Painel
+            </span>
+          </div>
+          <p className="hidden text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 xl:block">
+            FreelancerOS
+          </p>
           <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950 lg:text-2xl">
-            Controle tudo sem virar refém de planilha
+            The Operating System for Freelancers
           </h2>
           <p className="text-sm font-medium capitalize text-slate-500">
             {formattedDate}

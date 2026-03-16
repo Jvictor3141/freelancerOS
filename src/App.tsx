@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useRef } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrandLogo } from './components/BrandLogo';
 import { RouteTransition } from './components/RouteTransition';
 import { DashboardLayout } from './layout/DashboardLayout';
 import { LandingPage } from './pages/LandingPage';
@@ -42,7 +43,7 @@ type LoadingStateProps = {
 function LoadingState({ title, description }: LoadingStateProps) {
   return (
     <div className="motion-surface rounded-4xl border border-slate-200 bg-white/85 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur">
-      <p className="text-sm font-medium text-slate-500">FreelancerOS</p>
+      <BrandLogo variant="lockup" className="h-8 w-auto" />
       <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
         {title}
       </h1>

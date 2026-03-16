@@ -1,4 +1,4 @@
-import { BriefcaseBusiness, ShieldCheck } from 'lucide-react';
+import { BrandLogo } from './BrandLogo';
 import { useAuthStore } from '../store/useAuthStore';
 import { NavigationList } from './navigation';
 
@@ -7,22 +7,21 @@ export function Sidebar() {
 
   return (
     <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-slate-200 bg-white/90 px-5 py-6 backdrop-blur xl:flex xl:flex-col">
-      <div className="flex items-center gap-3 px-2">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#635bff] text-white shadow-lg shadow-indigo-200">
-          <BriefcaseBusiness size={20} />
-        </div>
-        <div>
-          <h1 className="text-lg font-semibold text-slate-900">
-            Painel operacional
-          </h1>
-        </div>
+      <div className="motion-surface rounded-[30px] border border-slate-200 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))] p-5 shadow-[0_18px_40px_rgba(15,23,42,0.06)]">
+        <BrandLogo variant="lockup" className="h-9 w-auto" />
+        <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+          Painel operacional
+        </p>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          Clientes, projetos, propostas e pagamentos no mesmo fluxo de trabalho.
+        </p>
       </div>
 
-      <NavigationList className="mt-10 space-y-2" />
+      <NavigationList className="mt-8 space-y-2" />
 
       <div className="motion-surface mt-auto rounded-3xl border border-slate-200 bg-slate-50 p-4">
-        <div className="mb-4 inline-flex rounded-2xl bg-white p-3 text-[#635bff] shadow-sm shadow-slate-200">
-          <ShieldCheck size={18} />
+        <div className="mb-4 inline-flex rounded-2xl bg-white p-3 shadow-sm shadow-slate-200">
+          <BrandLogo variant="mark" className="h-5 w-5" alt="" />
         </div>
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
           Conta conectada

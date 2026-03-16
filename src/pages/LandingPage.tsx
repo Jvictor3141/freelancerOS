@@ -9,7 +9,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import freelancerosLogo from '../assets/freelanceros-logo.svg';
+import { BrandLogo } from '../components/BrandLogo';
 
 const featureCards = [
   {
@@ -75,11 +75,7 @@ export function LandingPage() {
               to="/"
               className="inline-flex items-center gap-3 rounded-full px-2 py-1"
             >
-              <img
-                src={freelancerosLogo}
-                alt="FreelancerOS"
-                className="h-9 w-auto sm:h-10"
-              />
+              <BrandLogo variant="lockup" className="h-7 w-auto sm:h-8" />
             </Link>
 
             <nav className="hidden items-center gap-7 text-sm font-medium text-slate-600 lg:flex">
@@ -398,10 +394,10 @@ export function LandingPage() {
           <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 lg:px-10">
             <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(12rem,0.8fr)_minmax(12rem,0.8fr)]">
               <div className="space-y-4">
-                <img
-                  src={freelancerosLogo}
-                  alt="FreelancerOS"
-                  className="h-10 w-auto brightness-0 invert"
+                <BrandLogo
+                  variant="lockup"
+                  tone="inverse"
+                  className="h-8 w-auto"
                 />
                 <p className="max-w-xl text-sm leading-7 text-white/72">
                   FreelancerOS organiza apresentação comercial, execução de

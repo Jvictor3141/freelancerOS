@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, KeyRound, ShieldAlert } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import freelancerosLogo from '../assets/freelanceros-logo.svg';
+import { BrandLogo } from '../components/BrandLogo';
 import { getErrorMessage } from '../lib/supabase';
 import { updatePassword } from '../services/authService';
 import { useAuthStore } from '../store/useAuthStore';
@@ -99,11 +99,7 @@ export function RecoveryPasswordPage() {
             <div className="mx-auto w-full max-w-md">
               <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)] sm:p-8">
                 <div className="mb-6 flex justify-center">
-                  <img
-                    src={freelancerosLogo}
-                    alt="FreelancerOS"
-                    className="h-auto w-full max-w-110"
-                  />
+                  <BrandLogo variant="lockup" className="h-12 w-auto sm:h-14" />
                 </div>
 
                 {isInvalidRecoveryState ? (
@@ -241,8 +237,8 @@ export function RecoveryPasswordPage() {
             <div className="relative flex h-full flex-col justify-between gap-10">
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-[#635bff] shadow-lg shadow-indigo-950/20">
-                    <KeyRound size={20} />
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-lg shadow-indigo-950/20">
+                    <BrandLogo variant="mark" className="h-5 w-5" alt="" />
                   </span>
                   Recuperação segura
                 </div>
