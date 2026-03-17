@@ -6,16 +6,15 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts';
-
-type RevenuePoint = {
-  month: string;
-  revenue: number;
-};
+} from 'recharts'
+import {
+  formatDashboardCurrency,
+  type DashboardRevenuePoint,
+} from '../../utils/dashboard'
 
 type DashboardRevenueChartProps = {
-  data: RevenuePoint[];
-};
+  data: DashboardRevenuePoint[]
+}
 
 export function DashboardRevenueChart({ data }: DashboardRevenueChartProps) {
   return (
@@ -54,10 +53,7 @@ export function DashboardRevenueChart({ data }: DashboardRevenueChartProps) {
 
           <Tooltip
             formatter={(value) => [
-              Number(value).toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-              }),
+              formatDashboardCurrency(Number(value)),
               'Recebido',
             ]}
             contentStyle={{
@@ -77,5 +73,5 @@ export function DashboardRevenueChart({ data }: DashboardRevenueChartProps) {
         </AreaChart>
       </ResponsiveContainer>
     </div>
-  );
+  )
 }
