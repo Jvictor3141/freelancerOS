@@ -112,8 +112,8 @@ export function LandingPage() {
           <div className="mx-auto flex max-w-7xl flex-col gap-8 lg:gap-12">
             <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(22rem,0.95fr)] lg:gap-12">
               <div className="space-y-6">
-                <div className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm shadow-slate-200/70 backdrop-blur">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#635bff] text-white shadow-lg shadow-indigo-200">
+                <div className="inline-flex items-start gap-3 rounded-full border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm shadow-slate-200/70 backdrop-blur sm:items-center">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#635bff] text-white shadow-lg shadow-indigo-200">
                     <BadgeCheck size={18} />
                   </span>
                   Sistema operacional para freelancers e operações enxutas
