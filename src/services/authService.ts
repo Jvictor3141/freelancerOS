@@ -6,10 +6,35 @@ const autoAnonymousAuth =
   import.meta.env.VITE_SUPABASE_AUTO_ANON_AUTH === 'true';
 let sessionPromise: Promise<User> | null = null;
 
+function getSiteUrl() {
+  if (import.meta.env.VITE_SITE_URL) {
+    return import.meta.env.VITE_SITE_URL;
+  }
+
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+
+  return undefined;
+}
+
+function buildAuthCallbackUrl(next: string) {
+  const siteUrl = getSiteUrl();
+
+  if (!siteUrl) {
+    return undefined;
+  }
+
+  return `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`;
+}
+
 export async function signUp(email: string, password: string) {
+  const emailRedirectTo = buildAuthCallbackUrl('/dashboard');
+
   return supabase.auth.signUp({
     email,
     password,
+    options: emailRedirectTo ? { emailRedirectTo } : undefined,
   });
 }
 
@@ -37,10 +62,7 @@ function getMetadataObject(metadata: unknown) {
 }
 
 export async function requestPasswordReset(email: string) {
-  const redirectTo =
-    typeof window === 'undefined'
-      ? undefined
-      : `${window.location.origin}/redefinir-senha`;
+  const redirectTo = buildAuthCallbackUrl('/redefinir-senha');
 
   if (!redirectTo) {
     return supabase.auth.resetPasswordForEmail(email);

@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { Modal } from '../components/Modal';
 import { getErrorMessage } from '../lib/supabase';
 import {
@@ -128,7 +127,6 @@ function SummaryActionCard({
 
 export function SettingsPage() {
   const { user } = useAuthStore();
-  const { search } = useLocation();
   const theme = usePreferencesStore((state) => state.theme);
   const setTheme = usePreferencesStore((state) => state.setTheme);
   const [profileValues, setProfileValues] =
@@ -152,16 +150,6 @@ export function SettingsPage() {
       themeOptions.find((option) => option.value === theme) ?? themeOptions[0]!
     );
   }, [theme]);
-
-  const isRecoveryFlow = useMemo(() => {
-    return new URLSearchParams(search).get('recovery') === '1';
-  }, [search]);
-
-  useEffect(() => {
-    if (isRecoveryFlow) {
-      setSecurityModalOpen(true);
-    }
-  }, [isRecoveryFlow]);
 
   const profileIntro = useMemo(() => {
     return buildFreelancerIntro(profileValues);
@@ -588,13 +576,6 @@ export function SettingsPage() {
         onClose={() => setSecurityModalOpen(false)}
       >
         <div className="space-y-5">
-          {isRecoveryFlow ? (
-            <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-              Link de recuperação identificado. Defina sua nova senha abaixo
-              para concluir o processo.
-            </div>
-          ) : null}
-
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-sm font-semibold text-slate-900">
               E-mail da conta

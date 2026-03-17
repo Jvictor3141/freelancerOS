@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { User } from '@supabase/supabase-js';
+import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { supabase, getErrorMessage } from '../lib/supabase';
 import {
   getSession,
@@ -8,10 +8,12 @@ import {
   signUp as signUpService,
 } from '../services/authService';
 
+type AuthFlow = 'recovery' | null;
+
 type AuthStore = {
   user: User | null;
   initialized: boolean;
-  isRecoveryMode: boolean;
+  authFlow: AuthFlow;
   loading: boolean;
   error: string | null;
   notice: string | null;
@@ -19,78 +21,23 @@ type AuthStore = {
   clearFeedback: () => void;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
-  completePasswordRecovery: () => Promise<void>;
-  cancelPasswordRecovery: () => Promise<void>;
   logout: () => Promise<void>;
 };
-
-const passwordRecoveryStorageKey = 'freelanceros-password-recovery';
 
 function getAuthStoreError(error: unknown, fallback: string) {
   return getErrorMessage(error, fallback);
 }
 
-function persistRecoveryMode(isActive: boolean) {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  if (isActive) {
-    window.sessionStorage.setItem(passwordRecoveryStorageKey, '1');
-    return;
-  }
-
-  window.sessionStorage.removeItem(passwordRecoveryStorageKey);
-}
-
-function getPersistedRecoveryMode() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  return window.sessionStorage.getItem(passwordRecoveryStorageKey) === '1';
-}
-
-function isRecoveryUrl() {
-  if (typeof window === 'undefined') {
-    return false;
-  }
-
-  const search = window.location.search;
-  const hash = window.location.hash;
-  const markers = [
-    'type=recovery',
-    'token_hash=',
-    'access_token=',
-    'refresh_token=',
-    'code=',
-  ];
-
-  return markers.some((marker) => search.includes(marker) || hash.includes(marker));
-}
-
-function clearRecoveryLocation() {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const nextUrl = new URL(window.location.href);
-  nextUrl.pathname = '/login';
-  nextUrl.search = 'mode=sign_in';
-  nextUrl.hash = '';
-  window.history.replaceState({}, document.title, nextUrl.toString());
-}
-
 function applySession(
   set: (partial: Partial<AuthStore>) => void,
-  currentSession: { user: User } | null,
-  options?: { isRecoveryMode?: boolean },
+  currentSession: Session | null,
+  authFlow: AuthFlow,
 ) {
   set({
     user: currentSession?.user ?? null,
     initialized: true,
     loading: false,
-    isRecoveryMode: options?.isRecoveryMode ?? false,
+    authFlow,
   });
 }
 
@@ -111,45 +58,70 @@ function isExistingAccountSignUpResult(
   );
 }
 
+function resolveInitialAuthFlow(session: Session | null): AuthFlow {
+  if (!session?.user || typeof window === 'undefined') {
+    return null;
+  }
+
+  const currentUrl = new URL(window.location.href);
+
+  return currentUrl.pathname === '/redefinir-senha' &&
+    currentUrl.searchParams.get('flow') === 'recovery'
+    ? 'recovery'
+    : null;
+}
+
+function resolveAuthFlow(
+  event: AuthChangeEvent,
+  session: Session | null,
+  currentFlow: AuthFlow,
+): AuthFlow {
+  if (!session?.user || event === 'SIGNED_OUT') {
+    return null;
+  }
+
+  if (event === 'PASSWORD_RECOVERY') {
+    return 'recovery';
+  }
+
+  return currentFlow;
+}
+
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   initialized: false,
-  isRecoveryMode: false,
+  authFlow: null,
   loading: false,
   error: null,
   notice: null,
 
-  // A inicialização observa a sessão do Supabase para o app reagir a login, logout e refresh de token.
   initialize: async () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      const shouldEnterRecoveryMode =
-        event === 'PASSWORD_RECOVERY' ||
-        (getPersistedRecoveryMode() && Boolean(session?.user));
-
-      persistRecoveryMode(shouldEnterRecoveryMode);
-      applySession(set, session, { isRecoveryMode: shouldEnterRecoveryMode });
+      set((current) => ({
+        user: session?.user ?? null,
+        initialized: true,
+        loading: false,
+        authFlow: resolveAuthFlow(event, session, current.authFlow),
+      }));
     });
 
     const { data, error } = await getSession();
-    const shouldEnterRecoveryMode =
-      Boolean(data.session?.user) &&
-      (getPersistedRecoveryMode() || isRecoveryUrl());
-
-    persistRecoveryMode(shouldEnterRecoveryMode);
 
     if (error) {
       set({
+        user: null,
         initialized: true,
+        authFlow: null,
         loading: false,
         error: getAuthStoreError(
           error,
-          'Não foi possível carregar a sessão atual.',
+          'Nao foi possivel carregar a sessao atual.',
         ),
       });
     } else {
-      applySession(set, data.session, { isRecoveryMode: shouldEnterRecoveryMode });
+      applySession(set, data.session, resolveInitialAuthFlow(data.session));
     }
 
     return () => subscription.unsubscribe();
@@ -160,7 +132,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   signIn: async (email, password) => {
-    persistRecoveryMode(false);
     set({ loading: true, error: null, notice: null });
 
     const { data, error } = await signInService(email, password);
@@ -168,18 +139,17 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (error) {
       const message = getAuthStoreError(
         error,
-        'Não foi possível entrar com essa conta.',
+        'Nao foi possivel entrar com essa conta.',
       );
 
       set({ loading: false, error: message });
       throw new Error(message);
     }
 
-    applySession(set, data.session, { isRecoveryMode: false });
+    applySession(set, data.session, null);
   },
 
   signUp: async (email, password) => {
-    persistRecoveryMode(false);
     set({ loading: true, error: null, notice: null });
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -188,7 +158,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (error) {
       const message = getAuthStoreError(
         error,
-        'Não foi possível criar a conta.',
+        'Nao foi possivel criar a conta.',
       );
 
       set({ loading: false, error: message });
@@ -203,66 +173,22 @@ export const useAuthStore = create<AuthStore>((set) => ({
       )
     ) {
       const message =
-        'Já existe uma conta ativa com esse e-mail. Entre no app ou use a recuperação de senha.';
+        'Ja existe uma conta ativa com esse e-mail. Entre no app ou use a recuperacao de senha.';
 
       set({ loading: false, error: message });
       throw new Error(message);
     }
 
-    applySession(set, data.session ?? null, { isRecoveryMode: false });
+    applySession(set, data.session ?? null, null);
 
     set({
       notice: data.session
-        ? 'Conta criada e sessão iniciada com sucesso.'
+        ? 'Conta criada e sessao iniciada com sucesso.'
         : 'Conta criada. Confirme seu email para entrar no app.',
     });
   },
 
-  completePasswordRecovery: async () => {
-    set({ loading: true, error: null, notice: null });
-
-    const { error } = await signOutService();
-
-    if (error) {
-      const message = getAuthStoreError(
-        error,
-        'Não foi possível encerrar a sessão de recuperação.',
-      );
-
-      set({ loading: false, error: message });
-      throw new Error(message);
-    }
-
-    persistRecoveryMode(false);
-    clearRecoveryLocation();
-    applySession(set, null, { isRecoveryMode: false });
-    set({
-      notice: 'Senha redefinida com sucesso. Entre com a nova senha para continuar.',
-    });
-  },
-
-  cancelPasswordRecovery: async () => {
-    set({ loading: true, error: null, notice: null });
-
-    const { error } = await signOutService();
-
-    if (error) {
-      const message = getAuthStoreError(
-        error,
-        'Não foi possível sair do fluxo de recuperação.',
-      );
-
-      set({ loading: false, error: message });
-      throw new Error(message);
-    }
-
-    persistRecoveryMode(false);
-    clearRecoveryLocation();
-    applySession(set, null, { isRecoveryMode: false });
-  },
-
   logout: async () => {
-    persistRecoveryMode(false);
     set({ loading: true, error: null, notice: null });
 
     const { error } = await signOutService();
@@ -270,13 +196,13 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (error) {
       const message = getAuthStoreError(
         error,
-        'Não foi possível encerrar a sessão.',
+        'Nao foi possivel encerrar a sessao.',
       );
 
       set({ loading: false, error: message });
       throw new Error(message);
     }
 
-    applySession(set, null, { isRecoveryMode: false });
+    applySession(set, null, null);
   },
 }));

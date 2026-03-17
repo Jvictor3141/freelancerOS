@@ -1,25 +1,21 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, KeyRound, ShieldAlert } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
 import { PasswordField } from '../components/PasswordField';
 import { getErrorMessage } from '../lib/supabase';
 import { updatePassword } from '../services/authService';
 import { useAuthStore } from '../store/useAuthStore';
 
+type AuthFeedback = {
+  tone: 'success' | 'error';
+  message: string;
+};
+
 export function RecoveryPasswordPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const {
-    user,
-    loading,
-    error,
-    notice,
-    isRecoveryMode,
-    clearFeedback,
-    completePasswordRecovery,
-    cancelPasswordRecovery,
-  } = useAuthStore();
+  const { user, authFlow, loading, error, clearFeedback, logout } =
+    useAuthStore();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
@@ -29,20 +25,21 @@ export function RecoveryPasswordPage() {
     setLocalError(null);
   }, [clearFeedback]);
 
-  useEffect(() => {
-    if (isRecoveryMode && location.pathname !== '/redefinir-senha') {
-      navigate('/redefinir-senha', { replace: true });
-    }
-  }, [isRecoveryMode, location.pathname, navigate]);
+  async function redirectToLogin(authFeedback?: AuthFeedback) {
+    navigate('/login?mode=sign_in', {
+      replace: true,
+      state: authFeedback ? { authFeedback } : null,
+    });
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     clearFeedback();
     setLocalError(null);
 
-    if (!isRecoveryMode) {
+    if (!user) {
       setLocalError(
-        'Esse link não está mais ativo. Solicite uma nova recuperação de senha.',
+        'Esse link nao esta mais ativo. Solicite uma nova recuperacao de senha.',
       );
       return;
     }
@@ -53,7 +50,7 @@ export function RecoveryPasswordPage() {
     }
 
     if (password !== confirmPassword) {
-      setLocalError('A confirmação da nova senha não confere.');
+      setLocalError('A confirmacao da nova senha nao confere.');
       return;
     }
 
@@ -66,31 +63,41 @@ export function RecoveryPasswordPage() {
 
       setPassword('');
       setConfirmPassword('');
-      await completePasswordRecovery();
+      await logout();
+      await redirectToLogin({
+        tone: 'success',
+        message: 'Senha redefinida com sucesso. Entre com a nova senha para continuar.',
+      });
     } catch (error) {
       setLocalError(
-        getErrorMessage(error, 'Não foi possível atualizar a senha da conta.'),
+        getErrorMessage(error, 'Nao foi possivel atualizar a senha da conta.'),
       );
     }
   }
 
-  async function handleCancelRecovery() {
+  async function handleExitRecovery() {
     clearFeedback();
     setLocalError(null);
 
     try {
-      await cancelPasswordRecovery();
+      if (user) {
+        await logout();
+      }
+
+      await redirectToLogin();
     } catch (error) {
       setLocalError(
         getErrorMessage(
           error,
-          'Não foi possível sair do fluxo de recuperação.',
+          'Nao foi possivel encerrar a sessao temporaria de recuperacao.',
         ),
       );
     }
   }
 
-  const isInvalidRecoveryState = !isRecoveryMode || !user;
+  const hasActiveSession = Boolean(user);
+  const isRecoverySession = authFlow === 'recovery';
+  const userEmail = user?.email ?? 'sua conta';
 
   return (
     <div className="motion-page min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8 lg:px-10">
@@ -103,7 +110,7 @@ export function RecoveryPasswordPage() {
                   <BrandLogo variant="lockup" className="h-12 w-auto sm:h-14" />
                 </div>
 
-                {isInvalidRecoveryState ? (
+                {!hasActiveSession ? (
                   <div className="space-y-5">
                     <div className="inline-flex rounded-2xl bg-amber-50 p-3 text-amber-700">
                       <ShieldAlert size={20} />
@@ -111,21 +118,22 @@ export function RecoveryPasswordPage() {
 
                     <div className="space-y-3">
                       <p className="text-sm font-medium text-slate-500">
-                        Senha redefinida com sucesso!
+                        Link indisponivel
                       </p>
                       <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-                        Sua senha foi atualizada com sucesso.
+                        Esse link de redefinicao nao esta ativo.
                       </h1>
                       <p className="text-sm leading-6 text-slate-500">
-                        Por segurança, este link não permite acesso direto ao painel. Volte à página de login e entre usando sua nova senha.
+                        Solicite um novo email de recuperacao para gerar outra
+                        sessao valida e concluir a troca da senha.
                       </p>
                     </div>
 
                     <button
                       type="button"
-                      onClick={() =>
-                        navigate('/login?mode=sign_in', { replace: true })
-                      }
+                      onClick={() => {
+                        void redirectToLogin();
+                      }}
                       className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
                     >
                       Voltar para o login
@@ -136,20 +144,21 @@ export function RecoveryPasswordPage() {
                   <div className="space-y-5">
                     <div className="space-y-3">
                       <p className="text-sm font-medium text-slate-500">
-                        Fluxo protegido de recuperação
+                        {isRecoverySession
+                          ? 'Fluxo protegido de recuperacao'
+                          : 'Atualizacao de senha'}
                       </p>
                       <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
                         Defina sua nova senha
                       </h1>
                       <p className="text-sm leading-6 text-slate-500">
-                        Essa sessão temporária existe apenas para redefinir a
-                        senha. O painel continua bloqueado até a conclusão do
-                        processo.
+                        Use esse formulario para salvar a nova senha da conta e
+                        encerrar a sessao atual com seguranca.
                       </p>
                     </div>
 
                     <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                      Sessão de recuperação vinculada a {user.email}.
+                      Sessao vinculada a {userEmail}.
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -157,7 +166,7 @@ export function RecoveryPasswordPage() {
                         label="Nova senha"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
-                        placeholder="Mínimo de 6 caracteres"
+                        placeholder="Minimo de 6 caracteres"
                         autoComplete="new-password"
                       />
 
@@ -172,8 +181,8 @@ export function RecoveryPasswordPage() {
                       />
 
                       <div className="rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm leading-6 text-slate-500">
-                        Depois de atualizar a senha, a sessão temporária será
-                        encerrada automaticamente e um novo login será exigido.
+                        Depois de atualizar a senha, a sessao atual sera
+                        encerrada automaticamente e um novo login sera exigido.
                       </div>
 
                       {localError ? (
@@ -185,12 +194,6 @@ export function RecoveryPasswordPage() {
                       {error ? (
                         <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                           {error}
-                        </div>
-                      ) : null}
-
-                      {notice ? (
-                        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                          {notice}
                         </div>
                       ) : null}
 
@@ -206,12 +209,14 @@ export function RecoveryPasswordPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          void handleCancelRecovery();
+                          void handleExitRecovery();
                         }}
                         disabled={loading}
                         className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
                       >
-                        Cancelar recuperação
+                        {isRecoverySession
+                          ? 'Cancelar recuperacao'
+                          : 'Voltar ao login'}
                       </button>
                     </form>
                   </div>
@@ -229,20 +234,20 @@ export function RecoveryPasswordPage() {
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-lg shadow-indigo-950/20">
                     <BrandLogo variant="mark" className="h-5 w-5" alt="" />
                   </span>
-                  Recuperação segura
+                  Recuperacao segura
                 </div>
 
                 <div className="max-w-2xl space-y-4">
                   <p className="text-sm font-semibold uppercase tracking-[0.28em] text-indigo-100/90">
-                    Acesso isolado
+                    Rota publica de redefinicao
                   </p>
                   <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-                    A redefinição acontece fora do painel principal
+                    O callback do Supabase termina sempre nesta tela
                   </h2>
                   <p className="max-w-xl text-base leading-7 text-indigo-100/90 sm:text-lg">
-                    Mesmo com o link válido, essa sessão temporária não libera
-                    clientes, projetos, pagamentos ou configurações até a senha
-                    ser trocada e o login normal ser feito de novo.
+                    O app nao depende mais de parsing manual espalhado, hacks de
+                    sessionStorage nem renderizacao fora do router para concluir
+                    a troca de senha.
                   </p>
                 </div>
               </div>
@@ -253,11 +258,11 @@ export function RecoveryPasswordPage() {
                     <ShieldAlert size={18} />
                   </div>
                   <h3 className="text-lg font-semibold tracking-tight">
-                    Painel bloqueado durante o recovery
+                    Callback centralizado
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-indigo-100/90">
-                    A sessão do link não serve como login normal. Ela existe
-                    apenas para concluir a troca da senha.
+                    O link do email chega em <code>/auth/callback</code> e a
+                    aplicacao redireciona para a rota publica de recuperacao.
                   </p>
                 </article>
 
@@ -266,11 +271,11 @@ export function RecoveryPasswordPage() {
                     <KeyRound size={18} />
                   </div>
                   <h3 className="text-lg font-semibold tracking-tight">
-                    Encerramento obrigatório ao finalizar
+                    Encerramento apos salvar
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-indigo-100/90">
-                    Assim que a nova senha é salva, a sessão temporária é
-                    encerrada e o sistema volta a exigir login padrão.
+                    Assim que a nova senha e salva, a sessao atual e encerrada e
+                    o login normal volta a ser exigido.
                   </p>
                 </article>
               </div>

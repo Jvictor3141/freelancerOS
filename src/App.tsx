@@ -1,17 +1,18 @@
 import { Suspense, lazy, useEffect, useRef } from 'react';
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { BrandLogo } from './components/BrandLogo';
 import { RouteTransition } from './components/RouteTransition';
 import { DashboardLayout } from './layout/DashboardLayout';
+import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RecoveryPasswordPage } from './pages/RecoveryPasswordPage';
-import { usePreferencesStore } from './store/usePreferencesStore';
 import { useAuthStore } from './store/useAuthStore';
 import { useClientStore } from './store/useClientStore';
 import { usePaymentStore } from './store/usePaymentStore';
-import { useProposalStore } from './store/useProposalStore';
+import { usePreferencesStore } from './store/usePreferencesStore';
 import { useProjectStore } from './store/useProjectStore';
+import { useProposalStore } from './store/useProposalStore';
 
 const DashboardPage = lazy(async () => ({
   default: (await import('./pages/DashboardPage')).DashboardPage,
@@ -55,15 +56,62 @@ function LoadingState({ title, description }: LoadingStateProps) {
   );
 }
 
+function SharedProposalRoute() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8">
+          <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
+            <LoadingState
+              title="Carregando proposta compartilhada"
+              description="Validando o link seguro e preparando a visualizacao."
+            />
+          </div>
+        </div>
+      }
+    >
+      <SharedProposalPage />
+    </Suspense>
+  );
+}
+
+function ProtectedAppShell() {
+  const { user, authFlow } = useAuthStore();
+
+  if (!user) {
+    return <Navigate to="/login?mode=sign_in" replace />;
+  }
+
+  if (authFlow === 'recovery') {
+    return <Navigate to="/redefinir-senha?flow=recovery" replace />;
+  }
+
+  return (
+    <DashboardLayout>
+      <Suspense
+        fallback={
+          <LoadingState
+            title="Carregando pagina"
+            description="Montando a interface e buscando os modulos necessarios."
+          />
+        }
+      >
+        <RouteTransition>
+          <Outlet />
+        </RouteTransition>
+      </Suspense>
+    </DashboardLayout>
+  );
+}
+
 function App() {
-  const location = useLocation();
-  const { user, initialized, initialize, isRecoveryMode } = useAuthStore();
+  const { user, initialized, initialize, authFlow } = useAuthStore();
   const theme = usePreferencesStore((state) => state.theme);
   const previousUserIdRef = useRef<string | null>(null);
-  const isRecoveryRoute = location.pathname === '/redefinir-senha';
-  const isSharedProposalRoute = location.pathname.startsWith(
-    '/propostas/compartilhadas/',
-  );
+  const authenticatedHome =
+    authFlow === 'recovery'
+      ? '/redefinir-senha?flow=recovery'
+      : '/dashboard';
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -107,84 +155,46 @@ function App() {
       <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8">
         <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
           <LoadingState
-            title="Preparando sua sessão"
-            description="Verificando autenticação e conectando o painel ao Supabase."
+            title="Preparando sua sessao"
+            description="Verificando autenticacao e conectando o painel ao Supabase."
           />
         </div>
       </div>
     );
   }
 
-  if (isRecoveryMode || isRecoveryRoute) {
-    return <RecoveryPasswordPage />;
-  }
-
-  if (isSharedProposalRoute) {
-    return (
-      <Suspense
-        fallback={
-          <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8">
-            <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
-              <LoadingState
-                title="Carregando proposta compartilhada"
-                description="Validando o link seguro e preparando a visualização."
-              />
-            </div>
-          </div>
-        }
-      >
-        <Routes>
-          <Route
-            path="/propostas/compartilhadas/:shareId"
-            element={<SharedProposalPage />}
-          />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
-    );
-  }
-
-  if (!user) {
-    return (
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route
-          path="*"
-          element={<Navigate to="/login?mode=sign_in" replace />}
-        />
-      </Routes>
-    );
-  }
-
-  if (location.pathname === '/' || location.pathname === '/login') {
-    return <Navigate to="/dashboard" replace />;
-  }
-
   return (
-    <DashboardLayout>
-      <Suspense
-        fallback={
-          <LoadingState
-            title="Carregando página"
-            description="Montando a interface e buscando os módulos necessários."
-          />
-        }
-      >
-        <RouteTransition>
-          <Routes>
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/clientes" element={<ClientsPage />} />
-            <Route path="/clients/:id" element={<ClientDetailsPage />} />
-            <Route path="/projetos" element={<ProjectsPage />} />
-            <Route path="/pagamentos" element={<PaymentsPage />} />
-            <Route path="/propostas" element={<ProposalsPage />} />
-            <Route path="/configuracoes" element={<SettingsPage />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </RouteTransition>
-      </Suspense>
-    </DashboardLayout>
+    <Routes>
+      <Route
+        path="/"
+        element={user ? <Navigate to={authenticatedHome} replace /> : <LandingPage />}
+      />
+      <Route
+        path="/login"
+        element={user ? <Navigate to={authenticatedHome} replace /> : <LoginPage />}
+      />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      <Route path="/redefinir-senha" element={<RecoveryPasswordPage />} />
+      <Route
+        path="/propostas/compartilhadas/:shareId"
+        element={<SharedProposalRoute />}
+      />
+
+      <Route element={<ProtectedAppShell />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/clientes" element={<ClientsPage />} />
+        <Route path="/clients/:id" element={<ClientDetailsPage />} />
+        <Route path="/projetos" element={<ProjectsPage />} />
+        <Route path="/pagamentos" element={<PaymentsPage />} />
+        <Route path="/propostas" element={<ProposalsPage />} />
+        <Route path="/configuracoes" element={<SettingsPage />} />
+      </Route>
+
+      <Route
+        path="*"
+        element={<Navigate to={user ? authenticatedHome : '/'} replace />}
+      />
+    </Routes>
   );
 }
 

@@ -7,7 +7,7 @@ import {
   ShieldCheck,
   Wallet,
 } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
 import { PasswordField } from '../components/PasswordField';
 import { getErrorMessage } from '../lib/supabase';
@@ -15,6 +15,11 @@ import { requestPasswordReset } from '../services/authService';
 import { useAuthStore } from '../store/useAuthStore';
 
 type AuthMode = 'sign_in' | 'sign_up';
+
+type AuthFeedback = {
+  tone: 'success' | 'error';
+  message: string;
+};
 
 function getAuthModeFromSearchParams(searchParams: URLSearchParams): AuthMode {
   return searchParams.get('mode') === 'sign_up' ? 'sign_up' : 'sign_in';
@@ -42,10 +47,17 @@ const highlights = [
 ];
 
 export function LoginPage() {
+  const location = useLocation();
   const { loading, error, notice, signIn, signUp, clearFeedback } =
     useAuthStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const mode = getAuthModeFromSearchParams(searchParams);
+  const routeFeedback =
+    (
+      location.state as {
+        authFeedback?: AuthFeedback;
+      } | null
+    )?.authFeedback ?? null;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -297,6 +309,18 @@ export function LoginPage() {
                 {notice ? (
                   <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                     {notice}
+                  </div>
+                ) : null}
+
+                {routeFeedback ? (
+                  <div
+                    className={`rounded-2xl px-4 py-3 text-sm ${
+                      routeFeedback.tone === 'success'
+                        ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                        : 'border border-rose-200 bg-rose-50 text-rose-700'
+                    }`}
+                  >
+                    {routeFeedback.message}
                   </div>
                 ) : null}
 
