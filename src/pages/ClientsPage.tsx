@@ -2,8 +2,10 @@ import { Eye, PencilLine, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClientForm } from '../components/ClientForm';
+import { useFeedback } from '../components/FeedbackProvider';
 import { Modal } from '../components/Modal';
 import type { ClientInput } from '../lib/database';
+import { getToastToneForMessage } from '../lib/feedback';
 import { getErrorMessage } from '../lib/supabase';
 import { useClientStore } from '../store/useClientStore';
 import type { Client } from '../types/client';
@@ -38,6 +40,14 @@ export function ClientsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [search, setSearch] = useState('');
+  const { confirm, notify } = useFeedback();
+
+  function alert(message: string) {
+    notify({
+      tone: getToastToneForMessage(message),
+      title: message,
+    });
+  }
 
   useEffect(() => {
     void loadClients();
@@ -79,6 +89,8 @@ export function ClientsPage() {
     setIsSubmitting(true);
 
     try {
+      const isEditing = Boolean(selectedClient);
+
       if (selectedClient) {
         await editClient(selectedClient.id, values);
       } else {
@@ -86,6 +98,12 @@ export function ClientsPage() {
       }
 
       closeModal();
+      notify({
+        tone: 'success',
+        title: isEditing
+          ? 'Cliente atualizado com sucesso.'
+          : 'Cliente criado com sucesso.',
+      });
     } catch (submitError) {
       alert(getErrorMessage(submitError, 'Não foi possível salvar o cliente.'));
     } finally {
@@ -94,9 +112,13 @@ export function ClientsPage() {
   }
 
   async function handleClientRemoval(client: Client) {
-    const confirmed = window.confirm(
-      `Deseja excluir o cliente "${client.name}"?`,
-    );
+    const confirmed = await confirm({
+      title: 'Excluir cliente?',
+      description: `Deseja excluir o cliente "${client.name}"?`,
+      confirmLabel: 'Excluir cliente',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
 
     if (!confirmed) {
       return;
@@ -104,6 +126,10 @@ export function ClientsPage() {
 
     try {
       await removeClient(client.id);
+      notify({
+        tone: 'success',
+        title: 'Cliente excluido com sucesso.',
+      });
     } catch (removeError) {
       alert(
         getErrorMessage(removeError, 'Não foi possível excluir o cliente.'),

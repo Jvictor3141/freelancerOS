@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useFeedback } from './FeedbackProvider';
 import type { Client } from '../types/client';
 
 type ClientFormValues = Omit<Client, 'id' | 'createdAt'>;
@@ -25,6 +26,7 @@ export function ClientForm({
   isSubmitting = false,
 }: ClientFormProps) {
   const [values, setValues] = useState<ClientFormValues>(emptyValues);
+  const { notify } = useFeedback();
 
   useEffect(() => {
     if (initialValues) {
@@ -56,7 +58,10 @@ export function ClientForm({
     event.preventDefault();
 
     if (!values.name.trim() || !values.email.trim()) {
-      alert('Nome e e-mail são obrigatórios.');
+      notify({
+        tone: 'warning',
+        title: 'Nome e e-mail sao obrigatorios.',
+      });
       return;
     }
 
@@ -80,7 +85,7 @@ export function ClientForm({
           value={values.name}
           onChange={handleChange}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Ex.: João Silva"
+          placeholder="Ex.: Joao Silva"
         />
       </label>
 
@@ -133,7 +138,7 @@ export function ClientForm({
           value={values.notes}
           onChange={handleChange}
           className="min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Observações sobre esse cliente..."
+          placeholder="Observacoes sobre esse cliente..."
         />
       </label>
 

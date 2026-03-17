@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useFeedback } from './FeedbackProvider';
 import type { Client } from '../types/client';
 import type { Project, ProjectStatus } from '../types/project';
 import { projectStatusLabel } from '../utils/projectStatus';
@@ -39,6 +40,7 @@ export function ProjectForm({
   isSubmitting = false,
 }: ProjectFormProps) {
   const [values, setValues] = useState<ProjectFormState>(emptyValues);
+  const { notify } = useFeedback();
   const statusOptions =
     initialValues?.status === 'proposal'
       ? (['proposal', ...defaultStatusOptions] as ProjectStatus[])
@@ -80,12 +82,18 @@ export function ProjectForm({
     event.preventDefault();
 
     if (!values.clientId) {
-      alert('Selecione um cliente.');
+      notify({
+        tone: 'warning',
+        title: 'Selecione um cliente.',
+      });
       return;
     }
 
     if (!values.name.trim()) {
-      alert('O nome do projeto é obrigatório.');
+      notify({
+        tone: 'warning',
+        title: 'O nome do projeto e obrigatorio.',
+      });
       return;
     }
 
@@ -93,7 +101,10 @@ export function ProjectForm({
       values.value.trim() === '' ? 0 : Number(values.value);
 
     if (Number.isNaN(numericValue) || numericValue < 0) {
-      alert('O valor do projeto não pode ser negativo.');
+      notify({
+        tone: 'warning',
+        title: 'O valor do projeto nao pode ser negativo.',
+      });
       return;
     }
 
@@ -144,7 +155,7 @@ export function ProjectForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Descrição
+          Descricao
         </span>
         <textarea
           name="description"

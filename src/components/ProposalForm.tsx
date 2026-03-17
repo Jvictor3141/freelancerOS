@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useFeedback } from './FeedbackProvider';
 import type { ProposalInput } from '../lib/database';
 import type { Client } from '../types/client';
 import type { Proposal } from '../types/proposal';
@@ -35,6 +36,7 @@ export function ProposalForm({
   isSubmitting = false,
 }: ProposalFormProps) {
   const [values, setValues] = useState<ProposalFormValues>(emptyValues);
+  const { notify } = useFeedback();
 
   useEffect(() => {
     if (initialValues) {
@@ -88,19 +90,28 @@ export function ProposalForm({
     event.preventDefault();
 
     if (!values.clientId) {
-      alert('Selecione um cliente.');
+      notify({
+        tone: 'warning',
+        title: 'Selecione um cliente.',
+      });
       return;
     }
 
     if (!values.title.trim()) {
-      alert('Informe o título da proposta.');
+      notify({
+        tone: 'warning',
+        title: 'Informe o titulo da proposta.',
+      });
       return;
     }
 
     const amount = Number(values.amount);
 
     if (!values.amount.trim() || Number.isNaN(amount) || amount <= 0) {
-      alert('Informe um valor maior que zero.');
+      notify({
+        tone: 'warning',
+        title: 'Informe um valor maior que zero.',
+      });
       return;
     }
 
@@ -111,12 +122,18 @@ export function ProposalForm({
       Number.isNaN(deliveryDays) ||
       deliveryDays <= 0
     ) {
-      alert('Informe um prazo válido em dias.');
+      notify({
+        tone: 'warning',
+        title: 'Informe um prazo valido em dias.',
+      });
       return;
     }
 
     if (!values.recipientEmail.trim()) {
-      alert('Informe o email de envio.');
+      notify({
+        tone: 'warning',
+        title: 'Informe o email de envio.',
+      });
       return;
     }
 
@@ -156,7 +173,7 @@ export function ProposalForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Título da proposta
+          Titulo da proposta
         </span>
         <input
           name="title"
@@ -202,7 +219,7 @@ export function ProposalForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          E-mail do destinatário
+          E-mail do destinatario
         </span>
         <input
           name="recipientEmail"
@@ -223,13 +240,13 @@ export function ProposalForm({
           value={values.description}
           onChange={handleChange}
           className="min-h-32 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Descreva entregáveis, revisões, etapas e limites da proposta..."
+          placeholder="Descreva entregaveis, revisoes, etapas e limites da proposta..."
         />
       </label>
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Observações internas
+          Observacoes internas
         </span>
         <textarea
           name="notes"

@@ -312,11 +312,6 @@ export function SettingsPage() {
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
               Configure o painel para parecer seu
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-              Os cards abaixo viram atalhos reais: tema abre em modal,
-              segurança abre em modal e a identidade profissional também fica
-              concentrada em modal.
-            </p>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               <SummaryActionCard
@@ -356,10 +351,6 @@ export function SettingsPage() {
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
               Como sua identidade aparece para o cliente
             </h3>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              Esse bloco entra no email da proposta para levar contexto
-              comercial junto com valor, prazo e escopo.
-            </p>
 
             <div className="mt-6 rounded-[28px] border border-slate-200 bg-slate-50 p-5">
               <div className="flex items-start gap-3">

@@ -1,9 +1,11 @@
 import { ListFilter } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useFeedback } from '../components/FeedbackProvider';
 import { Modal } from '../components/Modal';
 import { ProjectForm } from '../components/ProjectForm';
 import type { ProjectInput } from '../lib/database';
+import { getToastToneForMessage } from '../lib/feedback';
 import { getErrorMessage } from '../lib/supabase';
 import { useClientStore } from '../store/useClientStore';
 import { useProposalStore } from '../store/useProposalStore';
@@ -65,6 +67,14 @@ export function ProjectsPage() {
   const [statusFilterDraft, setStatusFilterDraft] =
     useState<ProjectStatus | 'all'>('all');
   const [clientFilterDraft, setClientFilterDraft] = useState('all');
+  const { confirm, notify } = useFeedback();
+
+  function alert(message: string) {
+    notify({
+      tone: getToastToneForMessage(message),
+      title: message,
+    });
+  }
 
   const combinedError = clientError ?? projectError;
 
@@ -196,6 +206,7 @@ export function ProjectsPage() {
   }
 
   async function handleProjectSubmit(values: ProjectInput) {
+    const isEditing = Boolean(selectedProject);
     setIsSubmitting(true);
 
     try {
@@ -206,6 +217,11 @@ export function ProjectsPage() {
       }
 
       closeModal();
+      alert(
+        isEditing
+          ? 'Projeto atualizado com sucesso.'
+          : 'Projeto criado com sucesso.',
+      );
     } catch (submitError) {
       alert(getErrorMessage(submitError, 'Não foi possível salvar o projeto.'));
     } finally {
@@ -214,9 +230,13 @@ export function ProjectsPage() {
   }
 
   async function handleProjectRemoval(project: Project) {
-    const confirmed = window.confirm(
-      `Deseja excluir o projeto "${project.name}"?`,
-    );
+    const confirmed = await confirm({
+      title: 'Excluir projeto?',
+      description: `Deseja excluir o projeto "${project.name}"?`,
+      confirmLabel: 'Excluir projeto',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
 
     if (!confirmed) {
       return;
@@ -224,6 +244,7 @@ export function ProjectsPage() {
 
     try {
       await removeProject(project.id);
+      alert('Projeto excluido com sucesso.');
     } catch (removeError) {
       alert(
         getErrorMessage(removeError, 'Não foi possível excluir o projeto.'),

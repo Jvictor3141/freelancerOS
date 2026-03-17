@@ -1,8 +1,10 @@
 import { CheckCheck, ListFilter, PencilLine, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { useFeedback } from '../components/FeedbackProvider';
 import { Modal } from '../components/Modal';
 import { PaymentForm } from '../components/PaymentForm';
 import type { PaymentInput } from '../lib/database';
+import { getToastToneForMessage } from '../lib/feedback';
 import { getErrorMessage } from '../lib/supabase';
 import { useClientStore } from '../store/useClientStore';
 import { usePaymentStore } from '../store/usePaymentStore';
@@ -76,6 +78,14 @@ export function PaymentsPage() {
   );
   const [statusFilterDraft, setStatusFilterDraft] =
     useState<PaymentStatus | 'all'>('all');
+  const { confirm, notify } = useFeedback();
+
+  function alert(message: string) {
+    notify({
+      tone: getToastToneForMessage(message),
+      title: message,
+    });
+  }
 
   const combinedError = paymentError ?? projectError ?? clientError;
   const hasActiveFilters = statusFilter !== 'all';
@@ -148,6 +158,7 @@ export function PaymentsPage() {
   }
 
   async function handlePaymentSubmit(values: PaymentInput) {
+    const isEditing = Boolean(selectedPayment);
     setIsSubmitting(true);
 
     try {
@@ -158,6 +169,11 @@ export function PaymentsPage() {
       }
 
       closeModal();
+      alert(
+        isEditing
+          ? 'Pagamento atualizado com sucesso.'
+          : 'Pagamento criado com sucesso.',
+      );
     } catch (submitError) {
       alert(
         getErrorMessage(submitError, 'Não foi possível salvar o pagamento.'),
@@ -168,7 +184,13 @@ export function PaymentsPage() {
   }
 
   async function handlePaymentRemoval(payment: Payment) {
-    const confirmed = window.confirm('Deseja excluir este pagamento?');
+    const confirmed = await confirm({
+      title: 'Excluir pagamento?',
+      description: 'Deseja excluir este pagamento?',
+      confirmLabel: 'Excluir pagamento',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
 
     if (!confirmed) {
       return;
@@ -176,6 +198,7 @@ export function PaymentsPage() {
 
     try {
       await removePayment(payment.id);
+      alert('Pagamento excluido com sucesso.');
     } catch (removeError) {
       alert(
         getErrorMessage(removeError, 'Não foi possível excluir o pagamento.'),
@@ -186,6 +209,7 @@ export function PaymentsPage() {
   async function handleMarkAsPaid(paymentId: string) {
     try {
       await markAsPaid(paymentId);
+      alert('Pagamento marcado como pago.');
     } catch (markError) {
       alert(
         getErrorMessage(

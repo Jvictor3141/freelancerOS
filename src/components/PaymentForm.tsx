@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useFeedback } from './FeedbackProvider';
 import type { Payment } from '../types/payment';
 import type { Project } from '../types/project';
 import { paymentStatusLabel } from '../utils/paymentStatus';
@@ -34,6 +35,7 @@ export function PaymentForm({
   isSubmitting = false,
 }: PaymentFormProps) {
   const [values, setValues] = useState<PaymentFormState>(emptyValues);
+  const { notify } = useFeedback();
 
   useEffect(() => {
     if (initialValues) {
@@ -83,24 +85,36 @@ export function PaymentForm({
     event.preventDefault();
 
     if (!values.projectId) {
-      alert('Selecione um projeto.');
+      notify({
+        tone: 'warning',
+        title: 'Selecione um projeto.',
+      });
       return;
     }
 
     const amount = Number(values.amount);
 
     if (!values.amount.trim() || Number.isNaN(amount) || amount <= 0) {
-      alert('Informe um valor maior que zero.');
+      notify({
+        tone: 'warning',
+        title: 'Informe um valor maior que zero.',
+      });
       return;
     }
 
     if (!values.dueDate) {
-      alert('Informe a data de vencimento.');
+      notify({
+        tone: 'warning',
+        title: 'Informe a data de vencimento.',
+      });
       return;
     }
 
     if (values.status === 'paid' && !values.paidAt) {
-      alert('Informe a data em que o pagamento foi recebido.');
+      notify({
+        tone: 'warning',
+        title: 'Informe a data em que o pagamento foi recebido.',
+      });
       return;
     }
 
@@ -173,7 +187,7 @@ export function PaymentForm({
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Método
+          Metodo
           <select
             name="method"
             value={values.method}
@@ -181,8 +195,8 @@ export function PaymentForm({
             className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
           >
             <option value="pix">Pix</option>
-            <option value="card">Cartão</option>
-            <option value="bank_transfer">Transferência</option>
+            <option value="card">Cartao</option>
+            <option value="bank_transfer">Transferencia</option>
             <option value="cash">Dinheiro</option>
           </select>
         </label>
@@ -202,14 +216,14 @@ export function PaymentForm({
       ) : null}
 
       <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-        Observações
+        Observacoes
         <textarea
           name="notes"
           value={values.notes}
           onChange={handleChange}
           rows={4}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-          placeholder="Adicione observações sobre este pagamento"
+          placeholder="Adicione observacoes sobre este pagamento"
         />
       </label>
 

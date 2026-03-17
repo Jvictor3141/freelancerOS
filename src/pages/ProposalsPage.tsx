@@ -17,9 +17,11 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useFeedback } from '../components/FeedbackProvider';
 import { Modal } from '../components/Modal';
 import { ProposalForm } from '../components/ProposalForm';
 import type { ProposalInput } from '../lib/database';
+import { getToastToneForMessage } from '../lib/feedback';
 import { getErrorMessage } from '../lib/supabase';
 import { useAuthStore } from '../store/useAuthStore';
 import { useClientStore } from '../store/useClientStore';
@@ -194,12 +196,20 @@ export function ProposalsPage() {
     useState<ProposalStatus | 'all'>('all');
   const [dismissedClientResponseNotificationIds, setDismissedClientResponseNotificationIds] =
     useState<string[]>([]);
+  const { confirm, notify } = useFeedback();
 
   const combinedError = proposalError ?? clientError;
   const hasActiveFilters = search.trim() !== '' || statusFilter !== 'all';
   const freelancerProfile = useMemo(() => {
     return getFreelancerProfileFromUser(user);
   }, [user]);
+
+  function alert(message: string) {
+    notify({
+      tone: getToastToneForMessage(message),
+      title: message,
+    });
+  }
 
   useEffect(() => {
     void loadClients();
@@ -367,6 +377,7 @@ export function ProposalsPage() {
   }
 
   async function handleProposalSubmit(values: ProposalInput) {
+    const isEditing = Boolean(selectedProposal);
     setIsSubmitting(true);
 
     try {
@@ -377,6 +388,11 @@ export function ProposalsPage() {
       }
 
       closeModal();
+      alert(
+        isEditing
+          ? 'Proposta atualizada com sucesso.'
+          : 'Proposta criada com sucesso.',
+      );
     } catch (submitError) {
       alert(
         getErrorMessage(submitError, 'Não foi possível salvar a proposta.'),
@@ -387,9 +403,13 @@ export function ProposalsPage() {
   }
 
   async function handleProposalRemoval(proposal: Proposal) {
-    const confirmed = window.confirm(
-      `Deseja excluir a proposta "${proposal.title}"?`,
-    );
+    const confirmed = await confirm({
+      title: 'Excluir proposta?',
+      description: `Deseja excluir a proposta "${proposal.title}"?`,
+      confirmLabel: 'Excluir proposta',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
 
     if (!confirmed) {
       return;
@@ -397,6 +417,7 @@ export function ProposalsPage() {
 
     try {
       await removeProposal(proposal.id);
+      alert('Proposta excluida com sucesso.');
     } catch (removeError) {
       alert(
         getErrorMessage(removeError, 'Não foi possível excluir a proposta.'),
@@ -468,6 +489,7 @@ export function ProposalsPage() {
         subject,
         body,
       );
+      alert('Abrindo seu app de e-mail com a proposta preenchida.');
     } catch (sendError) {
       alert(
         getErrorMessage(sendError, 'Não foi possível enviar a proposta.'),
@@ -476,9 +498,13 @@ export function ProposalsPage() {
   }
 
   async function handleAcceptProposal(proposal: Proposal) {
-    const confirmed = window.confirm(
-      `Aceitar a proposta "${proposal.title}" e gerar o projeto automaticamente?`,
-    );
+    const confirmed = await confirm({
+      title: 'Aceitar proposta?',
+      description: `Aceitar a proposta "${proposal.title}" e gerar o projeto automaticamente?`,
+      confirmLabel: 'Aceitar proposta',
+      cancelLabel: 'Cancelar',
+      tone: 'default',
+    });
 
     if (!confirmed) {
       return;
@@ -498,9 +524,13 @@ export function ProposalsPage() {
   }
 
   async function handleRejectProposal(proposal: Proposal) {
-    const confirmed = window.confirm(
-      `Marcar a proposta "${proposal.title}" como recusada?`,
-    );
+    const confirmed = await confirm({
+      title: 'Recusar proposta?',
+      description: `Marcar a proposta "${proposal.title}" como recusada?`,
+      confirmLabel: 'Recusar proposta',
+      cancelLabel: 'Cancelar',
+      tone: 'danger',
+    });
 
     if (!confirmed) {
       return;
@@ -508,6 +538,7 @@ export function ProposalsPage() {
 
     try {
       await rejectProposalById(proposal.id);
+      alert('Proposta marcada como recusada.');
     } catch (rejectError) {
       alert(
         getErrorMessage(
@@ -521,6 +552,7 @@ export function ProposalsPage() {
   async function handleReopenProposal(proposal: Proposal) {
     try {
       await reopenProposalById(proposal.id);
+      alert(`Proposta "${proposal.title}" reaberta como rascunho.`);
     } catch (reopenError) {
       alert(
         getErrorMessage(
@@ -561,11 +593,6 @@ export function ProposalsPage() {
           <h2 className="mt-2 text-3xl font-semibold tracking-tight">
             Proposta, envio, aceite e projeto no mesmo fluxo
           </h2>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-indigo-100/90">
-            A proposta nasce como rascunho, pode ser enviada ao cliente e,
-            quando aceita, gera um projeto automaticamente sem retrabalho de
-            cadastro.
-          </p>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
@@ -615,10 +642,6 @@ export function ProposalsPage() {
           <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
             Nova proposta operacional
           </h3>
-          <p className="mt-3 text-sm leading-6 text-slate-600">
-            Crie a proposta, envie por e-mail direto do app e, quando houver
-            aceite, transforme em projeto com um clique.
-          </p>
 
           <button
             type="button"

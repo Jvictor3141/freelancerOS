@@ -2,12 +2,15 @@ import { LogOut, Plus, ShieldCheck, UserRound } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BrandLogo } from './BrandLogo';
+import { useFeedback } from './FeedbackProvider';
+import { getToastToneForMessage } from '../lib/feedback';
 import { getErrorMessage } from '../lib/supabase';
 import { useAuthStore } from '../store/useAuthStore';
 
 export function Header() {
   const navigate = useNavigate();
   const { user, loading, logout } = useAuthStore();
+  const { notify } = useFeedback();
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
   const formattedDate = new Date().toLocaleDateString('pt-BR', {
@@ -15,6 +18,13 @@ export function Header() {
     day: 'numeric',
     month: 'long',
   });
+
+  function alert(message: string) {
+    notify({
+      tone: getToastToneForMessage(message),
+      title: message,
+    });
+  }
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
