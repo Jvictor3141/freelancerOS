@@ -198,7 +198,7 @@ export function LandingPage() {
   return (
     <div id="top" className="motion-page min-h-screen bg-transparent text-slate-900">
       <div className="relative overflow-hidden">
-        <div className="absolute inset-x-0 top-0 -z-10 h-[42rem] bg-[radial-gradient(circle_at_top_left,rgba(99,91,255,0.16),transparent_36%),radial-gradient(circle_at_top_right,rgba(56,189,248,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.76))]" />
+        <div className="absolute inset-x-0 top-0 -z-10 h-168 bg-[radial-gradient(circle_at_top_left,rgba(99,91,255,0.16),transparent_36%),radial-gradient(circle_at_top_right,rgba(56,189,248,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.76))]" />
         <div className="absolute left-1/2 top-28 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-white/80 blur-3xl" />
 
         <header className="sticky top-0 z-30 border-b border-white/70 bg-white/78 backdrop-blur-xl">
@@ -271,7 +271,7 @@ export function LandingPage() {
                   </a>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-3">
+                <div className="grid gap-3 md:grid-cols-2">
                   {heroPoints.map((item) => (
                     <article
                       key={item}
@@ -302,7 +302,7 @@ export function LandingPage() {
                     { label: 'Cobranças pendentes', value: '3', detail: 'pedem ação hoje', icon: Clock3 },
                     { label: 'Projetos em andamento', value: '5', detail: 'com status visível', icon: FolderKanban },
                   ].map(({ label, value, detail, icon: Icon }) => (
-                    <article key={label} className="rounded-[24px] border border-slate-200 bg-slate-50/90 p-4">
+                    <article key={label} className="rounded-3xl border border-slate-200 bg-slate-50/90 p-4">
                       <div className="inline-flex rounded-2xl bg-white p-2 text-[#635bff] shadow-sm shadow-slate-200">
                         <Icon size={16} />
                       </div>
@@ -397,7 +397,7 @@ export function LandingPage() {
                   description="A bagunça custa tempo para encontrar contexto, atrasa cobrança e dificulta saber o que realmente precisa de atenção no dia."
                 />
 
-                <article className="rounded-[32px] border border-slate-200 bg-slate-950 p-6 text-white shadow-[0_24px_70px_rgba(15,23,42,0.14)]">
+                <article className="rounded-4xl border border-slate-200 bg-slate-950 p-6 text-white shadow-[0_24px_70px_rgba(15,23,42,0.14)]">
                   <div className="inline-flex rounded-2xl bg-white/10 p-3 text-white">
                     <AlertTriangle size={20} />
                   </div>
@@ -416,7 +416,7 @@ export function LandingPage() {
                 {painCards.map(({ title, description }) => (
                   <article
                     key={title}
-                    className="motion-surface rounded-[32px] border border-slate-200 bg-white/86 p-6 shadow-[0_24px_56px_rgba(15,23,42,0.06)] backdrop-blur"
+                    className="motion-surface rounded-4xl border border-slate-200 bg-white/86 p-6 shadow-[0_24px_56px_rgba(15,23,42,0.06)] backdrop-blur"
                   >
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
                       Dor real
@@ -442,7 +442,7 @@ export function LandingPage() {
                     description="Em vez de reconstruir o contexto a cada entrega, cobrança ou fechamento do mês, você passa a operar com tudo conectado em uma única interface."
                   />
 
-                  <div className="rounded-[32px] border border-slate-200 bg-slate-50/90 p-5">
+                  <div className="rounded-4xl border border-slate-200 bg-slate-50/90 p-5">
                     <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
                       Ao abrir o painel
                     </p>
@@ -471,7 +471,7 @@ export function LandingPage() {
                   {solutionCards.map(({ title, description, icon: Icon }) => (
                     <article
                       key={title}
-                      className="motion-surface rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100"
+                      className="motion-surface rounded-4xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100"
                     >
                       <div className="inline-flex rounded-2xl bg-indigo-50 p-3 text-[#635bff] shadow-sm shadow-slate-200">
                         <Icon size={20} />
@@ -498,7 +498,7 @@ export function LandingPage() {
                 {featureCards.map(({ eyebrow, title, description, benefit, icon: Icon }) => (
                   <article
                     key={title}
-                    className="motion-surface rounded-[32px] border border-slate-200 bg-white/86 p-6 shadow-[0_24px_56px_rgba(15,23,42,0.06)] backdrop-blur"
+                    className="motion-surface rounded-4xl border border-slate-200 bg-white/86 p-6 shadow-[0_24px_56px_rgba(15,23,42,0.06)] backdrop-blur"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
@@ -594,7 +594,7 @@ export function LandingPage() {
                       { label: 'A receber', value: 'R$ 4.200' },
                       { label: 'Projetos ativos', value: '5' },
                     ].map(({ label, value }) => (
-                      <div key={label} className="rounded-[24px] border border-slate-200 bg-slate-50/90 p-4">
+                      <div key={label} className="rounded-3xl border border-slate-200 bg-slate-50/90 p-4">
                         <p className="text-sm font-medium text-slate-500">{label}</p>
                         <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
                           {value}
