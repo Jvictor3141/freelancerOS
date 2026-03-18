@@ -1,50 +1,25 @@
 import type { Client } from '../types/client'
+import type {
+  DashboardMetricSummary,
+  DashboardPaymentAlert,
+  DashboardPaymentMetrics,
+  DashboardRecentActivity,
+  DashboardRevenuePoint,
+  DashboardViewModel,
+} from '../types/dashboard'
 import type { Payment } from '../types/payment'
 import type { Project } from '../types/project'
-
-export type DashboardMetricSummary = {
-  totalClients: number
-  projectsInProgress: number
-  completedProjects: number
-  averageTicket: number
-}
-
-export type DashboardPaymentMetrics = {
-  receivedAmount: number
-  pendingAmount: number
-  overdueAmount: number
-}
-
-export type DashboardRevenuePoint = {
-  month: string
-  revenue: number
-}
-
-export type DashboardPaymentAlert = {
-  id: string
-  clientName: string
-  projectName: string
-  amount: number
-  dueDate: string
-  status: 'pending' | 'overdue'
-}
-
-export type DashboardRecentActivity = {
-  id: string
-  title: string
-  clientName: string
-  status: Project['status']
-  createdAt: string
-  value: number
-}
-
-export type DashboardViewModel = {
-  metrics: DashboardMetricSummary
-  paymentMetrics: DashboardPaymentMetrics
-  revenue: DashboardRevenuePoint[]
-  recentActivities: DashboardRecentActivity[]
-  paymentAlerts: DashboardPaymentAlert[]
-}
+import { getAverageTicket, getPaymentAmountSummary, sumProjectValues } from './financial'
+import {
+  getPaymentsRequiringAttention,
+  sortPaymentsByDueDate,
+} from './paymentRules'
+import {
+  countActiveProjects,
+  countCompletedProjects,
+  getOperationalProjects,
+  sortProjectsByCreatedAtDesc,
+} from './projectRules'
 
 type DashboardViewModelInput = {
   clients: Client[]
@@ -77,49 +52,23 @@ export function getDashboardMetrics(
   clients: Client[],
   projects: Project[],
 ): DashboardMetricSummary {
-  const operationalProjects = projects.filter(
-    (project) => project.status !== 'proposal',
-  )
-  const totalClients = clients.length
-
-  const projectsInProgress = operationalProjects.filter(
-    (project) => project.status === 'in_progress' || project.status === 'review',
-  ).length
-
-  const completedProjects = operationalProjects.filter(
-    (project) => project.status === 'completed',
-  ).length
-
-  const totalContractedValue = operationalProjects.reduce(
-    (sum, project) => sum + Number(project.value || 0),
-    0,
-  )
-
-  const averageTicket =
-    operationalProjects.length > 0
-      ? totalContractedValue / operationalProjects.length
-      : 0
+  const operationalProjects = getOperationalProjects(projects)
+  const totalContractedValue = sumProjectValues(operationalProjects)
 
   return {
-    totalClients,
-    projectsInProgress,
-    completedProjects,
-    averageTicket,
+    totalClients: clients.length,
+    projectsInProgress: countActiveProjects(operationalProjects),
+    completedProjects: countCompletedProjects(operationalProjects),
+    averageTicket: getAverageTicket(
+      totalContractedValue,
+      operationalProjects.length,
+    ),
   }
 }
 
 export function getPaymentMetrics(payments: Payment[]): DashboardPaymentMetrics {
-  const receivedAmount = payments
-    .filter((payment) => payment.status === 'paid')
-    .reduce((sum, payment) => sum + payment.amount, 0)
-
-  const pendingAmount = payments
-    .filter((payment) => payment.status === 'pending')
-    .reduce((sum, payment) => sum + payment.amount, 0)
-
-  const overdueAmount = payments
-    .filter((payment) => payment.status === 'overdue')
-    .reduce((sum, payment) => sum + payment.amount, 0)
+  const { receivedAmount, pendingAmount, overdueAmount } =
+    getPaymentAmountSummary(payments)
 
   return {
     receivedAmount,
@@ -178,13 +127,7 @@ export function getRecentProjectActivities(
 ): DashboardRecentActivity[] {
   const clientMap = new Map(clients.map((client) => [client.id, client]))
 
-  return projects
-    .filter((project) => project.status !== 'proposal')
-    .slice()
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )
+  return sortProjectsByCreatedAtDesc(getOperationalProjects(projects))
     .slice(0, limit)
     .map((project) => ({
       id: project.id,
@@ -205,18 +148,7 @@ export function getPaymentAlerts(
   const projectMap = new Map(projects.map((project) => [project.id, project]))
   const clientMap = new Map(clients.map((client) => [client.id, client]))
 
-  return payments
-    .filter(
-      (
-        payment,
-      ): payment is Payment & { status: 'pending' | 'overdue' } =>
-        payment.status === 'pending' || payment.status === 'overdue',
-    )
-    .sort((a, b) => {
-      const aTime = new Date(a.dueDate).getTime()
-      const bTime = new Date(b.dueDate).getTime()
-      return aTime - bTime
-    })
+  return sortPaymentsByDueDate(getPaymentsRequiringAttention(payments))
     .slice(0, limit)
     .map((payment) => {
       const project = projectMap.get(payment.projectId)

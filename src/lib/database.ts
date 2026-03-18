@@ -1,24 +1,15 @@
 import type { Client } from '../types/client';
+import type {
+  ClientInput,
+  PaymentInput,
+  ProjectInput,
+  ProposalInput,
+} from '../types/inputs'
 import type { Payment } from '../types/payment';
 import type { Proposal } from '../types/proposal';
 import type { Project } from '../types/project';
 
 type NumericValue = number | string;
-
-export type ClientInput = Omit<Client, 'id' | 'createdAt'>;
-export type ProjectInput = Omit<Project, 'id' | 'createdAt'>;
-export type PaymentInput = Omit<Payment, 'id' | 'createdAt'>;
-export type ProposalInput = Omit<
-  Proposal,
-  | 'id'
-  | 'projectId'
-  | 'sentAt'
-  | 'acceptedAt'
-  | 'rejectedAt'
-  | 'clientRespondedAt'
-  | 'clientResponseChannel'
-  | 'createdAt'
->;
 
 export type ClientRecord = {
   id: string;
@@ -76,33 +67,18 @@ export type ProposalRecord = {
   created_at: string;
 };
 
-type ClientPayloadOptions = {
-  id?: string;
-  createdAt?: string;
-  userId?: string;
-};
+type BasePayloadOptions = {
+  id?: string
+  createdAt?: string
+  userId?: string
+}
 
-type ProjectPayloadOptions = {
-  id?: string;
-  createdAt?: string;
-  userId?: string;
-};
-
-type PaymentPayloadOptions = {
-  id?: string;
-  createdAt?: string;
-  userId?: string;
-};
-
-type ProposalPayloadOptions = {
-  id?: string;
-  createdAt?: string;
-  userId?: string;
-  projectId?: string | null;
-  sentAt?: string | null;
-  acceptedAt?: string | null;
-  rejectedAt?: string | null;
-};
+type ProposalPayloadOptions = BasePayloadOptions & {
+  projectId?: string | null
+  sentAt?: string | null
+  acceptedAt?: string | null
+  rejectedAt?: string | null
+}
 
 // Os mapeamentos abaixo convertem o formato snake_case do banco no shape usado pela UI.
 export function mapClientRecord(record: ClientRecord): Client {
@@ -168,7 +144,7 @@ export function mapProposalRecord(record: ProposalRecord): Proposal {
 // Os payloads abaixo garantem que inserts e updates enviem ao banco apenas os campos esperados.
 export function toClientPayload(
   data: ClientInput,
-  options?: ClientPayloadOptions,
+  options?: BasePayloadOptions,
 ) {
   return {
     ...(options?.id ? { id: options.id } : {}),
@@ -184,7 +160,7 @@ export function toClientPayload(
 
 export function toProjectPayload(
   data: ProjectInput,
-  options?: ProjectPayloadOptions,
+  options?: BasePayloadOptions,
 ) {
   return {
     ...(options?.id ? { id: options.id } : {}),
@@ -201,7 +177,7 @@ export function toProjectPayload(
 
 export function toPaymentPayload(
   data: PaymentInput,
-  options?: PaymentPayloadOptions,
+  options?: BasePayloadOptions,
 ) {
   return {
     ...(options?.id ? { id: options.id } : {}),

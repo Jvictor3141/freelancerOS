@@ -1,11 +1,11 @@
-import { DashboardAlertsPanel } from '../components/dashboard/DashboardAlertsPanel'
-import { DashboardErrorBanner } from '../components/dashboard/DashboardErrorBanner'
-import { DashboardFinancialOverview } from '../components/dashboard/DashboardFinancialOverview'
-import { DashboardLoadingState } from '../components/dashboard/DashboardLoadingState'
-import { DashboardRecentActivitiesPanel } from '../components/dashboard/DashboardRecentActivitiesPanel'
-import { DashboardRevenueSection } from '../components/dashboard/DashboardRevenueSection'
-import { DashboardSummaryMetrics } from '../components/dashboard/DashboardSummaryMetrics'
-import { useDashboardData } from '../components/dashboard/useDashboardData'
+import { DashboardAlertsPanel } from '../features/dashboard/DashboardAlertsPanel'
+import { DashboardErrorBanner } from '../features/dashboard/DashboardErrorBanner'
+import { DashboardFinancialOverview } from '../features/dashboard/DashboardFinancialOverview'
+import { DashboardLoadingState } from '../features/dashboard/DashboardLoadingState'
+import { DashboardRecentActivitiesPanel } from '../features/dashboard/DashboardRecentActivitiesPanel'
+import { DashboardRevenueSection } from '../features/dashboard/DashboardRevenueSection'
+import { DashboardSummaryMetrics } from '../features/dashboard/DashboardSummaryMetrics'
+import { useDashboardData } from '../features/dashboard/useDashboardData'
 
 export function DashboardPage() {
   const {
@@ -43,3 +43,4 @@ export function DashboardPage() {
     </div>
   )
 }
+

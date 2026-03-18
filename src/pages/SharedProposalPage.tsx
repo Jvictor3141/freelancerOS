@@ -9,6 +9,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
+import { formatCurrency, formatDateTime } from '../utils/formatting';
 import {
   getSharedProposal,
   respondToSharedProposal,
@@ -18,24 +19,10 @@ import {
   buildFreelancerIntro,
   buildFreelancerSignatureLines,
 } from '../utils/freelancerProfile';
-
-function formatCurrency(value: number) {
-  return value.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
-}
-
-function formatDateTime(value: string | null) {
-  if (!value) {
-    return '-';
-  }
-
-  return new Date(value).toLocaleString('pt-BR', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
-}
+import {
+  isAcceptedProposal,
+  isRejectedProposal,
+} from '../utils/proposalRules';
 
 function getTokenFromHash() {
   if (typeof window === 'undefined') {
@@ -143,8 +130,8 @@ export function SharedProposalPage() {
     }
   }
 
-  const isAccepted = proposal?.status === 'accepted';
-  const isRejected = proposal?.status === 'rejected';
+  const isAccepted = proposal ? isAcceptedProposal(proposal) : false;
+  const isRejected = proposal ? isRejectedProposal(proposal) : false;
 
   return (
     <div className="motion-page min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8 lg:px-10">

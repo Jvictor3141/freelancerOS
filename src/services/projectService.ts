@@ -2,9 +2,9 @@ import { supabase, getSupabaseErrorMessage } from '../lib/supabase';
 import {
   mapProjectRecord,
   toProjectPayload,
-  type ProjectInput,
   type ProjectRecord,
 } from '../lib/database';
+import type { ProjectInput } from '../types/inputs';
 import { ensureDatabaseBootstrap } from './bootstrapService';
 import type { Project } from '../types/project';
 

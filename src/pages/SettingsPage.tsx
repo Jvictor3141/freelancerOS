@@ -17,8 +17,8 @@ import {
   updateFreelancerProfile,
   updatePassword,
 } from '../services/authService';
-import { useAuthStore } from '../store/useAuthStore';
-import { usePreferencesStore } from '../store/usePreferencesStore';
+import { useAuthStore } from '../stores/useAuthStore';
+import { usePreferencesStore } from '../stores/usePreferencesStore';
 import type {
   FreelancerProfile,
   WorkspaceTheme,
@@ -630,3 +630,5 @@ export function SettingsPage() {
     </>
   );
 }
+
+

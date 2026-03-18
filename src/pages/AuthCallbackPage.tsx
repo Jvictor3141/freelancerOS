@@ -3,7 +3,7 @@ import { LoaderCircle } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
 import { getSession } from '../services/authService';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/useAuthStore';
 
 type AuthFeedback = {
   tone: 'success' | 'error';
@@ -146,3 +146,5 @@ export function AuthCallbackPage() {
     </div>
   );
 }
+
+

@@ -12,7 +12,8 @@ import { BrandLogo } from '../components/BrandLogo';
 import { PasswordField } from '../components/PasswordField';
 import { getErrorMessage } from '../lib/supabase';
 import { requestPasswordReset } from '../services/authService';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/useAuthStore';
+import { getRecord } from '../utils/typeGuards';
 
 type AuthMode = 'sign_in' | 'sign_up';
 
@@ -20,6 +21,24 @@ type AuthFeedback = {
   tone: 'success' | 'error';
   message: string;
 };
+
+function getRouteAuthFeedback(state: unknown): AuthFeedback | null {
+  const stateRecord = getRecord(state);
+  const feedbackRecord = getRecord(stateRecord?.authFeedback);
+
+  if (
+    !feedbackRecord ||
+    (feedbackRecord.tone !== 'success' && feedbackRecord.tone !== 'error') ||
+    typeof feedbackRecord.message !== 'string'
+  ) {
+    return null;
+  }
+
+  return {
+    tone: feedbackRecord.tone,
+    message: feedbackRecord.message,
+  };
+}
 
 function getAuthModeFromSearchParams(searchParams: URLSearchParams): AuthMode {
   return searchParams.get('mode') === 'sign_up' ? 'sign_up' : 'sign_in';
@@ -52,12 +71,7 @@ export function LoginPage() {
     useAuthStore();
   const [searchParams, setSearchParams] = useSearchParams();
   const mode = getAuthModeFromSearchParams(searchParams);
-  const routeFeedback =
-    (
-      location.state as {
-        authFeedback?: AuthFeedback;
-      } | null
-    )?.authFeedback ?? null;
+  const routeFeedback = getRouteAuthFeedback(location.state);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -410,3 +424,5 @@ export function LoginPage() {
     </div>
   );
 }
+
+

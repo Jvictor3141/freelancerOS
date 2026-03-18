@@ -1,5 +1,5 @@
 import { BrandLogo } from './BrandLogo';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/useAuthStore';
 import { NavigationList } from './navigation';
 
 export function Sidebar() {
@@ -37,3 +37,5 @@ export function Sidebar() {
     </aside>
   );
 }
+
+

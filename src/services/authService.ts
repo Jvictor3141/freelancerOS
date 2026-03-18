@@ -1,6 +1,7 @@
 import type { User } from '@supabase/supabase-js';
 import { supabase, getSupabaseErrorMessage } from '../lib/supabase';
 import type { FreelancerProfile } from '../types/freelancerProfile';
+import { getRecord } from '../utils/typeGuards';
 
 const autoAnonymousAuth =
   import.meta.env.VITE_SUPABASE_AUTO_ANON_AUTH === 'true';
@@ -54,11 +55,7 @@ export async function getSession() {
 }
 
 function getMetadataObject(metadata: unknown) {
-  if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
-    return {};
-  }
-
-  return metadata as Record<string, unknown>;
+  return getRecord(metadata) ?? {};
 }
 
 export async function requestPasswordReset(email: string) {

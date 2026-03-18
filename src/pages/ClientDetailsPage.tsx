@@ -7,9 +7,9 @@ import {
   FolderKanban,
   Wallet,
 } from 'lucide-react';
-import { useClientStore } from '../store/useClientStore';
-import { usePaymentStore } from '../store/usePaymentStore';
-import { useProjectStore } from '../store/useProjectStore';
+import { useClientStore } from '../stores/useClientStore';
+import { usePaymentStore } from '../stores/usePaymentStore';
+import { useProjectStore } from '../stores/useProjectStore';
 import {
   getClientFinancialSummary,
   getClientPayments,
@@ -36,28 +36,30 @@ export function ClientDetailsPage() {
     clients,
     error: clientError,
     initialized: clientsInitialized,
-    loadClients,
+    ensureClientsLoaded,
   } = useClientStore();
   const {
     projects,
     error: projectError,
     initialized: projectsInitialized,
-    loadProjects,
+    ensureProjectsLoaded,
   } = useProjectStore();
   const {
     payments,
     error: paymentError,
     initialized: paymentsInitialized,
-    loadPayments,
+    ensurePaymentsLoaded,
   } = usePaymentStore();
 
   const combinedError = paymentError ?? projectError ?? clientError;
 
   useEffect(() => {
-    void loadClients();
-    void loadProjects();
-    void loadPayments();
-  }, [loadClients, loadProjects, loadPayments]);
+    void Promise.all([
+      ensureClientsLoaded(),
+      ensureProjectsLoaded(),
+      ensurePaymentsLoaded(),
+    ]);
+  }, [ensureClientsLoaded, ensureProjectsLoaded, ensurePaymentsLoaded]);
 
   const client = useMemo(
     () => clients.find((item) => item.id === id) ?? null,
@@ -191,7 +193,7 @@ export function ClientDetailsPage() {
           </div>
           <p className="text-sm font-medium text-slate-500">Pendente</p>
           <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
-            {formatCurrency(summary.totalPending + summary.totalOverdue)}
+            {formatCurrency(summary.totalOutstanding)}
           </p>
         </div>
 
@@ -297,3 +299,5 @@ export function ClientDetailsPage() {
     </div>
   );
 }
+
+

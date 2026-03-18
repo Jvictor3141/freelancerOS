@@ -5,9 +5,9 @@ import {
   toProjectPayload,
   toProposalPayload,
   type ProjectRecord,
-  type ProposalInput,
   type ProposalRecord,
 } from '../lib/database';
+import type { ProposalInput } from '../types/inputs';
 import type { Project } from '../types/project';
 import type { Proposal } from '../types/proposal';
 import { ensureDatabaseBootstrap } from './bootstrapService';

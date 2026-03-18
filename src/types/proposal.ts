@@ -1,5 +1,13 @@
-export type ProposalStatus = 'draft' | 'sent' | 'accepted' | 'rejected';
-export type ProposalResponseChannel = 'shared_link';
+export const proposalStatuses = [
+  'draft',
+  'sent',
+  'accepted',
+  'rejected',
+] as const;
+export type ProposalStatus = (typeof proposalStatuses)[number];
+
+export const proposalResponseChannels = ['shared_link'] as const;
+export type ProposalResponseChannel = (typeof proposalResponseChannels)[number];
 
 export type Proposal = {
   id: string;

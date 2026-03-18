@@ -5,7 +5,7 @@ import { BrandLogo } from '../components/BrandLogo';
 import { PasswordField } from '../components/PasswordField';
 import { getErrorMessage } from '../lib/supabase';
 import { updatePassword } from '../services/authService';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/useAuthStore';
 
 type AuthFeedback = {
   tone: 'success' | 'error';
@@ -286,3 +286,5 @@ export function RecoveryPasswordPage() {
     </div>
   );
 }
+
+

@@ -1,30 +1,21 @@
 import type { Client } from '../types/client'
 import type { Proposal } from '../types/proposal'
-import type { Project, ProjectStatus } from '../types/project'
-
-export const projectStatusFilterOptions: Array<ProjectStatus | 'all'> = [
-  'all',
-  'in_progress',
-  'review',
-  'completed',
-]
-
-export type ProjectWithClient = Project & {
-  clientName: string
-  clientCompany: string
-}
+import type { Project } from '../types/project'
+import type {
+  ProjectWithClient,
+  ProjectsCommercialSummary,
+} from '../types/viewModels'
+import type { ProjectStatusFilter } from './projectStatus'
+import {
+  countProposalsByStatus,
+  getOpenProposalValue,
+  isProposalOpen,
+} from './proposalRules'
 
 export type ProjectListFilters = {
   search: string
-  status: ProjectStatus | 'all'
+  status: ProjectStatusFilter
   clientId: string
-}
-
-export type ProjectsCommercialSummary = {
-  openCount: number
-  sentCount: number
-  draftCount: number
-  openPipelineValue: number
 }
 
 export function getProjectsWithClient(
@@ -47,23 +38,15 @@ export function getProjectsWithClient(
 export function getProjectsCommercialSummary(
   proposals: Proposal[],
 ): ProjectsCommercialSummary {
-  const openProposals = proposals.filter(
-    (proposal) => proposal.status === 'draft' || proposal.status === 'sent',
-  )
-  const sentCount = openProposals.filter(
-    (proposal) => proposal.status === 'sent',
-  ).length
-  const draftCount = openProposals.length - sentCount
-  const openPipelineValue = openProposals.reduce(
-    (total, proposal) => total + proposal.amount,
-    0,
-  )
+  const openProposals = proposals.filter(isProposalOpen)
+  const sentCount = countProposalsByStatus(openProposals, 'sent')
+  const draftCount = countProposalsByStatus(openProposals, 'draft')
 
   return {
     openCount: openProposals.length,
     sentCount,
     draftCount,
-    openPipelineValue,
+    openPipelineValue: getOpenProposalValue(openProposals),
   }
 }
 

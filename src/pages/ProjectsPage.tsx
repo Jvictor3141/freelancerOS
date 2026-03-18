@@ -2,12 +2,12 @@ import { useNavigate } from 'react-router-dom'
 import { Modal } from '../components/Modal'
 import { PageBanner } from '../components/page/PageBanner'
 import { PageLoadingState } from '../components/page/PageLoadingState'
-import { ProjectFiltersModalContent } from '../components/projects/ProjectFiltersModalContent'
-import { ProjectsCommercialBanner } from '../components/projects/ProjectsCommercialBanner'
-import { ProjectsListSection } from '../components/projects/ProjectsListSection'
+import { ProjectFiltersModalContent } from '../features/projects/ProjectFiltersModalContent'
+import { ProjectsCommercialBanner } from '../features/projects/ProjectsCommercialBanner'
+import { ProjectsListSection } from '../features/projects/ProjectsListSection'
 import { ProjectForm } from '../components/ProjectForm'
-import { ProjectsToolbar } from '../components/projects/ProjectsToolbar'
-import { useProjectsPage } from '../components/projects/useProjectsPage'
+import { ProjectsToolbar } from '../features/projects/ProjectsToolbar'
+import { useProjectsPage } from '../features/projects/useProjectsPage'
 
 export function ProjectsPage() {
   const navigate = useNavigate()
@@ -133,3 +133,4 @@ export function ProjectsPage() {
     </div>
   )
 }
+

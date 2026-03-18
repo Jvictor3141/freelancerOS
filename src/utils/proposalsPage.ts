@@ -1,13 +1,13 @@
 import type { Client } from '../types/client'
-import type { Proposal, ProposalStatus } from '../types/proposal'
-
-export const proposalStatusOptions: Array<ProposalStatus | 'all'> = [
-  'all',
-  'draft',
-  'sent',
-  'accepted',
-  'rejected',
-]
+import type { Proposal } from '../types/proposal'
+import type { ProposalMetrics, ProposalWithClient } from '../types/viewModels'
+import type { ProposalStatusFilter } from './proposalStatus'
+import {
+  countProposalsByStatus,
+  getClientRespondedProposals,
+  getOpenProposalValue,
+  sortProposalsByClientResponseDesc,
+} from './proposalRules'
 
 export const shareExpirationOptions = [
   { value: 1, label: '1 dia' },
@@ -19,18 +19,6 @@ export const shareExpirationOptions = [
 
 const dismissedProposalResponseNotificationsStoragePrefix =
   'dismissed-proposal-response-notifications'
-
-export type ProposalWithClient = Proposal & {
-  clientName: string
-  clientCompany: string
-}
-
-export type ProposalMetrics = {
-  draftCount: number
-  sentCount: number
-  acceptedCount: number
-  openPipelineValue: number
-}
 
 export function getProposalActionButtonClassName(
   tone: 'neutral' | 'info' | 'success' | 'danger',
@@ -124,7 +112,7 @@ export function getProposalsWithClient(
 export function getFilteredProposals(
   proposals: ProposalWithClient[],
   search: string,
-  statusFilter: ProposalStatus | 'all',
+  statusFilter: ProposalStatusFilter,
 ) {
   const term = search.trim().toLowerCase()
 
@@ -147,19 +135,9 @@ export function getClientResponseNotifications(
   proposals: ProposalWithClient[],
   limit = 4,
 ) {
-  return proposals
-    .filter(
-      (proposal) =>
-        proposal.clientRespondedAt &&
-        proposal.clientResponseChannel === 'shared_link' &&
-        (proposal.status === 'accepted' || proposal.status === 'rejected'),
-    )
-    .sort((firstProposal, secondProposal) => {
-      return (
-        new Date(secondProposal.clientRespondedAt ?? 0).getTime() -
-        new Date(firstProposal.clientRespondedAt ?? 0).getTime()
-      )
-    })
+  return sortProposalsByClientResponseDesc(
+    getClientRespondedProposals(proposals),
+  )
     .slice(0, limit)
 }
 
@@ -175,22 +153,10 @@ export function getVisibleClientResponseNotifications(
 }
 
 export function getProposalMetrics(proposals: Proposal[]): ProposalMetrics {
-  const draftCount = proposals.filter((proposal) => proposal.status === 'draft').length
-  const sentCount = proposals.filter((proposal) => proposal.status === 'sent').length
-  const acceptedCount = proposals.filter(
-    (proposal) => proposal.status === 'accepted',
-  ).length
-  const openPipelineValue = proposals
-    .filter(
-      (proposal) =>
-        proposal.status === 'draft' || proposal.status === 'sent',
-    )
-    .reduce((total, proposal) => total + proposal.amount, 0)
-
   return {
-    draftCount,
-    sentCount,
-    acceptedCount,
-    openPipelineValue,
+    draftCount: countProposalsByStatus(proposals, 'draft'),
+    sentCount: countProposalsByStatus(proposals, 'sent'),
+    acceptedCount: countProposalsByStatus(proposals, 'accepted'),
+    openPipelineValue: getOpenProposalValue(proposals),
   }
 }

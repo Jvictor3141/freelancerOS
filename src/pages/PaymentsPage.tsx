@@ -2,9 +2,9 @@ import { Modal } from '../components/Modal'
 import { PaymentForm } from '../components/PaymentForm'
 import { PageBanner } from '../components/page/PageBanner'
 import { PageLoadingState } from '../components/page/PageLoadingState'
-import { PaymentFiltersModalContent } from '../components/payments/PaymentFiltersModalContent'
-import { PaymentsListSection } from '../components/payments/PaymentsListSection'
-import { usePaymentsPage } from '../components/payments/usePaymentsPage'
+import { PaymentFiltersModalContent } from '../features/payments/PaymentFiltersModalContent'
+import { PaymentsListSection } from '../features/payments/PaymentsListSection'
+import { usePaymentsPage } from '../features/payments/usePaymentsPage'
 
 export function PaymentsPage() {
   const {
@@ -93,3 +93,4 @@ export function PaymentsPage() {
     </div>
   )
 }
+

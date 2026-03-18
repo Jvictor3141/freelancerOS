@@ -5,7 +5,7 @@ import { BrandLogo } from './BrandLogo';
 import { useFeedback } from './FeedbackProvider';
 import { getToastToneForMessage } from '../lib/feedback';
 import { getErrorMessage } from '../lib/supabase';
-import { useAuthStore } from '../store/useAuthStore';
+import { useAuthStore } from '../stores/useAuthStore';
 
 export function Header() {
   const navigate = useNavigate();
@@ -165,3 +165,5 @@ export function Header() {
     </header>
   );
 }
+
+

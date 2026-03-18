@@ -1,5 +1,6 @@
 import type { User } from '@supabase/supabase-js';
 import type { FreelancerProfile } from '../types/freelancerProfile';
+import { getRecord } from './typeGuards';
 
 export const emptyFreelancerProfile: FreelancerProfile = {
   displayName: '',
@@ -11,14 +12,6 @@ export const emptyFreelancerProfile: FreelancerProfile = {
   bio: '',
   proposalSignature: '',
 };
-
-function getRecord(value: unknown) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return null;
-  }
-
-  return value as Record<string, unknown>;
-}
 
 function getString(value: unknown) {
   return typeof value === 'string' ? value : '';

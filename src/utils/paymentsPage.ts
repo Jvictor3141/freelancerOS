@@ -1,18 +1,8 @@
 import type { Client } from '../types/client'
-import type { Payment, PaymentStatus } from '../types/payment'
+import type { Payment } from '../types/payment'
 import type { Project } from '../types/project'
-
-export const paymentStatusFilterOptions: Array<PaymentStatus | 'all'> = [
-  'all',
-  'pending',
-  'paid',
-  'overdue',
-]
-
-export type PaymentWithRelations = Payment & {
-  projectName: string
-  clientName: string
-}
+import type { PaymentWithProjectAndClient } from '../types/viewModels'
+import type { PaymentStatusFilter } from './paymentStatus'
 
 export function getPaymentActionButtonClassName(
   tone: 'success' | 'neutral' | 'danger',
@@ -32,7 +22,7 @@ export function getPaymentsWithRelations(
   payments: Payment[],
   projects: Project[],
   clients: Client[],
-): PaymentWithRelations[] {
+): PaymentWithProjectAndClient[] {
   const projectMap = new Map(projects.map((project) => [project.id, project]))
   const clientMap = new Map(clients.map((client) => [client.id, client]))
 
@@ -49,8 +39,8 @@ export function getPaymentsWithRelations(
 }
 
 export function getFilteredPayments(
-  payments: PaymentWithRelations[],
-  statusFilter: PaymentStatus | 'all',
+  payments: PaymentWithProjectAndClient[],
+  statusFilter: PaymentStatusFilter,
 ) {
   if (statusFilter === 'all') {
     return payments

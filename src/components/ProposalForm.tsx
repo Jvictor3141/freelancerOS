@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useFeedback } from './FeedbackProvider';
-import type { ProposalInput } from '../lib/database';
+import type { ProposalInput } from '../types/inputs';
 import type { Client } from '../types/client';
 import type { Proposal } from '../types/proposal';
 
@@ -16,6 +16,7 @@ type ProposalFormValues = Omit<ProposalInput, 'amount' | 'deliveryDays'> & {
   amount: string;
   deliveryDays: string;
 };
+type ProposalFormField = keyof ProposalFormValues;
 
 const emptyValues: ProposalFormValues = {
   clientId: '',
@@ -37,6 +38,16 @@ export function ProposalForm({
 }: ProposalFormProps) {
   const [values, setValues] = useState<ProposalFormValues>(emptyValues);
   const { notify } = useFeedback();
+
+  function setField<K extends ProposalFormField>(
+    field: K,
+    value: ProposalFormValues[K],
+  ) {
+    setValues((previousValues) => ({
+      ...previousValues,
+      [field]: value,
+    }));
+  }
 
   useEffect(() => {
     if (initialValues) {
@@ -68,22 +79,45 @@ export function ProposalForm({
   ) {
     const { name, value } = event.target;
 
-    setValues((previousValues) => {
-      if (name === 'clientId') {
-        const selectedClient = clients.find((client) => client.id === value);
+    if (name === 'clientId') {
+      const selectedClient = clients.find((client) => client.id === value);
 
-        return {
-          ...previousValues,
-          clientId: value,
-          recipientEmail: selectedClient?.email ?? previousValues.recipientEmail,
-        };
-      }
-
-      return {
+      setValues((previousValues) => ({
         ...previousValues,
-        [name]: value,
-      };
-    });
+        clientId: value,
+        recipientEmail: selectedClient?.email ?? previousValues.recipientEmail,
+      }));
+      return;
+    }
+
+    if (name === 'title') {
+      setField('title', value);
+      return;
+    }
+
+    if (name === 'description') {
+      setField('description', value);
+      return;
+    }
+
+    if (name === 'amount') {
+      setField('amount', value);
+      return;
+    }
+
+    if (name === 'deliveryDays') {
+      setField('deliveryDays', value);
+      return;
+    }
+
+    if (name === 'recipientEmail') {
+      setField('recipientEmail', value);
+      return;
+    }
+
+    if (name === 'notes') {
+      setField('notes', value);
+    }
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

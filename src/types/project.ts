@@ -1,8 +1,11 @@
-export type ProjectStatus =
-  | 'proposal'
-  | 'in_progress'
-  | 'review'
-  | 'completed';
+export const projectStatuses = [
+  'proposal',
+  'in_progress',
+  'review',
+  'completed',
+] as const;
+
+export type ProjectStatus = (typeof projectStatuses)[number];
 
 export type Project = {
   id: string;

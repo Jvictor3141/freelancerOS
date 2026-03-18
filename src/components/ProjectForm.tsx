@@ -1,18 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useFeedback } from './FeedbackProvider';
 import type { Client } from '../types/client';
-import type { Project, ProjectStatus } from '../types/project';
-import { projectStatusLabel } from '../utils/projectStatus';
+import type { Project } from '../types/project';
+import type { ProjectInput } from '../types/inputs';
+import {
+  isProjectStatus,
+  projectEditableStatusOptions,
+  projectStatusLabel,
+  proposalProjectEditableStatusOptions,
+} from '../utils/projectStatus';
 
-type ProjectFormValues = Omit<Project, 'id' | 'createdAt'>;
-type ProjectFormState = Omit<ProjectFormValues, 'value'> & {
+type ProjectFormState = Omit<ProjectInput, 'value'> & {
   value: string;
 };
+type ProjectFormField = keyof ProjectFormState;
 
 type ProjectFormProps = {
   clients: Client[];
   initialValues?: Project | null;
-  onSubmit: (values: ProjectFormValues) => Promise<void> | void;
+  onSubmit: (values: ProjectInput) => Promise<void> | void;
   onCancel: () => void;
   isSubmitting?: boolean;
 };
@@ -26,12 +32,6 @@ const emptyValues: ProjectFormState = {
   status: 'in_progress',
 };
 
-const defaultStatusOptions: ProjectStatus[] = [
-  'in_progress',
-  'review',
-  'completed',
-];
-
 export function ProjectForm({
   clients,
   initialValues,
@@ -43,8 +43,18 @@ export function ProjectForm({
   const { notify } = useFeedback();
   const statusOptions =
     initialValues?.status === 'proposal'
-      ? (['proposal', ...defaultStatusOptions] as ProjectStatus[])
-      : defaultStatusOptions;
+      ? proposalProjectEditableStatusOptions
+      : projectEditableStatusOptions;
+
+  function setField<K extends ProjectFormField>(
+    field: K,
+    value: ProjectFormState[K],
+  ) {
+    setValues((previousValues) => ({
+      ...previousValues,
+      [field]: value,
+    }));
+  }
 
   useEffect(() => {
     if (initialValues) {
@@ -72,10 +82,34 @@ export function ProjectForm({
   ) {
     const { name, value } = event.target;
 
-    setValues((previousValues) => ({
-      ...previousValues,
-      [name]: value,
-    }));
+    if (name === 'clientId') {
+      setField('clientId', value);
+      return;
+    }
+
+    if (name === 'name') {
+      setField('name', value);
+      return;
+    }
+
+    if (name === 'description') {
+      setField('description', value);
+      return;
+    }
+
+    if (name === 'value') {
+      setField('value', value);
+      return;
+    }
+
+    if (name === 'deadline') {
+      setField('deadline', value);
+      return;
+    }
+
+    if (name === 'status' && isProjectStatus(value)) {
+      setField('status', value);
+    }
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

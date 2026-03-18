@@ -1,32 +1,25 @@
 import { getErrorMessage, supabase, supabaseKey, supabaseUrl } from '../lib/supabase';
-import type { SharedProposal, ProposalSecureShareLink } from '../types/sharedProposal';
-
-type CreateShareLinkResponse = {
-  shareLink: ProposalSecureShareLink;
-};
-
-type SharedProposalResponse = {
-  proposal: SharedProposal;
-};
-
-type ProposalShareAction = 'create_share_link' | 'get_shared_proposal' | 'respond_to_shared_proposal';
-type SharedProposalDecision = 'accept' | 'reject';
+import type {
+  CreateShareLinkResponse,
+  ProposalShareRequest,
+  ProposalShareResponse,
+  SharedProposalDecision,
+  SharedProposalResponse,
+} from '../types/sharedProposal'
+import { getRecord } from '../utils/typeGuards'
 
 function getProposalShareErrorMessage(error: unknown, fallback: string) {
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'error' in error &&
-    typeof error.error === 'string'
-  ) {
-    return error.error;
+  const errorRecord = getRecord(error)
+
+  if (typeof errorRecord?.error === 'string') {
+    return errorRecord.error
   }
 
-  return getErrorMessage(error, fallback);
+  return getErrorMessage(error, fallback)
 }
 
-async function invokeProposalShareFunction<TResult>(
-  payload: Record<string, unknown>,
+async function invokeProposalShareFunction<TResult extends ProposalShareResponse>(
+  payload: ProposalShareRequest,
   options?: { accessToken?: string | null },
 ): Promise<TResult> {
   const response = await fetch(`${supabaseUrl}/functions/v1/proposal-share`, {
@@ -44,7 +37,7 @@ async function invokeProposalShareFunction<TResult>(
   const responseJson = (await response.json().catch(() => null)) as
     | { error?: string }
     | TResult
-    | null;
+    | null
 
   if (!response.ok) {
     throw new Error(
@@ -55,7 +48,7 @@ async function invokeProposalShareFunction<TResult>(
     );
   }
 
-  return responseJson as TResult;
+  return responseJson as TResult
 }
 
 async function getAccessToken() {
@@ -78,7 +71,7 @@ export async function createProposalSecureShareLink(
 
   const response = await invokeProposalShareFunction<CreateShareLinkResponse>(
     {
-      action: 'create_share_link' satisfies ProposalShareAction,
+      action: 'create_share_link',
       proposalId,
       expiresInDays,
     },
@@ -90,7 +83,7 @@ export async function createProposalSecureShareLink(
 
 export async function getSharedProposal(shareId: string, token: string) {
   const response = await invokeProposalShareFunction<SharedProposalResponse>({
-    action: 'get_shared_proposal' satisfies ProposalShareAction,
+    action: 'get_shared_proposal',
     shareId,
     token,
   });
@@ -104,7 +97,7 @@ export async function respondToSharedProposal(
   decision: SharedProposalDecision,
 ) {
   const response = await invokeProposalShareFunction<SharedProposalResponse>({
-    action: 'respond_to_shared_proposal' satisfies ProposalShareAction,
+    action: 'respond_to_shared_proposal',
     shareId,
     token,
     decision,

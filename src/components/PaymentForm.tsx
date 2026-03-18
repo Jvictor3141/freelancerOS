@@ -1,18 +1,24 @@
 import { useEffect, useState } from 'react';
 import { useFeedback } from './FeedbackProvider';
+import type { PaymentInput } from '../types/inputs';
 import type { Payment } from '../types/payment';
 import type { Project } from '../types/project';
-import { paymentStatusLabel } from '../utils/paymentStatus';
+import { paymentMethods } from '../types/payment';
+import {
+  isPaymentMethod,
+  isPaymentStatus,
+  paymentStatusLabel,
+} from '../utils/paymentStatus';
 
-type PaymentFormValues = Omit<Payment, 'id' | 'createdAt'>;
-type PaymentFormState = Omit<PaymentFormValues, 'amount'> & {
+type PaymentFormState = Omit<PaymentInput, 'amount'> & {
   amount: string;
 };
+type PaymentFormField = keyof PaymentFormState;
 
 type PaymentFormProps = {
   projects: Project[];
   initialValues?: Payment | null;
-  onSubmit: (values: PaymentFormValues) => Promise<void> | void;
+  onSubmit: (values: PaymentInput) => Promise<void> | void;
   onCancel: () => void;
   isSubmitting?: boolean;
 };
@@ -36,6 +42,16 @@ export function PaymentForm({
 }: PaymentFormProps) {
   const [values, setValues] = useState<PaymentFormState>(emptyValues);
   const { notify } = useFeedback();
+
+  function setField<K extends PaymentFormField>(
+    field: K,
+    value: PaymentFormState[K],
+  ) {
+    setValues((previousValues) => ({
+      ...previousValues,
+      [field]: value,
+    }));
+  }
 
   useEffect(() => {
     if (initialValues) {
@@ -64,21 +80,46 @@ export function PaymentForm({
   ) {
     const { name, value } = event.target;
 
-    setValues((previousValues) => {
-      const nextValues: PaymentFormState = {
-        ...previousValues,
-        [name]: value,
-      } as PaymentFormState;
+    if (name === 'projectId') {
+      setField('projectId', value);
+      return;
+    }
 
-      if (name === 'status') {
-        nextValues.paidAt =
+    if (name === 'amount') {
+      setField('amount', value);
+      return;
+    }
+
+    if (name === 'dueDate') {
+      setField('dueDate', value);
+      return;
+    }
+
+    if (name === 'paidAt') {
+      setField('paidAt', value || null);
+      return;
+    }
+
+    if (name === 'notes') {
+      setField('notes', value);
+      return;
+    }
+
+    if (name === 'method' && isPaymentMethod(value)) {
+      setField('method', value);
+      return;
+    }
+
+    if (name === 'status' && isPaymentStatus(value)) {
+      setValues((previousValues) => ({
+        ...previousValues,
+        status: value,
+        paidAt:
           value === 'paid'
             ? previousValues.paidAt || new Date().toISOString().slice(0, 10)
-            : null;
-      }
-
-      return nextValues;
-    });
+            : null,
+      }));
+    }
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -194,10 +235,17 @@ export function PaymentForm({
             onChange={handleChange}
             className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
           >
-            <option value="pix">Pix</option>
-            <option value="card">Cartao</option>
-            <option value="bank_transfer">Transferencia</option>
-            <option value="cash">Dinheiro</option>
+            {paymentMethods.map((method) => (
+              <option key={method} value={method}>
+                {method === 'pix'
+                  ? 'Pix'
+                  : method === 'card'
+                    ? 'Cartão'
+                    : method === 'bank_transfer'
+                      ? 'Transferência'
+                      : 'Dinheiro'}
+              </option>
+            ))}
           </select>
         </label>
       </div>

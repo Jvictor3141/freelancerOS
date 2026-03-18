@@ -2,9 +2,9 @@ import { supabase, getSupabaseErrorMessage } from '../lib/supabase';
 import {
   mapClientRecord,
   toClientPayload,
-  type ClientInput,
   type ClientRecord,
 } from '../lib/database';
+import type { ClientInput } from '../types/inputs';
 import { ensureDatabaseBootstrap } from './bootstrapService';
 import type { Client } from '../types/client';
 

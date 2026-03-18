@@ -7,12 +7,12 @@ import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
 import { RecoveryPasswordPage } from './pages/RecoveryPasswordPage';
-import { useAuthStore } from './store/useAuthStore';
-import { useClientStore } from './store/useClientStore';
-import { usePaymentStore } from './store/usePaymentStore';
-import { usePreferencesStore } from './store/usePreferencesStore';
-import { useProjectStore } from './store/useProjectStore';
-import { useProposalStore } from './store/useProposalStore';
+import { useAuthStore } from './stores/useAuthStore';
+import { useClientStore } from './stores/useClientStore';
+import { usePaymentStore } from './stores/usePaymentStore';
+import { usePreferencesStore } from './stores/usePreferencesStore';
+import { useProjectStore } from './stores/useProjectStore';
+import { useProposalStore } from './stores/useProposalStore';
 
 const DashboardPage = lazy(async () => ({
   default: (await import('./pages/DashboardPage')).DashboardPage,
@@ -199,3 +199,5 @@ function App() {
 }
 
 export default App;
+
+

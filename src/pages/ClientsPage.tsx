@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { ClientForm } from '../components/ClientForm'
-import { ClientsListSection } from '../components/clients/ClientsListSection'
-import { useClientsPage } from '../components/clients/useClientsPage'
+import { ClientsListSection } from '../features/clients/ClientsListSection'
+import { useClientsPage } from '../features/clients/useClientsPage'
 import { Modal } from '../components/Modal'
 import { PageBanner } from '../components/page/PageBanner'
 import { PageLoadingState } from '../components/page/PageLoadingState'
@@ -70,3 +70,4 @@ export function ClientsPage() {
     </div>
   )
 }
+

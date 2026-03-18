@@ -2,9 +2,9 @@ import { supabase, getSupabaseErrorMessage } from '../lib/supabase';
 import {
   mapPaymentRecord,
   toPaymentPayload,
-  type PaymentInput,
   type PaymentRecord,
 } from '../lib/database';
+import type { PaymentInput } from '../types/inputs';
 import { ensureDatabaseBootstrap } from './bootstrapService';
 import type { Payment } from '../types/payment';
 

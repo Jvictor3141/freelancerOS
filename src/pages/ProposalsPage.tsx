@@ -2,14 +2,14 @@ import { useNavigate } from 'react-router-dom'
 import { Modal } from '../components/Modal'
 import { PageBanner } from '../components/page/PageBanner'
 import { PageLoadingState } from '../components/page/PageLoadingState'
-import { ProposalFiltersModalContent } from '../components/proposals/ProposalFiltersModalContent'
-import { ProposalListSection } from '../components/proposals/ProposalListSection'
-import { ProposalResponseNotificationsSection } from '../components/proposals/ProposalResponseNotificationsSection'
-import { ProposalShareModalContent } from '../components/proposals/ProposalShareModalContent'
+import { ProposalFiltersModalContent } from '../features/proposals/ProposalFiltersModalContent'
+import { ProposalListSection } from '../features/proposals/ProposalListSection'
+import { ProposalResponseNotificationsSection } from '../features/proposals/ProposalResponseNotificationsSection'
+import { ProposalShareModalContent } from '../features/proposals/ProposalShareModalContent'
 import { ProposalForm } from '../components/ProposalForm'
-import { ProposalsFiltersSection } from '../components/proposals/ProposalsFiltersSection'
-import { ProposalsOverviewSection } from '../components/proposals/ProposalsOverviewSection'
-import { useProposalsPage } from '../components/proposals/useProposalsPage'
+import { ProposalsFiltersSection } from '../features/proposals/ProposalsFiltersSection'
+import { ProposalsOverviewSection } from '../features/proposals/ProposalsOverviewSection'
+import { useProposalsPage } from '../features/proposals/useProposalsPage'
 
 export function ProposalsPage() {
   const navigate = useNavigate()
@@ -173,3 +173,4 @@ export function ProposalsPage() {
     </div>
   )
 }
+
