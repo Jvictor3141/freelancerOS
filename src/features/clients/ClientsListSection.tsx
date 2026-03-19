@@ -25,14 +25,11 @@ export function ClientsListSection({
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
       <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
-        <div className="flex flex-col gap-4 min-[425px]:flex-row min-[425px]:items-start min-[425px]:justify-between lg:items-center">
+        <div className="flex gap-4 items-center">
           <div className="min-w-0 flex-1">
             <h3 className="text-xl font-semibold tracking-tight text-slate-950">
               Lista de clientes
             </h3>
-            <p className="mt-1 text-sm font-medium text-slate-500">
-              {clients.length} cliente(s) encontrado(s)
-            </p>
           </div>
 
           <div className="flex min-w-0 items-center gap-3 min-[425px]:shrink-0">
@@ -40,7 +37,7 @@ export function ClientsListSection({
               value={search}
               onChange={(event) => onSearchChange(event.target.value)}
               placeholder="Buscar por nome, empresa ou email"
-              className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff] min-[425px]:w-52 min-[425px]:flex-none sm:w-60 md:w-72 lg:w-80"
+              className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff] w-32 min-[425px]:flex-none sm:w-60 md:w-72 lg:w-80"
             />
 
             <button
@@ -54,6 +51,9 @@ export function ClientsListSection({
             </button>
           </div>
         </div>
+        <p className="mt-1 text-sm font-medium text-slate-500">
+            {clients.length} cliente(s) encontrado(s)
+        </p>
       </div>
 
       <div className="divide-y divide-slate-100 lg:hidden">

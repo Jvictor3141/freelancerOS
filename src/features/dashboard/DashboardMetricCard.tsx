@@ -23,7 +23,7 @@ export function DashboardMetricCard({
         </div>
         <p className="text-sm font-medium text-slate-500">{label}</p>
       </div>
-      <p className="flex items-end justify-end mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+      <p className="flex items-end justify-end mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-slate-950">
         {value}
       </p>
       <p className="mt-2 text-sm text-slate-500">{description}</p>

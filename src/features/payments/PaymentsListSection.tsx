@@ -37,14 +37,11 @@ export function PaymentsListSection({
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
       <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
-        <div className="flex items-start justify-between gap-4 max-[425px]:items-center">
+        <div className="flex justify-between gap-4 items-center">
           <div className="min-w-0 flex-1">
-            <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+            <h3 className="text-xl font-semibold tracking-tight text-slate-950">
               Lista de pagamentos
             </h3>
-            <p className="text-sm font-medium text-slate-500">
-              {payments.length} pagamento(s) encontrado(s)
-            </p>
           </div>
 
           <div className="flex shrink-0 items-center gap-3">
@@ -92,6 +89,9 @@ export function PaymentsListSection({
             </button>
           </div>
         </div>
+        <p className="text-sm font-medium text-slate-500">
+          {payments.length} pagamento(s) encontrado(s)
+        </p>
       </div>
 
       <div className="divide-y divide-slate-100 lg:hidden">

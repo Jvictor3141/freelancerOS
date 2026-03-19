@@ -34,7 +34,7 @@ export function ProposalsOverviewSection({
       icon: CheckCircle2,
     },
     {
-      label: 'Pipeline aberto',
+      label: 'Em aberto',
       value: formatCurrency(metrics.openPipelineValue),
       icon: Clock3,
     },
@@ -48,7 +48,7 @@ export function ProposalsOverviewSection({
           Proposta, envio, aceite e projeto no mesmo fluxo
         </h2>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-4">
           {summaryCards.map((card) => {
             const Icon = card.icon
 
@@ -57,11 +57,13 @@ export function ProposalsOverviewSection({
                 key={card.label}
                 className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm"
               >
-                <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
-                  <Icon size={18} />
+                <div className='flex items-center'>
+                  <div className="mr-2 inline-flex rounded-2xl bg-white/12 p-2">
+                    <Icon size={16} />
+                  </div>
+                  <p className="text-sm text-indigo-100">{card.label}</p>
                 </div>
-                <p className="text-sm text-indigo-100">{card.label}</p>
-                <p className="mt-2 text-2xl font-semibold">{card.value}</p>
+                <p className="flex items-end justify-end mt-2 text-2xl font-semibold">{card.value}</p>
               </div>
             )
           })}

@@ -166,43 +166,51 @@ export function ClientDetailsPage() {
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 grid-cols-2 md:grid-cols-4">
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
-          <div className="mb-4 inline-flex rounded-2xl bg-blue-100 p-3 text-blue-700">
-            <FolderKanban size={18} />
+          <div className='flex items-center'>
+            <div className="mr-2 inline-flex rounded-2xl bg-blue-100 p-3 text-blue-700">
+              <FolderKanban size={16} />
+            </div>
+            <p className="text-sm font-medium text-slate-500">Projetos</p>
           </div>
-          <p className="text-sm font-medium text-slate-500">Projetos</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+          <p className="flex items-end justify-end mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-slate-950">
             {clientProjects.length}
           </p>
         </div>
 
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
-          <div className="mb-4 inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-700">
-            <Wallet size={18} />
+          <div className='flex items-center'>
+            <div className="mr-2 inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-700">
+              <Wallet size={16} />
+            </div>
+            <p className="text-sm font-medium text-slate-500">Recebido</p>
           </div>
-          <p className="text-sm font-medium text-slate-500">Recebido</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+          <p className="flex items-end justify-end mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-slate-950">
             {formatCurrency(summary.totalReceived)}
           </p>
         </div>
 
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
-          <div className="mb-4 inline-flex rounded-2xl bg-amber-100 p-3 text-amber-700">
-            <Clock3 size={18} />
+          <div className='flex items-center'>
+            <div className="mr-2 inline-flex rounded-2xl bg-amber-100 p-3 text-amber-700">
+              <Clock3 size={16} />
+            </div>
+            <p className="text-sm font-medium text-slate-500">Pendente</p>
           </div>
-          <p className="text-sm font-medium text-slate-500">Pendente</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+          <p className="flex items-end justify-end mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-slate-950">
             {formatCurrency(summary.totalOutstanding)}
           </p>
         </div>
 
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
-          <div className="mb-4 inline-flex rounded-2xl bg-violet-100 p-3 text-violet-700">
-            <CheckCircle2 size={18} />
+          <div className='flex items-center'>
+            <div className="mr-2 inline-flex rounded-2xl bg-violet-100 p-3 text-violet-700">
+              <CheckCircle2 size={16} />
+            </div>
+            <p className="text-sm font-medium text-slate-500">Concluídos</p>
           </div>
-          <p className="text-sm font-medium text-slate-500">Concluídos</p>
-          <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
+          <p className="flex items-end justify-end mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-slate-950">
             {summary.completedProjects}
           </p>
         </div>
@@ -221,7 +229,7 @@ export function ClientDetailsPage() {
             {clientProjects.length > 0 ? (
               clientProjects.map((project) => (
                 <div key={project.id} className="px-6 py-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex flex-col-2 justify-between gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <p className="font-semibold text-slate-900">{project.name}</p>
                       <p className="mt-1 text-sm text-slate-500">
@@ -230,7 +238,7 @@ export function ClientDetailsPage() {
                     </div>
 
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${projectStatusClassName[project.status]}`}
+                      className={`inline-flex rounded-full h-6.5 px-3 py-1 text-xs font-semibold ${projectStatusClassName[project.status]}`}
                     >
                       {projectStatusLabel[project.status]}
                     </span>
@@ -269,7 +277,7 @@ export function ClientDetailsPage() {
             {clientPayments.length > 0 ? (
               clientPayments.map((payment) => (
                 <div key={payment.id} className="px-6 py-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex flex-col-2 justify-between gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <p className="font-semibold text-slate-900">
                         {formatCurrency(payment.amount)}
@@ -281,7 +289,7 @@ export function ClientDetailsPage() {
                     </div>
 
                     <span
-                      className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${paymentStatusClassName[payment.status]}`}
+                      className={`inline-flex rounded-full h-6.5 px-3 py-1 text-xs font-semibold ${paymentStatusClassName[payment.status]}`}
                     >
                       {paymentStatusLabel[payment.status]}
                     </span>

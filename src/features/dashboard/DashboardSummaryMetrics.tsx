@@ -47,7 +47,7 @@ export function DashboardSummaryMetrics({
   ]
 
   return (
-    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <section className="grid grid-cols-2 gap-4 xl:grid-cols-4">
       {cards.map((card) => (
         <DashboardMetricCard key={card.label} {...card} />
       ))}

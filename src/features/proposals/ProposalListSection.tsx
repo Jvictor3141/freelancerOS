@@ -110,12 +110,12 @@ export function ProposalListSection({
               <article key={proposal.id} className="space-y-4 px-5 py-5 sm:px-6">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <div className="flex justify-between gap-2 sm:flex-row sm:items-center">
                       <p className="text-lg font-semibold text-slate-900">
                         {proposal.title}
                       </p>
                       <span
-                        className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${proposalStatusClassName[proposal.status]}`}
+                        className={`inline-flex w-fit h-7 rounded-full px-3 py-1 text-xs font-semibold ${proposalStatusClassName[proposal.status]}`}
                       >
                         {proposalStatusLabel[proposal.status]}
                       </span>
