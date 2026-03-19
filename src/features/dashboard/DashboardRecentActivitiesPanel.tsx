@@ -5,6 +5,13 @@ import {
   projectStatusLabel,
 } from '../../utils/projectStatus'
 
+const MAX_VISIBLE_ACTIVITY_CARDS = 3
+const ACTIVITY_CARD_MIN_HEIGHT = 116
+const ACTIVITY_CARD_GAP = 12
+const ACTIVITIES_SCROLL_AREA_MAX_HEIGHT =
+  MAX_VISIBLE_ACTIVITY_CARDS * ACTIVITY_CARD_MIN_HEIGHT +
+  (MAX_VISIBLE_ACTIVITY_CARDS - 1) * ACTIVITY_CARD_GAP
+
 type DashboardRecentActivitiesPanelProps = {
   activities: DashboardRecentActivity[]
 }
@@ -23,12 +30,16 @@ export function DashboardRecentActivitiesPanel({
         </h3>
       </div>
 
-      <div className="space-y-3">
+      <div
+        className="space-y-3 overflow-y-auto pr-1"
+        style={{ maxHeight: `${ACTIVITIES_SCROLL_AREA_MAX_HEIGHT}px` }}
+        aria-label="Lista de atividades recentes"
+      >
         {activities.length > 0 ? (
           activities.map((activity) => (
             <div
               key={activity.id}
-              className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4"
+              className="min-h-[116px] rounded-2xl border border-slate-200 bg-slate-50/70 p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
