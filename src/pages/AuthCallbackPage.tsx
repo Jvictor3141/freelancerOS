@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
+import { Seo } from '../seo/Seo';
 import { getSession } from '../services/authService';
 import { useAuthStore } from '../stores/useAuthStore';
 
@@ -127,24 +128,31 @@ export function AuthCallbackPage() {
   }, [authFlow, initialized, navigate, searchParams, user]);
 
   return (
-    <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8">
-      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
-        <div className="motion-surface rounded-4xl border border-slate-200 bg-white/85 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur">
-          <div className="flex items-center gap-3">
-            <BrandLogo variant="lockup" className="h-8 w-auto" />
-            <LoaderCircle className="h-5 w-5 animate-spin text-[#635bff]" />
+    <>
+      <Seo
+        title="Autenticando | FreelancerOS"
+        description="Processando o retorno de autenticacao e encaminhando voce para a rota correta."
+        robots="noindex, follow"
+        canonical="/auth/callback"
+      />
+      <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8">
+        <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
+          <div className="motion-surface rounded-4xl border border-slate-200 bg-white/85 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur">
+            <div className="flex items-center gap-3">
+              <BrandLogo variant="lockup" className="h-8 w-auto" />
+              <LoaderCircle className="h-5 w-5 animate-spin text-[#635bff]" />
+            </div>
+            <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+              Validando autenticacao
+            </h1>
+            <p className="mt-2 text-sm text-slate-500">
+              Processando o retorno do Supabase e encaminhando voce para a rota
+              correta.
+            </p>
           </div>
-          <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-            Validando autenticacao
-          </h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Processando o retorno do Supabase e encaminhando voce para a rota
-            correta.
-          </p>
         </div>
       </div>
-    </div>
+    </>
   );
 }
-
 

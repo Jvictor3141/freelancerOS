@@ -11,6 +11,7 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
 import { PasswordField } from '../components/PasswordField';
 import { getErrorMessage } from '../lib/supabase';
+import { Seo } from '../seo/Seo';
 import { requestPasswordReset } from '../services/authService';
 import { useAuthStore } from '../stores/useAuthStore';
 import { getRecord } from '../utils/typeGuards';
@@ -168,8 +169,23 @@ export function LoginPage() {
   }
 
   return (
-    <div className="motion-page min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8 lg:px-10">
-      <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-7xl overflow-hidden rounded-[36px] border border-slate-200 bg-white/80 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur xl:grid-cols-[0.92fr_1.08fr]">
+    <>
+      <Seo
+        title={
+          mode === 'sign_in'
+            ? 'Entrar | FreelancerOS'
+            : 'Criar Conta | FreelancerOS'
+        }
+        description={
+          mode === 'sign_in'
+            ? 'Acesse sua conta do FreelancerOS para gerenciar sua operacao como freelancer.'
+            : 'Crie sua conta no FreelancerOS para centralizar clientes, projetos, propostas e pagamentos.'
+        }
+        robots="noindex, follow"
+        canonical="/login"
+      />
+      <div className="motion-page min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8 lg:px-10">
+        <div className="mx-auto grid min-h-[calc(100vh-3rem)] max-w-7xl overflow-hidden rounded-[36px] border border-slate-200 bg-white/80 shadow-[0_30px_80px_rgba(15,23,42,0.08)] backdrop-blur xl:grid-cols-[0.92fr_1.08fr]">
         <section className="flex items-center bg-[linear-gradient(180deg,rgba(248,250,252,0.88),rgba(255,255,255,0.98))] px-5 py-8 sm:px-8 lg:px-10">
           <div className="mx-auto w-full max-w-md">
             <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_20px_45px_rgba(15,23,42,0.08)] sm:p-8">
@@ -420,9 +436,9 @@ export function LoginPage() {
             </div>
           </div>
         </section>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
-
 

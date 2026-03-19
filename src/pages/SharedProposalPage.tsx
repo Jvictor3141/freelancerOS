@@ -9,6 +9,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
+import { Seo } from '../seo/Seo';
 import { formatCurrency, formatDateTime } from '../utils/formatting';
 import {
   getSharedProposal,
@@ -132,10 +133,29 @@ export function SharedProposalPage() {
 
   const isAccepted = proposal ? isAcceptedProposal(proposal) : false;
   const isRejected = proposal ? isRejectedProposal(proposal) : false;
+  const seoTitle = loading
+    ? 'Proposta compartilhada | FreelancerOS'
+    : error
+      ? 'Link indisponivel | FreelancerOS'
+      : proposal
+        ? `${proposal.title} | FreelancerOS`
+        : 'Proposta compartilhada | FreelancerOS';
+  const seoDescription = error
+    ? 'Esse link de proposta nao esta disponivel no momento.'
+    : proposal
+      ? 'Visualize a proposta compartilhada e responda diretamente pelo FreelancerOS.'
+      : 'Visualize uma proposta compartilhada no FreelancerOS.';
 
   return (
-    <div className="motion-page min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8 lg:px-10">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6">
+    <>
+      <Seo
+        title={seoTitle}
+        description={seoDescription}
+        robots="index, follow"
+        canonical={null}
+      />
+      <div className="motion-page min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8 lg:px-10">
+        <div className="mx-auto flex max-w-6xl flex-col gap-6">
         <header className="rounded-[30px] border border-slate-200 bg-white/85 px-5 py-4 shadow-sm shadow-slate-100 backdrop-blur sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <BrandLogo variant="lockup" className="h-8 w-auto" />
@@ -333,7 +353,8 @@ export function SharedProposalPage() {
             </section>
           </>
         ) : null}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

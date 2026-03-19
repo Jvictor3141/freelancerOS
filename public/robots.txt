@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+
+Disallow: /auth/callback
+Disallow: /clientes
+Disallow: /clients
+Disallow: /configuracoes
+Disallow: /dashboard
+Disallow: /login
+Disallow: /pagamentos
+Disallow: /projetos
+Disallow: /redefinir-senha
+
+Sitemap: https://usefreelanceros.app/sitemap.xml

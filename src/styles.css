@@ -168,6 +168,9 @@ summary:focus-visible {
 }
 
 .motion-surface {
+  --surface-lift: 0px;
+  --surface-scale: 1;
+  transform: translate3d(0, var(--surface-lift), 0) scale(var(--surface-scale));
   transition:
     transform var(--motion-base) var(--motion-ease-standard),
     box-shadow var(--motion-base) var(--motion-ease-standard),
@@ -176,8 +179,63 @@ summary:focus-visible {
 }
 
 .motion-surface:hover {
-  transform: translateY(-2px);
+  --surface-lift: -2px;
   box-shadow: 0 20px 46px rgba(15, 23, 42, 0.08);
+}
+
+.landing-scroll-root {
+  --landing-parallax: 0px;
+}
+
+.landing-ambient-shell {
+  transform: translate3d(0, calc(var(--landing-parallax) * -0.12), 0);
+  transition: transform 220ms linear;
+  will-change: transform;
+}
+
+.landing-scroll-root[data-scroll-ready="true"] [data-scroll-reveal] {
+  --reveal-distance: 36px;
+  --reveal-shift: var(--reveal-distance);
+  --reveal-scale: 0.985;
+  opacity: 0;
+  filter: blur(12px);
+  transform: translate3d(0, var(--reveal-shift), 0) scale(var(--reveal-scale));
+  transition:
+    opacity 620ms var(--motion-ease-emphasized),
+    transform 720ms var(--motion-ease-emphasized),
+    filter 620ms var(--motion-ease-standard),
+    box-shadow var(--motion-base) var(--motion-ease-standard),
+    border-color var(--motion-base) var(--motion-ease-standard),
+    background-color var(--motion-base) var(--motion-ease-standard);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: transform, opacity, filter;
+}
+
+.landing-scroll-root[data-scroll-ready="true"][data-scroll-direction="up"]
+  [data-scroll-reveal]:not([data-in-view="true"]) {
+  --reveal-shift: calc(var(--reveal-distance) * -0.72);
+}
+
+.landing-scroll-root[data-scroll-ready="true"][data-scroll-direction="down"]
+  [data-scroll-reveal]:not([data-in-view="true"]) {
+  --reveal-shift: var(--reveal-distance);
+}
+
+.landing-scroll-root[data-scroll-ready="true"] [data-scroll-reveal][data-in-view="true"] {
+  --reveal-shift: 0px;
+  --reveal-scale: 1;
+  opacity: 1;
+  filter: blur(0);
+}
+
+.landing-scroll-root[data-scroll-ready="true"] .motion-surface[data-scroll-reveal] {
+  transform: translate3d(0, calc(var(--surface-lift) + var(--reveal-shift)), 0)
+    scale(calc(var(--surface-scale) * var(--reveal-scale)));
+}
+
+.landing-scroll-root[data-scroll-ready="true"]
+  .motion-surface[data-scroll-reveal][data-in-view="true"] {
+  transform: translate3d(0, var(--surface-lift), 0) scale(var(--surface-scale));
 }
 
 .motion-popover {

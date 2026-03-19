@@ -1,3 +1,4 @@
+import { useRef, type CSSProperties } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   AlertTriangle,
@@ -13,6 +14,8 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
+import { useScrollReveal } from '../lib/useScrollReveal';
+import { Seo } from '../seo/Seo';
 
 type StatusTone = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -194,27 +197,64 @@ const footerLinks = [
   { label: 'Demonstração', href: '#demo' },
 ];
 
+function getRevealStyle(delay: number, distance = 32): CSSProperties {
+  return {
+    '--reveal-delay': `${delay}ms`,
+    '--reveal-distance': `${distance}px`,
+  } as CSSProperties;
+}
+
 function LandingBackground() {
   return (
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <div className="landing-ambient-base absolute inset-0" />
-      <div className="landing-ambient-wave absolute inset-0" />
-      <div className="landing-ambient-orb landing-ambient-orb-one" />
-      <div className="landing-ambient-orb landing-ambient-orb-two" />
-      <div className="landing-ambient-orb landing-ambient-orb-three" />
-      <div className="landing-ambient-vignette absolute inset-0" />
+      <div className="landing-ambient-shell absolute inset-0">
+        <div className="landing-ambient-base absolute inset-0" />
+        <div className="landing-ambient-wave absolute inset-0" />
+        <div className="landing-ambient-orb landing-ambient-orb-one" />
+        <div className="landing-ambient-orb landing-ambient-orb-two" />
+        <div className="landing-ambient-orb landing-ambient-orb-three" />
+        <div className="landing-ambient-vignette absolute inset-0" />
+      </div>
     </div>
   );
 }
 
 export function LandingPage() {
+  const pageRef = useRef<HTMLDivElement>(null);
+
+  useScrollReveal(pageRef);
+
   return (
-    <div
-      id="top"
-      className="motion-page relative isolate min-h-screen bg-transparent text-slate-900"
-    >
-      <LandingBackground />
-      <div className="relative z-10 overflow-hidden">
+    <>
+      <Seo
+        title="FreelancerOS | Organize clientes, projetos e pagamentos"
+        description="FreelancerOS e o painel para freelancers centralizarem clientes, projetos, propostas e pagamentos em um unico lugar."
+        robots="index, follow"
+        canonical="/"
+        openGraph={{
+          title: 'FreelancerOS | Organize clientes, projetos e pagamentos',
+          description:
+            'FreelancerOS e o painel para freelancers centralizarem clientes, projetos, propostas e pagamentos em um unico lugar.',
+          image: '/freelanceros-og.png',
+          url: '/',
+          type: 'website',
+          siteName: 'FreelancerOS',
+        }}
+        twitter={{
+          card: 'summary_large_image',
+          title: 'FreelancerOS | Organize clientes, projetos e pagamentos',
+          description:
+            'FreelancerOS e o painel para freelancers centralizarem clientes, projetos, propostas e pagamentos em um unico lugar.',
+          image: '/freelanceros-og.png',
+        }}
+      />
+      <div
+        ref={pageRef}
+        id="top"
+        className="landing-scroll-root motion-page relative isolate min-h-screen bg-transparent text-slate-900"
+      >
+        <LandingBackground />
+        <div className="relative z-10 overflow-hidden">
         <header className="sticky top-0 z-30 border-b border-white/70 bg-white/78 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
             <Link to="/" className="inline-flex items-center rounded-full px-2 py-1">
@@ -250,7 +290,11 @@ export function LandingPage() {
         <main className="px-5 pb-16 pt-6 sm:px-8 lg:px-10 lg:pb-24 lg:pt-10">
           <div className="page-stack mx-auto flex max-w-7xl flex-col gap-18 lg:gap-24">
             <section className="grid items-center gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(24rem,0.96fr)] lg:gap-12">
-              <div className="space-y-7">
+              <div
+                data-scroll-reveal
+                style={getRevealStyle(20, 56)}
+                className="space-y-7"
+              >
                 <div className="inline-flex items-start gap-3 rounded-full border border-slate-200 bg-white/84 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm shadow-slate-200/70 backdrop-blur sm:items-center">
                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#635bff] text-white shadow-lg shadow-indigo-200">
                     <BadgeCheck size={18} />
@@ -300,7 +344,11 @@ export function LandingPage() {
                 </div>
               </div>
 
-              <div className="relative rounded-[36px] border border-slate-200 bg-white/88 p-5 shadow-[0_28px_80px_rgba(15,23,42,0.1)] backdrop-blur sm:p-6">
+              <div
+                data-scroll-reveal
+                style={getRevealStyle(90, 72)}
+                className="relative rounded-[36px] border border-slate-200 bg-white/88 p-5 shadow-[0_28px_80px_rgba(15,23,42,0.1)] backdrop-blur sm:p-6"
+              >
                 <div className="mb-5 space-y-2">
                   <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">
                     Exemplo visual do painel
@@ -351,7 +399,7 @@ export function LandingPage() {
                           key={`${client}-${status}`}
                           className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4"
                         >
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="flex justify-between gap-3 sm:flex-row sm:items-start sm:justify-between">
                             <div className="min-w-0">
                               <p className="font-semibold text-slate-900">{client}</p>
                               <p className="mt-1 text-sm text-slate-500">{detail}</p>
@@ -385,7 +433,7 @@ export function LandingPage() {
                           key={`${title}-${client}`}
                           className="rounded-2xl border border-white/10 bg-white/8 p-4"
                         >
-                          <div className="flex flex-col gap-3">
+                          <div className="flex items-start justify-between gap-3 min-[1279px]:flex-col min-[1279px]:justify-start">
                             <div className="min-w-0">
                               <p className="font-semibold leading-6">{title}</p>
                               <p className="mt-1 text-sm text-white/65">{client}</p>
@@ -404,7 +452,11 @@ export function LandingPage() {
               id="problema"
               className="grid gap-8 lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)]"
             >
-              <div className="space-y-6">
+              <div
+                data-scroll-reveal
+                style={getRevealStyle(0, 48)}
+                className="space-y-6"
+              >
                 <SectionHeader
                   eyebrow="O problema"
                   title="Quando a operação fica espalhada, o prejuízo não é só visual."
@@ -427,9 +479,11 @@ export function LandingPage() {
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                {painCards.map(({ title, description }) => (
+                {painCards.map(({ title, description }, index) => (
                   <article
                     key={title}
+                    data-scroll-reveal
+                    style={getRevealStyle(70 + index * 55, 34)}
                     className="motion-surface rounded-4xl border border-slate-200 bg-white/86 p-6 shadow-[0_24px_56px_rgba(15,23,42,0.06)] backdrop-blur"
                   >
                     <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
@@ -449,7 +503,11 @@ export function LandingPage() {
               className="rounded-[40px] border border-slate-200 bg-white/84 p-6 shadow-[0_24px_64px_rgba(15,23,42,0.06)] backdrop-blur sm:p-8"
             >
               <div className="grid gap-8 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-                <div className="space-y-6">
+                <div
+                  data-scroll-reveal
+                  style={getRevealStyle(0, 48)}
+                  className="space-y-6"
+                >
                   <SectionHeader
                     eyebrow="A solução"
                     title="O FreelancerOS junta cliente, projeto e pagamento no mesmo fluxo."
@@ -482,9 +540,11 @@ export function LandingPage() {
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {solutionCards.map(({ title, description, icon: Icon }) => (
+                  {solutionCards.map(({ title, description, icon: Icon }, index) => (
                     <article
                       key={title}
+                      data-scroll-reveal
+                      style={getRevealStyle(80 + index * 50, 34)}
                       className="motion-surface rounded-4xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100"
                     >
                       <div className="inline-flex rounded-2xl bg-indigo-50 p-3 text-[#635bff] shadow-sm shadow-slate-200">
@@ -501,17 +561,21 @@ export function LandingPage() {
             </section>
 
             <section id="funcionalidades" className="space-y-8">
-              <SectionHeader
-                eyebrow="Funcionalidades principais"
-                title="Cada área do produto existe para resolver uma parte da rotina do freelancer."
-                description="Aqui, a feature importa porque reduz retrabalho, melhora a visibilidade e deixa a operação menos dependente de memória."
-                align="center"
-              />
+              <div data-scroll-reveal style={getRevealStyle(0, 44)}>
+                <SectionHeader
+                  eyebrow="Funcionalidades principais"
+                  title="Cada área do produto existe para resolver uma parte da rotina do freelancer."
+                  description="Aqui, a feature importa porque reduz retrabalho, melhora a visibilidade e deixa a operação menos dependente de memória."
+                  align="center"
+                />
+              </div>
 
               <div className="grid gap-4 lg:grid-cols-2">
-                {featureCards.map(({ eyebrow, title, description, benefit, icon: Icon }) => (
+                {featureCards.map(({ eyebrow, title, description, benefit, icon: Icon }, index) => (
                   <article
                     key={title}
+                    data-scroll-reveal
+                    style={getRevealStyle(70 + index * 55, 34)}
                     className="motion-surface rounded-4xl border border-slate-200 bg-white/86 p-6 shadow-[0_24px_56px_rgba(15,23,42,0.06)] backdrop-blur"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -545,7 +609,11 @@ export function LandingPage() {
               className="rounded-[40px] border border-slate-200 bg-slate-950 p-6 text-white shadow-[0_28px_80px_rgba(15,23,42,0.16)] sm:p-8"
             >
               <div className="grid gap-8 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)]">
-                <div className="space-y-5">
+                <div
+                  data-scroll-reveal
+                  style={getRevealStyle(0, 48)}
+                  className="space-y-5"
+                >
                   <SectionHeader
                     eyebrow="Ganhos reais"
                     title="O ganho não é só organização. É clareza para cobrar, entregar e fechar o mês."
@@ -563,15 +631,17 @@ export function LandingPage() {
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {benefits.map((item) => (
+                  {benefits.map((item, index) => (
                     <article
                       key={item}
-                      className="rounded-[28px] border border-white/10 bg-white/8 p-5 backdrop-blur"
+                      data-scroll-reveal
+                      style={getRevealStyle(75 + index * 55, 34)}
+                      className="rounded-[28px] border border-white/10 bg-white/8 p-5 backdrop-blur max-sm:flex max-sm:items-center max-sm:gap-1.5"
                     >
-                      <div className="inline-flex rounded-2xl bg-white/12 p-3 text-white">
+                      <div className="inline-flex rounded-2xl bg-white/12 p-3 text-white max-sm:shrink-0">
                         <CheckCircle2 size={18} />
                       </div>
-                      <p className="mt-4 text-base leading-7 text-white/82">{item}</p>
+                      <p className="mt-4 text-base leading-7 text-white/82 max-sm:mt-0">{item}</p>
                     </article>
                   ))}
                 </div>
@@ -579,15 +649,21 @@ export function LandingPage() {
             </section>
 
             <section id="demo" className="space-y-8">
-              <SectionHeader
-                eyebrow="Demonstração visual"
-                title="Veja como o produto se organiza por dentro."
-                description="A estrutura abaixo mostra como o FreelancerOS apresenta clientes, projetos e pagamentos com a mesma linguagem visual do restante do sistema."
-                align="center"
-              />
+              <div data-scroll-reveal style={getRevealStyle(0, 44)}>
+                <SectionHeader
+                  eyebrow="Demonstração visual"
+                  title="Veja como o produto se organiza por dentro."
+                  description="A estrutura abaixo mostra como o FreelancerOS apresenta clientes, projetos e pagamentos com a mesma linguagem visual do restante do sistema."
+                  align="center"
+                />
+              </div>
 
               <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr]">
-                <article className="rounded-[36px] border border-slate-200 bg-white/88 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.1)] backdrop-blur">
+                <article
+                  data-scroll-reveal
+                  style={getRevealStyle(70, 40)}
+                  className="rounded-[36px] border border-slate-200 bg-white/88 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.1)] backdrop-blur"
+                >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-400">
@@ -639,7 +715,11 @@ export function LandingPage() {
                   </div>
                 </article>
 
-                <article className="rounded-[36px] border border-slate-900 bg-slate-950 p-6 text-white shadow-[0_28px_80px_rgba(15,23,42,0.18)]">
+                <article
+                  data-scroll-reveal
+                  style={getRevealStyle(130, 40)}
+                  className="rounded-[36px] border border-slate-900 bg-slate-950 p-6 text-white shadow-[0_28px_80px_rgba(15,23,42,0.18)]"
+                >
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/55">
@@ -675,7 +755,7 @@ export function LandingPage() {
                         key={`${client}-${amount}`}
                         className="rounded-2xl border border-white/10 bg-white/8 p-4"
                       >
-                        <div className="flex flex-col gap-3">
+                        <div className="flex justify-between gap-3">
                           <div className="min-w-0">
                             <p className="font-semibold">{client}</p>
                             <p className="mt-1 text-sm text-white/65">{detail}</p>
@@ -690,7 +770,11 @@ export function LandingPage() {
               </div>
             </section>
 
-            <section className="rounded-[40px] border border-slate-200 bg-[linear-gradient(135deg,rgba(99,91,255,0.95),rgba(79,70,229,0.92))] p-6 text-white shadow-[0_28px_70px_rgba(79,70,229,0.28)] sm:p-8">
+            <section
+              data-scroll-reveal
+              style={getRevealStyle(20, 44)}
+              className="rounded-[40px] border border-slate-200 bg-[linear-gradient(135deg,rgba(99,91,255,0.95),rgba(79,70,229,0.92))] p-6 text-white shadow-[0_28px_70px_rgba(79,70,229,0.28)] sm:p-8"
+            >
               <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div className="max-w-2xl space-y-3">
                   <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white/70">
@@ -780,8 +864,9 @@ export function LandingPage() {
             </div>
           </div>
         </footer>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -837,7 +922,7 @@ function StatusPill({ label, tone }: StatusPillProps) {
   return (
     <span
       className={[
-        'inline-flex w-fit max-w-full shrink-0 rounded-full px-3.5 py-1.5 text-center text-xs font-semibold leading-4 whitespace-nowrap',
+        'inline-flex w-fit max-w-full shrink-0 h-7.5 rounded-full px-3.5 py-1.5 text-center text-xs font-semibold leading-4 whitespace-nowrap',
         toneClassName[tone],
       ].join(' ')}
     >
