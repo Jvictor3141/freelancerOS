@@ -194,13 +194,27 @@ const footerLinks = [
   { label: 'Demonstração', href: '#demo' },
 ];
 
+function LandingBackground() {
+  return (
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <div className="landing-ambient-base absolute inset-0" />
+      <div className="landing-ambient-wave absolute inset-0" />
+      <div className="landing-ambient-orb landing-ambient-orb-one" />
+      <div className="landing-ambient-orb landing-ambient-orb-two" />
+      <div className="landing-ambient-orb landing-ambient-orb-three" />
+      <div className="landing-ambient-vignette absolute inset-0" />
+    </div>
+  );
+}
+
 export function LandingPage() {
   return (
-    <div id="top" className="motion-page min-h-screen bg-transparent text-slate-900">
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-x-0 top-0 -z-10 h-168 bg-[radial-gradient(circle_at_top_left,rgba(99,91,255,0.16),transparent_36%),radial-gradient(circle_at_top_right,rgba(56,189,248,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.76))]" />
-        <div className="absolute left-1/2 top-28 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-white/80 blur-3xl" />
-
+    <div
+      id="top"
+      className="motion-page relative isolate min-h-screen bg-transparent text-slate-900"
+    >
+      <LandingBackground />
+      <div className="relative z-10 overflow-hidden">
         <header className="sticky top-0 z-30 border-b border-white/70 bg-white/78 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
             <Link to="/" className="inline-flex items-center rounded-full px-2 py-1">

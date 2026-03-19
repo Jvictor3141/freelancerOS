@@ -198,6 +198,64 @@ summary:focus-visible {
   animation: motion-swap-enter 240ms var(--motion-ease-emphasized) both;
 }
 
+.landing-ambient-base {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 250, 252, 0.88) 40%, rgba(241, 245, 249, 0.92) 100%);
+}
+
+.landing-ambient-wave {
+  inset: -8%;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(99, 91, 255, 0.16), transparent 24%),
+    radial-gradient(circle at 82% 14%, rgba(56, 189, 248, 0.14), transparent 22%),
+    radial-gradient(circle at 50% 72%, rgba(14, 165, 233, 0.08), transparent 28%);
+  filter: blur(14px);
+  opacity: 0.9;
+  transform-origin: center;
+  animation: landing-gradient-shift 18s var(--motion-ease-standard) infinite alternate;
+  will-change: transform, opacity;
+}
+
+.landing-ambient-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  opacity: 0.5;
+  will-change: transform, opacity;
+}
+
+.landing-ambient-orb-one {
+  top: -8rem;
+  left: -6rem;
+  width: 24rem;
+  height: 24rem;
+  background: rgba(99, 91, 255, 0.22);
+  animation: landing-orb-float-one 24s var(--motion-ease-standard) infinite alternate;
+}
+
+.landing-ambient-orb-two {
+  top: 14%;
+  right: -7rem;
+  width: 22rem;
+  height: 22rem;
+  background: rgba(56, 189, 248, 0.2);
+  animation: landing-orb-float-two 28s var(--motion-ease-standard) infinite alternate;
+}
+
+.landing-ambient-orb-three {
+  bottom: -9rem;
+  left: 28%;
+  width: 20rem;
+  height: 20rem;
+  background: rgba(244, 114, 182, 0.14);
+  animation: landing-orb-float-three 30s var(--motion-ease-standard) infinite alternate;
+}
+
+.landing-ambient-vignette {
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0) 48%, rgba(255, 255, 255, 0.32) 100%);
+}
+
 .bg-\[\#635bff\] {
   background-color: var(--accent) !important;
 }
@@ -294,6 +352,48 @@ summary:focus-visible {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes landing-gradient-shift {
+  from {
+    opacity: 0.84;
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1.08) translate3d(0, -2%, 0);
+  }
+}
+
+@keyframes landing-orb-float-one {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(8%, 10%, 0) scale(1.08);
+  }
+}
+
+@keyframes landing-orb-float-two {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(-12%, 8%, 0) scale(1.12);
+  }
+}
+
+@keyframes landing-orb-float-three {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    transform: translate3d(10%, -12%, 0) scale(1.1);
   }
 }
 
