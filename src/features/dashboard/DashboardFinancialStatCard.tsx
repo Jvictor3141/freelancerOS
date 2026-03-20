@@ -12,14 +12,14 @@ export function DashboardFinancialStatCard({
   value,
 }: DashboardFinancialStatCardProps) {
   return (
-    <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
+    <div className="rounded-3xl bg-white/12 p-2 md:p-4 backdrop-blur-sm">
       <div className='flex items-center'>
-        <div className="mr-2 inline-flex rounded-2xl bg-white/12 p-2">
-          <Icon size={15} />
+        <div className="mr-0.5 md:mr-2 inline-flex rounded-2xl bg-white/12 p-2">
+          <Icon size={10} />
         </div>
-        <p className="text-1xl text-indigo-100">{label} :</p>
+        <p className="text-sm max-[374px]:hidden text-indigo-100">{label}:</p>
       </div>
-      <p className="flex items-end justify-end mt-2 text-2xl font-semibold">{value}</p>
+      <p className="flex items-end justify-end max-[374px]:text-xs mt-2 md:text-2xl font-semibold">{value}</p>
     </div>
   )
 }

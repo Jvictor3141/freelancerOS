@@ -106,10 +106,12 @@ function SummaryActionCard({
       onClick={onClick}
       className="group rounded-3xl border border-slate-200 bg-slate-50 p-4 text-left transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-white hover:shadow-sm hover:shadow-slate-200"
     >
-      <div className="mb-3 inline-flex rounded-2xl bg-white p-3 text-slate-700 shadow-sm shadow-slate-200">
-        {icon}
+      <div className='flex items-center'>
+        <div className="mr-2 inline-flex rounded-2xl bg-white p-3 text-slate-700 shadow-sm shadow-slate-200">
+          {icon}
+        </div>
+        <p className="text-sm text-slate-500">{label}</p>
       </div>
-      <p className="text-sm text-slate-500">{label}</p>
       <div className="mt-2 flex items-start justify-between gap-3">
         <p className="min-w-0 truncate text-lg font-semibold text-slate-950">
           {value}
@@ -303,19 +305,21 @@ export function SettingsPage() {
       <div className="page-stack space-y-6">
         <section className="grid items-start gap-6 xl:grid-cols-[1.1fr_0.9fr]">
           <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-            <div className="mb-5 inline-flex rounded-2xl bg-indigo-50 p-3 text-[#635bff]">
-              <Sparkles size={18} />
+            <div className='flex items-center mb-5'>
+              <div className="mr-2 inline-flex rounded-2xl bg-indigo-50 p-3 text-[#635bff]">
+                <Sparkles size={18} />
+              </div>
+              <p className="text-sm font-medium text-slate-500">
+                Aparência, conta e posicionamento
+              </p>
             </div>
-            <p className="text-sm font-medium text-slate-500">
-              Aparência, conta e posicionamento
-            </p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
               Configure o painel para parecer seu
             </h2>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               <SummaryActionCard
-                icon={<Palette size={18} />}
+                icon={<Palette size={16} />}
                 label="Tema atual"
                 value={currentTheme.label}
                 hint="Abrir tema"
@@ -323,7 +327,7 @@ export function SettingsPage() {
               />
 
               <SummaryActionCard
-                icon={<BriefcaseBusiness size={18} />}
+                icon={<BriefcaseBusiness size={16} />}
                 label="Assinatura usada"
                 value={
                   profileValues.businessName ||
@@ -335,7 +339,7 @@ export function SettingsPage() {
               />
 
               <SummaryActionCard
-                icon={<ShieldCheck size={18} />}
+                icon={<ShieldCheck size={16} />}
                 label="Conta"
                 value={user?.email ?? 'Conta autenticada'}
                 hint="Abrir segurança"

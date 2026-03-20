@@ -30,7 +30,13 @@ function getTokenFromHash() {
     return '';
   }
 
-  return decodeURIComponent(window.location.hash.replace(/^#/, '').trim());
+  // O token fica no hash para nao ir ao servidor nem aparecer em logs e referrers.
+  // Se a URL vier malformada, tratamos como link invalido em vez de quebrar a tela.
+  try {
+    return decodeURIComponent(window.location.hash.replace(/^#/, '').trim());
+  } catch {
+    return '';
+  }
 }
 
 export function SharedProposalPage() {
@@ -148,10 +154,12 @@ export function SharedProposalPage() {
 
   return (
     <>
+      {/* Esse link e privado e protegido por token; manter fora do indice evita
+          descoberta acidental por crawler caso a URL seja compartilhada indevidamente. */}
       <Seo
         title={seoTitle}
         description={seoDescription}
-        robots="index, follow"
+        robots="noindex, nofollow"
         canonical={null}
       />
       <div className="motion-page min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8 lg:px-10">
@@ -167,7 +175,7 @@ export function SharedProposalPage() {
         </header>
 
         {loading ? (
-          <section className="rounded-[32px] border border-slate-200 bg-white/85 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur">
+          <section className="rounded-4xl border border-slate-200 bg-white/85 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur">
             <p className="text-sm font-medium text-slate-500">
               Proposta compartilhada
             </p>
@@ -179,7 +187,7 @@ export function SharedProposalPage() {
             </p>
           </section>
         ) : error ? (
-          <section className="rounded-[32px] border border-rose-200 bg-white/90 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur">
+          <section className="rounded-4xl border border-rose-200 bg-white/90 p-8 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur">
             <div className="inline-flex rounded-2xl bg-rose-50 p-3 text-rose-700">
               <AlertTriangle size={20} />
             </div>
@@ -322,7 +330,7 @@ export function SharedProposalPage() {
             </section>
 
             <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-              <article className="rounded-[32px] border border-slate-200 bg-white/88 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:p-8">
+              <article className="rounded-4xl border border-slate-200 bg-white/88 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:p-8">
                 <p className="text-sm font-medium text-slate-500">Escopo</p>
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
                   O que está incluído nesta proposta
@@ -332,7 +340,7 @@ export function SharedProposalPage() {
                 </div>
               </article>
 
-              <article className="rounded-[32px] border border-slate-200 bg-white/88 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:p-8">
+              <article className="rounded-4xl border border-slate-200 bg-white/88 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:p-8">
                 <p className="text-sm font-medium text-slate-500">
                   Quem enviou
                 </p>

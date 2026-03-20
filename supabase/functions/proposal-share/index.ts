@@ -114,6 +114,44 @@ function getErrorMessage(error: unknown, fallback: string) {
   return fallback;
 }
 
+function getHttpUrl(value: string | null | undefined) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const parsedUrl = new URL(value);
+
+    if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+      return null;
+    }
+
+    return parsedUrl;
+  } catch {
+    return null;
+  }
+}
+
+function resolvePublicAppUrl(request: Request) {
+  // Preferimos a origem configurada porque ela representa a URL publica canonica
+  // do app; o origin da requisicao fica como fallback seguro para browser/dev.
+  const configuredPublicAppUrl = getHttpUrl(publicAppUrl);
+
+  if (configuredPublicAppUrl) {
+    return configuredPublicAppUrl.toString();
+  }
+
+  const requestOrigin = getHttpUrl(request.headers.get('origin'));
+
+  if (requestOrigin) {
+    return requestOrigin.toString();
+  }
+
+  throw new Error(
+    'Configure PUBLIC_APP_URL para gerar links compartilhados com origem confiavel.',
+  );
+}
+
 function getAuthClient(authorizationHeader: string) {
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
@@ -187,6 +225,20 @@ async function hashToken(token: string) {
     .join('');
 }
 
+function timingSafeEqual(left: string, right: string) {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  let mismatch = 0;
+
+  for (let index = 0; index < left.length; index += 1) {
+    mismatch |= left.charCodeAt(index) ^ right.charCodeAt(index);
+  }
+
+  return mismatch === 0;
+}
+
 function generateToken() {
   const bytes = crypto.getRandomValues(new Uint8Array(32));
   const binary = Array.from(bytes, (value) => String.fromCharCode(value)).join(
@@ -203,12 +255,6 @@ function getFutureIsoDate(days: number) {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
 }
 
-function toProjectDeadline(days: number) {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  return date.toISOString().slice(0, 10);
-}
-
 function getClientRecord(
   clients: ProposalRow['clients'],
 ): { name: string; company: string | null } {
@@ -223,7 +269,7 @@ async function getAuthenticatedUser(request: Request) {
   const authorizationHeader = request.headers.get('Authorization');
 
   if (!authorizationHeader) {
-    throw new Error('Faça login para gerar o link seguro da proposta.');
+    throw new Error('FaÃ§a login para gerar o link seguro da proposta.');
   }
 
   const authClient = getAuthClient(authorizationHeader);
@@ -233,7 +279,7 @@ async function getAuthenticatedUser(request: Request) {
   } = await authClient.auth.getUser();
 
   if (error || !user) {
-    throw new Error('Sessão inválida. Faça login novamente.');
+    throw new Error('SessÃ£o invÃ¡lida. FaÃ§a login novamente.');
   }
 
   return {
@@ -273,7 +319,7 @@ async function getProposalById(proposalId: string) {
     .single();
 
   if (error || !data) {
-    throw new Error('Não foi possível localizar a proposta compartilhada.');
+    throw new Error('NÃ£o foi possÃ­vel localizar a proposta compartilhada.');
   }
 
   return data as ProposalRow;
@@ -287,7 +333,7 @@ async function getShareById(shareId: string) {
     .single();
 
   if (error || !data) {
-    throw new Error('Esse link não existe ou já foi removido.');
+    throw new Error('Esse link nÃ£o existe ou jÃ¡ foi removido.');
   }
 
   return data as ProposalShareRow;
@@ -306,8 +352,10 @@ async function validateShareToken(shareId: string, token: string) {
 
   const providedHash = await hashToken(token);
 
-  if (providedHash !== share.token_hash) {
-    throw new Error('Esse link é inválido ou foi alterado.');
+  // A comparacao constante evita vazar, por tempo de resposta, em que ponto a
+  // verificacao do token publico falhou.
+  if (!timingSafeEqual(providedHash, share.token_hash)) {
+    throw new Error('Esse link Ã© invÃ¡lido ou foi alterado.');
   }
 
   return share;
@@ -324,31 +372,31 @@ async function markShareViewed(shareId: string) {
 }
 
 async function buildSharedProposalPayload(share: ProposalShareRow) {
-  const proposal = await getProposalById(share.proposal_id);
-  const client = getClientRecord(proposal.clients);
+  const sharedProposal = await getProposalById(share.proposal_id);
+  const client = getClientRecord(sharedProposal.clients);
   const { data: authUserResponse } = await admin.auth.admin.getUserById(
-    proposal.user_id,
+    sharedProposal.user_id,
   );
 
   return {
     proposal: {
       shareId: share.id,
-      title: proposal.title,
-      description: proposal.description ?? '',
-      amount: Number(proposal.amount),
-      deliveryDays: proposal.delivery_days,
-      status: proposal.status,
-      sentAt: proposal.sent_at,
-      acceptedAt: proposal.accepted_at,
-      rejectedAt: proposal.rejected_at,
-      clientRespondedAt: proposal.client_responded_at,
-      clientResponseChannel: proposal.client_response_channel,
-      createdAt: proposal.created_at,
+      title: sharedProposal.title,
+      description: sharedProposal.description ?? '',
+      amount: Number(sharedProposal.amount),
+      deliveryDays: sharedProposal.delivery_days,
+      status: sharedProposal.status,
+      sentAt: sharedProposal.sent_at,
+      acceptedAt: sharedProposal.accepted_at,
+      rejectedAt: sharedProposal.rejected_at,
+      clientRespondedAt: sharedProposal.client_responded_at,
+      clientResponseChannel: sharedProposal.client_response_channel,
+      createdAt: sharedProposal.created_at,
       expiresAt: share.expires_at,
       lastViewedAt: share.last_viewed_at,
       canRespond:
-        proposal.status !== 'accepted' &&
-        proposal.status !== 'rejected' &&
+        sharedProposal.status !== 'accepted' &&
+        sharedProposal.status !== 'rejected' &&
         !share.revoked_at &&
         new Date(share.expires_at).getTime() >= Date.now(),
       clientName: client.name,
@@ -365,8 +413,12 @@ async function handleCreateShareLink(
   const { user, authClient } = await getAuthenticatedUser(request);
   const expiresInDays = Number(payload.expiresInDays);
 
-  if (!Number.isInteger(expiresInDays) || expiresInDays < 1 || expiresInDays > 30) {
-    throw new Error('Defina uma expiração entre 1 e 30 dias.');
+  if (
+    !Number.isInteger(expiresInDays) ||
+    expiresInDays < 1 ||
+    expiresInDays > 30
+  ) {
+    throw new Error('Defina uma expiraÃ§Ã£o entre 1 e 30 dias.');
   }
 
   const { data: proposal, error: proposalError } = await authClient
@@ -376,11 +428,13 @@ async function handleCreateShareLink(
     .single();
 
   if (proposalError || !proposal) {
-    throw new Error('Não foi possível localizar essa proposta no seu painel.');
+    throw new Error('NÃ£o foi possÃ­vel localizar essa proposta no seu painel.');
   }
 
   if (proposal.status === 'accepted') {
-    throw new Error('Não é possível compartilhar novamente uma proposta já aceita.');
+    throw new Error(
+      'NÃ£o Ã© possÃ­vel compartilhar novamente uma proposta jÃ¡ aceita.',
+    );
   }
 
   const now = new Date().toISOString();
@@ -401,7 +455,9 @@ async function handleCreateShareLink(
     .eq('id', payload.proposalId);
 
   if (updateProposalError) {
-    throw new Error('Não foi possível preparar a proposta para o compartilhamento.');
+    throw new Error(
+      'NÃ£o foi possÃ­vel preparar a proposta para o compartilhamento.',
+    );
   }
 
   const { data: share, error: shareError } = await authClient
@@ -422,13 +478,12 @@ async function handleCreateShareLink(
     .single();
 
   if (shareError || !share) {
-    throw new Error('Não foi possível gerar o link seguro da proposta.');
+    throw new Error('NÃ£o foi possÃ­vel gerar o link seguro da proposta.');
   }
 
-  const requestOrigin = request.headers.get('origin') ?? '';
-  const baseUrl = publicAppUrl || requestOrigin;
+  const baseUrl = resolvePublicAppUrl(request);
   const sharedPath = `/propostas/compartilhadas/${share.id}#${encodeURIComponent(token)}`;
-  const url = baseUrl ? new URL(sharedPath, baseUrl).toString() : sharedPath;
+  const url = new URL(sharedPath, baseUrl).toString();
 
   return jsonResponse({
     shareLink: {
@@ -445,92 +500,29 @@ async function handleGetSharedProposal(payload: GetSharedProposalRequest) {
   return jsonResponse(await buildSharedProposalPayload(share));
 }
 
-async function acceptSharedProposal(proposal: ProposalRow) {
-  if (proposal.status === 'accepted' && proposal.project_id) {
-    return;
-  }
-
-  if (proposal.status === 'rejected') {
-    throw new Error('Essa proposta já foi recusada e não aceita novas ações.');
-  }
-
-  const { data: createdProject, error: createProjectError } = await admin
-    .from('projects')
-    .insert({
-      user_id: proposal.user_id,
-      client_id: proposal.client_id,
-      name: proposal.title,
-      description: proposal.description ?? '',
-      value: proposal.amount,
-      deadline: toProjectDeadline(proposal.delivery_days),
-      status: 'in_progress',
-    })
-    .select('id')
-    .single();
-
-  if (createProjectError || !createdProject) {
-    throw new Error('Não foi possível gerar o projeto após o aceite da proposta.');
-  }
-
-  const responseTimestamp = new Date().toISOString();
-  const { error: updateProposalError } = await admin
-    .from('proposals')
-    .update({
-      status: 'accepted',
-      accepted_at: responseTimestamp,
-      rejected_at: null,
-      project_id: createdProject.id,
-      client_responded_at: responseTimestamp,
-      client_response_channel: 'shared_link',
-    })
-    .eq('id', proposal.id);
-
-  if (updateProposalError) {
-    await admin.from('projects').delete().eq('id', createdProject.id);
-    throw new Error('O aceite foi registrado, mas o projeto não conseguiu ser vinculado à proposta.');
-  }
-}
-
-async function rejectSharedProposal(proposal: ProposalRow) {
-  if (proposal.status === 'accepted') {
-    throw new Error('Essa proposta já foi aceita e não pode mais ser recusada.');
-  }
-
-  const responseTimestamp = new Date().toISOString();
-  const { error } = await admin
-    .from('proposals')
-    .update({
-      status: 'rejected',
-      rejected_at: responseTimestamp,
-      accepted_at: null,
-      client_responded_at: responseTimestamp,
-      client_response_channel: 'shared_link',
-    })
-    .eq('id', proposal.id);
-
-  if (error) {
-    throw new Error('Não foi possível registrar a recusa da proposta.');
-  }
-}
-
 async function handleSharedProposalResponse(
   payload: RespondToSharedProposalRequest,
 ) {
-  const share = await validateShareToken(payload.shareId, payload.token);
-  const proposal = await getProposalById(share.proposal_id);
+  const tokenHash = await hashToken(payload.token);
 
-  if (proposal.status === 'accepted' || proposal.status === 'rejected') {
-    throw new Error('Essa proposta já recebeu uma resposta e não aceita novas ações.');
+  // A RPC trava o link e a proposta na mesma transacao para evitar aceite/recusa
+  // concorrentes gerarem projeto duplicado ou sobrescreverem o estado final.
+  const { error } = await admin.rpc('respond_to_shared_proposal', {
+    p_share_id: payload.shareId,
+    p_token_hash: tokenHash,
+    p_decision: payload.decision,
+  });
+
+  if (error) {
+    throw new Error(
+      getErrorMessage(
+        error,
+        'NÃ£o foi possÃ­vel registrar a resposta da proposta compartilhada.',
+      ),
+    );
   }
 
-  if (payload.decision === 'accept') {
-    await acceptSharedProposal(proposal);
-  } else {
-    await rejectSharedProposal(proposal);
-  }
-
-  await markShareViewed(share.id);
-
+  const share = await getShareById(payload.shareId);
   return jsonResponse(await buildSharedProposalPayload(share));
 }
 
@@ -554,13 +546,13 @@ Deno.serve(async (request) => {
       return await handleSharedProposalResponse(payload);
     }
 
-    return jsonResponse({ error: 'Ação inválida.' }, 400);
+    return jsonResponse({ error: 'AÃ§Ã£o invÃ¡lida.' }, 400);
   } catch (error) {
     return jsonResponse(
       {
         error: getErrorMessage(
           error,
-          'Não foi possível concluir a operação da proposta compartilhada.',
+          'NÃ£o foi possÃ­vel concluir a operaÃ§Ã£o da proposta compartilhada.',
         ),
       },
       400,

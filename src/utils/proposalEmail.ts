@@ -4,6 +4,7 @@ import {
   buildFreelancerIntro,
   buildFreelancerSignatureLines,
 } from './freelancerProfile';
+import { assertValidEmailAddress } from './email';
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
@@ -54,7 +55,12 @@ export function buildMailtoLink(
   subject: string,
   body: string,
 ) {
-  const normalizedRecipientEmail = recipientEmail.trim();
+  // Validamos antes de interpolar na URI para impedir que o destinatario injete
+  // parametros extras no mailto ou quebre o fluxo em clientes de e-mail.
+  const normalizedRecipientEmail = assertValidEmailAddress(
+    recipientEmail,
+    'Defina um e-mail de destinatario valido antes de enviar a proposta.',
+  );
   const query = [
     `subject=${encodeMailtoValue(subject)}`,
     `body=${encodeMailtoValue(body)}`,

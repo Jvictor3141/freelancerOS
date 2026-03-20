@@ -3,6 +3,7 @@ import { useFeedback } from './FeedbackProvider';
 import type { ProposalInput } from '../types/inputs';
 import type { Client } from '../types/client';
 import type { Proposal } from '../types/proposal';
+import { isValidEmailAddress } from '../utils/email';
 
 type ProposalFormProps = {
   clients: Client[];
@@ -167,6 +168,14 @@ export function ProposalForm({
       notify({
         tone: 'warning',
         title: 'Informe o email de envio.',
+      });
+      return;
+    }
+
+    if (!isValidEmailAddress(values.recipientEmail)) {
+      notify({
+        tone: 'warning',
+        title: 'Informe um email de destinatario valido.',
       });
       return;
     }
