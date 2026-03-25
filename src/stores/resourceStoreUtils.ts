@@ -2,6 +2,10 @@ type EntityWithId = {
   id: string
 }
 
+type EntityWithIdAndCreatedAt = EntityWithId & {
+  createdAt: string
+}
+
 export function prependRecord<T>(records: T[], nextRecord: T) {
   return [nextRecord, ...records]
 }
@@ -27,6 +31,34 @@ export function removeRecordById<T extends EntityWithId>(
   id: string,
 ) {
   return records.filter((record) => record.id !== id)
+}
+
+export function upsertRecordById<T extends EntityWithId>(
+  records: T[],
+  nextRecord: T,
+) {
+  return findRecordById(records, nextRecord.id)
+    ? replaceRecordById(records, nextRecord)
+    : prependRecord(records, nextRecord)
+}
+
+export function sortRecordsByCreatedAtDesc<T extends { createdAt: string }>(
+  records: T[],
+) {
+  return records
+    .slice()
+    .sort(
+      (firstRecord, secondRecord) =>
+        new Date(secondRecord.createdAt).getTime() -
+        new Date(firstRecord.createdAt).getTime(),
+    )
+}
+
+export function upsertRecordByCreatedAtDesc<T extends EntityWithIdAndCreatedAt>(
+  records: T[],
+  nextRecord: T,
+) {
+  return sortRecordsByCreatedAtDesc(upsertRecordById(records, nextRecord))
 }
 
 export function syncSelectedRecord<T extends EntityWithId>(

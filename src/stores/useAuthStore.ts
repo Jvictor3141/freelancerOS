@@ -1,6 +1,6 @@
 import type { AuthChangeEvent, Session, User } from '@supabase/supabase-js'
 import { create } from 'zustand'
-import { getErrorMessage, supabase } from '../lib/supabase'
+import { getErrorMessage, supabase, syncRealtimeAuth } from '../lib/supabase'
 import {
   getSession,
   signIn as signInService,
@@ -118,6 +118,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
+      syncRealtimeAuth(session)
       set((current) => ({
         user: session?.user ?? null,
         initialized: true,
@@ -137,6 +138,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         error: getAuthStoreError(error, 'Nao foi possivel carregar a sessao atual.'),
       })
     } else {
+      syncRealtimeAuth(data.session)
       applySession(set, data.session, resolveInitialAuthFlow(data.session))
     }
 

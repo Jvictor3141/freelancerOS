@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useRef } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { BrandLogo } from './components/BrandLogo';
 import { RouteTransition } from './components/RouteTransition';
+import { useSupabaseRealtimeSync } from './lib/useSupabaseRealtimeSync';
 import { DashboardLayout } from './layout/DashboardLayout';
 import { AuthCallbackPage } from './pages/AuthCallbackPage';
 import { LandingPage } from './pages/LandingPage';
@@ -77,6 +78,7 @@ function SharedProposalRoute() {
 
 function ProtectedAppShell() {
   const { user, authFlow } = useAuthStore();
+  useSupabaseRealtimeSync(user?.id ?? null);
 
   if (!user) {
     return <Navigate to="/login?mode=sign_in" replace />;
@@ -199,5 +201,3 @@ function App() {
 }
 
 export default App;
-
-

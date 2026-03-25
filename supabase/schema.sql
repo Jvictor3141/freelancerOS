@@ -90,6 +90,40 @@ where project_id is not null;
 create index if not exists proposal_share_links_user_id_idx on public.proposal_share_links (user_id);
 create index if not exists proposal_share_links_expires_at_idx on public.proposal_share_links (expires_at);
 
+do $$
+declare
+  realtime_table text;
+begin
+  if not exists (
+    select 1
+    from pg_publication
+    where pubname = 'supabase_realtime'
+  ) then
+    create publication supabase_realtime;
+  end if;
+
+  foreach realtime_table in array array[
+    'clients',
+    'projects',
+    'payments',
+    'proposals'
+  ] loop
+    if not exists (
+      select 1
+      from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = realtime_table
+    ) then
+      execute format(
+        'alter publication supabase_realtime add table public.%I',
+        realtime_table
+      );
+    end if;
+  end loop;
+end;
+$$;
+
 alter table public.clients enable row level security;
 alter table public.projects enable row level security;
 alter table public.payments enable row level security;

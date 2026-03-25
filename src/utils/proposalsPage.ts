@@ -133,12 +133,10 @@ export function getFilteredProposals(
 
 export function getClientResponseNotifications(
   proposals: ProposalWithClient[],
-  limit = 4,
 ) {
   return sortProposalsByClientResponseDesc(
     getClientRespondedProposals(proposals),
   )
-    .slice(0, limit)
 }
 
 export function getVisibleClientResponseNotifications(
