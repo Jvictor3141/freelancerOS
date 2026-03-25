@@ -29,7 +29,7 @@ export function DashboardFinancialOverview({
   ]
 
   return (
-    <div className="rounded-[28px] bg-[#635bff] p-6 text-white shadow-[0_24px_60px_rgba(99,91,255,0.28)] xl:col-span-8">
+    <div className="rounded-[28px] bg-[#635bff] p-3 md:p-6 text-white shadow-[0_24px_60px_rgba(99,91,255,0.28)] xl:col-span-8">
       <div className="flex h-full flex-col justify-between gap-6">
         <div className="space-y-2">
           <p className="text-sm font-medium text-indigo-100">
@@ -40,7 +40,7 @@ export function DashboardFinancialOverview({
           </h2>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-3 gap-1 md:gap-4">
           {cards.map((card) => (
             <DashboardFinancialStatCard key={card.label} {...card} />
           ))}

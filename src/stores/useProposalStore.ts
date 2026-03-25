@@ -14,6 +14,7 @@ import {
 } from '../services/proposalService'
 import type { Proposal } from '../types/proposal'
 import type { ProposalSecureShareLink } from '../types/sharedProposal'
+import { reconcileProposalSnapshot } from '../utils/proposalRules'
 import {
   clearSelectedRecord,
   findRecordById,
@@ -21,6 +22,7 @@ import {
   removeRecordById,
   replaceRecordById,
   syncSelectedRecord,
+  upsertRecordByCreatedAtDesc,
 } from './resourceStoreUtils'
 import { useProjectStore } from './useProjectStore'
 
@@ -61,6 +63,7 @@ const proposalStoreInitialState: ProposalStoreState = {
 }
 
 let loadProposalsPromise: Promise<void> | null = null
+let shouldReloadProposalsAfterCurrentLoad = false
 
 function getProposalStoreError(error: unknown, fallback: string) {
   return getErrorMessage(error, fallback)
@@ -81,26 +84,40 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
 
   loadProposals: async () => {
     if (loadProposalsPromise) {
+      shouldReloadProposalsAfterCurrentLoad = true
       return loadProposalsPromise
     }
 
     loadProposalsPromise = (async () => {
-      set({ loading: true, error: null })
-
       try {
-        const proposals = await getProposals()
-        set({
-          proposals,
-          loading: false,
-          error: null,
-          initialized: true,
-        })
-      } catch (error) {
-        set({
-          loading: false,
-          error: getProposalStoreError(error, 'Não foi possível carregar as propostas.'),
-          initialized: true,
-        })
+        do {
+          shouldReloadProposalsAfterCurrentLoad = false
+          set({ loading: true, error: null })
+
+          try {
+            const proposals = await getProposals()
+            set((state) => ({
+              proposals: proposals.map((proposal) =>
+                reconcileProposalSnapshot(
+                  findRecordById(state.proposals, proposal.id),
+                  proposal,
+                ),
+              ),
+              loading: false,
+              error: null,
+              initialized: true,
+            }))
+          } catch (error) {
+            set({
+              loading: false,
+              error: getProposalStoreError(
+                error,
+                'Não foi possível carregar as propostas.',
+              ),
+              initialized: true,
+            })
+          }
+        } while (shouldReloadProposalsAfterCurrentLoad)
       } finally {
         loadProposalsPromise = null
       }
@@ -133,7 +150,10 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
 
       return newProposal
     } catch (error) {
-      const message = getProposalStoreError(error, 'Não foi possível salvar a proposta.')
+      const message = getProposalStoreError(
+        error,
+        'Não foi possível salvar a proposta.',
+      )
 
       set({ error: message })
       throw new Error(message)
@@ -177,7 +197,10 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
         selectedProposal: clearSelectedRecord(state.selectedProposal, id),
       }))
     } catch (error) {
-      const message = getProposalStoreError(error, 'Não foi possível excluir a proposta.')
+      const message = getProposalStoreError(
+        error,
+        'Não foi possível excluir a proposta.',
+      )
 
       set({ error: message })
       throw new Error(message)
@@ -200,7 +223,10 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
 
       return updatedProposal
     } catch (error) {
-      const message = getProposalStoreError(error, 'Não foi possível enviar a proposta.')
+      const message = getProposalStoreError(
+        error,
+        'Não foi possível enviar a proposta.',
+      )
 
       set({ error: message })
       throw new Error(message)
@@ -234,16 +260,22 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
     set({ error: null })
 
     try {
-      const { proposal } = await acceptProposalService(id)
+      const { proposal, project } = await acceptProposalService(id)
 
       set((state) => ({
         proposals: replaceRecordById(state.proposals, proposal),
         selectedProposal: syncSelectedRecord(state.selectedProposal, proposal),
       }))
 
-      await useProjectStore.getState().loadProjects()
+      useProjectStore.setState((state) => ({
+        projects: upsertRecordByCreatedAtDesc(state.projects, project),
+        selectedProject: syncSelectedRecord(state.selectedProject, project),
+      }))
     } catch (error) {
-      const message = getProposalStoreError(error, 'Não foi possível aceitar a proposta.')
+      const message = getProposalStoreError(
+        error,
+        'Não foi possível aceitar a proposta.',
+      )
 
       set({ error: message })
       throw new Error(message)
@@ -292,7 +324,10 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
 
       return updatedProposal
     } catch (error) {
-      const message = getProposalStoreError(error, 'Não foi possível reabrir a proposta.')
+      const message = getProposalStoreError(
+        error,
+        'Não foi possível reabrir a proposta.',
+      )
 
       set({ error: message })
       throw new Error(message)
@@ -301,6 +336,7 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
 
   resetStore: () => {
     loadProposalsPromise = null
+    shouldReloadProposalsAfterCurrentLoad = false
     set(proposalStoreInitialState)
   },
 }))

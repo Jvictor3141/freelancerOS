@@ -59,9 +59,9 @@ export function ProposalsOverviewSection({
               >
                 <div className='flex items-center'>
                   <div className="mr-2 inline-flex rounded-2xl bg-white/12 p-2">
-                    <Icon size={16} />
+                    <Icon size={10} />
                   </div>
-                  <p className="text-sm text-indigo-100">{card.label}</p>
+                  <p className="text-sm text-indigo-100">{card.label}:</p>
                 </div>
                 <p className="flex items-end justify-end mt-2 text-2xl font-semibold">{card.value}</p>
               </div>

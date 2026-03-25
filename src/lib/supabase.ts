@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Session } from '@supabase/supabase-js';
 
 export const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 export const supabaseKey =
@@ -20,6 +21,16 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
     detectSessionInUrl: true,
   },
 });
+
+export function syncRealtimeAuth(session: Session | null) {
+  const accessToken = session?.access_token;
+
+  if (!accessToken) {
+    return;
+  }
+
+  supabase.realtime.setAuth(accessToken);
+}
 
 type ErrorLike = {
   code?: string;

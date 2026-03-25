@@ -76,7 +76,7 @@ export function ProposalShareModalContent({
             <a
               href={generatedShareLink.url}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm shadow-slate-100 transition hover:bg-slate-50"
               aria-label="Abrir visualização compartilhada"
               title="Abrir visualização compartilhada"

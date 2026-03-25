@@ -1,7 +1,7 @@
 import { Eye, PencilLine, Trash2 } from 'lucide-react'
 import type { Client } from '../../types/client'
 import { formatDate } from '../../utils/formatting'
-import { getClientActionButtonClassName } from '../../utils/clientsPage'
+import { getActionButtonClassName } from '../../utils/actionButtonStyles'
 
 type ClientsListSectionProps = {
   clients: Client[]
@@ -85,7 +85,7 @@ export function ClientsListSection({
                   onClick={() => onEdit(client)}
                   aria-label={`Editar cliente ${client.name}`}
                   title="Editar cliente"
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getClientActionButtonClassName('neutral')}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getActionButtonClassName('neutral')}`}
                 >
                   <PencilLine size={15} />
                 </button>
@@ -95,7 +95,7 @@ export function ClientsListSection({
                   onClick={() => onOpenDetails(client)}
                   aria-label={`Ver detalhes do cliente ${client.name}`}
                   title="Ver detalhes"
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getClientActionButtonClassName('neutral')}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getActionButtonClassName('neutral')}`}
                 >
                   <Eye size={15} />
                 </button>
@@ -105,7 +105,7 @@ export function ClientsListSection({
                   onClick={() => onRemove(client)}
                   aria-label={`Excluir cliente ${client.name}`}
                   title="Excluir cliente"
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getClientActionButtonClassName('danger')}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getActionButtonClassName('danger')}`}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -177,7 +177,7 @@ export function ClientsListSection({
                       onClick={() => onEdit(client)}
                       aria-label={`Editar cliente ${client.name}`}
                       title="Editar cliente"
-                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getClientActionButtonClassName('neutral')}`}
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getActionButtonClassName('neutral')}`}
                     >
                       <PencilLine size={17} />
                     </button>
@@ -187,7 +187,7 @@ export function ClientsListSection({
                       onClick={() => onOpenDetails(client)}
                       aria-label={`Ver detalhes do cliente ${client.name}`}
                       title="Ver detalhes"
-                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getClientActionButtonClassName('neutral')}`}
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getActionButtonClassName('neutral')}`}
                     >
                       <Eye size={17} />
                     </button>
@@ -197,7 +197,7 @@ export function ClientsListSection({
                       onClick={() => onRemove(client)}
                       aria-label={`Excluir cliente ${client.name}`}
                       title="Excluir cliente"
-                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getClientActionButtonClassName('danger')}`}
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getActionButtonClassName('danger')}`}
                     >
                       <Trash2 size={17} />
                     </button>

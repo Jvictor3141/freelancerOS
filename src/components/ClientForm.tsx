@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useFeedback } from './FeedbackProvider';
 import type { Client } from '../types/client';
+import { isValidEmailAddress } from '../utils/email';
 
 type ClientFormValues = Omit<Client, 'id' | 'createdAt'>;
 
@@ -61,6 +62,14 @@ export function ClientForm({
       notify({
         tone: 'warning',
         title: 'Nome e e-mail sao obrigatorios.',
+      });
+      return;
+    }
+
+    if (!isValidEmailAddress(values.email)) {
+      notify({
+        tone: 'warning',
+        title: 'Informe um email valido para o cliente.',
       });
       return;
     }

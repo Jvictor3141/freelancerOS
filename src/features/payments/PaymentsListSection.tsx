@@ -9,7 +9,7 @@ import {
   paymentStatusFilterOptions,
   paymentStatusLabel,
 } from '../../utils/paymentStatus'
-import { getPaymentActionButtonClassName } from '../../utils/paymentsPage'
+import { getActionButtonClassName } from '../../utils/actionButtonStyles'
 
 type PaymentsListSectionProps = {
   payments: PaymentWithProjectAndClient[]
@@ -135,7 +135,7 @@ export function PaymentsListSection({
                     onClick={() => onMarkAsPaid(payment.id)}
                     aria-label={`Marcar pagamento de ${payment.clientName} como pago`}
                     title="Marcar como pago"
-                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getPaymentActionButtonClassName('success')}`}
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getActionButtonClassName('success')}`}
                   >
                     <CheckCheck size={15} />
                   </button>
@@ -146,7 +146,7 @@ export function PaymentsListSection({
                   onClick={() => onEdit(payment)}
                   aria-label={`Editar pagamento de ${payment.clientName}`}
                   title="Editar pagamento"
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getPaymentActionButtonClassName('neutral')}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getActionButtonClassName('neutral')}`}
                 >
                   <PencilLine size={15} />
                 </button>
@@ -156,7 +156,7 @@ export function PaymentsListSection({
                   onClick={() => onRemove(payment)}
                   aria-label={`Excluir pagamento de ${payment.clientName}`}
                   title="Excluir pagamento"
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getPaymentActionButtonClassName('danger')}`}
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 ${getActionButtonClassName('danger')}`}
                 >
                   <Trash2 size={15} />
                 </button>
@@ -228,7 +228,7 @@ export function PaymentsListSection({
                         onClick={() => onMarkAsPaid(payment.id)}
                         aria-label={`Marcar pagamento de ${payment.clientName} como pago`}
                         title="Marcar como pago"
-                        className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getPaymentActionButtonClassName('success')}`}
+                        className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getActionButtonClassName('success')}`}
                       >
                         <CheckCheck size={18} />
                       </button>
@@ -239,7 +239,7 @@ export function PaymentsListSection({
                       onClick={() => onEdit(payment)}
                       aria-label={`Editar pagamento de ${payment.clientName}`}
                       title="Editar pagamento"
-                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getPaymentActionButtonClassName('neutral')}`}
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getActionButtonClassName('neutral')}`}
                     >
                       <PencilLine size={17} />
                     </button>
@@ -249,7 +249,7 @@ export function PaymentsListSection({
                       onClick={() => onRemove(payment)}
                       aria-label={`Excluir pagamento de ${payment.clientName}`}
                       title="Excluir pagamento"
-                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getPaymentActionButtonClassName('danger')}`}
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl border transition ${getActionButtonClassName('danger')}`}
                     >
                       <Trash2 size={17} />
                     </button>

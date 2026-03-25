@@ -28,14 +28,14 @@ export function ProposalResponseNotificationsSection({
         </p>
       </div>
 
-      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="mt-5 flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pr-1">
         {notifications.map((proposal) => {
           const isAccepted = isAcceptedProposal(proposal)
 
           return (
             <article
               key={`${proposal.id}-${proposal.clientRespondedAt}`}
-              className={`rounded-3xl border p-4 ${
+              className={`w-full shrink-0 snap-start rounded-3xl border p-4 md:w-[calc((100%-0.75rem)/2)] xl:w-[calc((100%-1.5rem)/3)] ${
                 isAccepted
                   ? 'border-emerald-200 bg-emerald-50/70'
                   : 'border-rose-200 bg-rose-50/70'
@@ -59,7 +59,7 @@ export function ProposalResponseNotificationsSection({
                   </div>
                   <p className="mt-1 text-sm text-slate-500">
                     {proposal.clientName}
-                    {proposal.clientCompany ? ` Â· ${proposal.clientCompany}` : ''}
+                    {proposal.clientCompany ? ` · ${proposal.clientCompany}` : ''}
                   </p>
                 </div>
 

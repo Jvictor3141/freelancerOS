@@ -97,6 +97,60 @@ export function sortProposalsByClientResponseDesc<
     )
 }
 
+function getComparableProposalResponseTime(
+  proposal: Pick<
+    Proposal,
+    'acceptedAt' | 'rejectedAt' | 'clientRespondedAt'
+  >,
+) {
+  return Math.max(
+    new Date(proposal.acceptedAt ?? 0).getTime(),
+    new Date(proposal.rejectedAt ?? 0).getTime(),
+    new Date(proposal.clientRespondedAt ?? 0).getTime(),
+  )
+}
+
+export function reconcileProposalSnapshot<
+  TProposal extends Pick<
+    Proposal,
+    | 'id'
+    | 'status'
+    | 'projectId'
+    | 'acceptedAt'
+    | 'rejectedAt'
+    | 'clientRespondedAt'
+  >,
+>(currentProposal: TProposal | null, nextProposal: TProposal) {
+  if (!currentProposal || currentProposal.id !== nextProposal.id) {
+    return nextProposal
+  }
+
+  const currentResponseTime = getComparableProposalResponseTime(currentProposal)
+  const nextResponseTime = getComparableProposalResponseTime(nextProposal)
+
+  if (currentResponseTime > nextResponseTime) {
+    return currentProposal
+  }
+
+  if (nextResponseTime > currentResponseTime) {
+    return nextProposal
+  }
+
+  if (!isProposalOpen(currentProposal) && isProposalOpen(nextProposal)) {
+    return currentProposal
+  }
+
+  if (
+    currentProposal.status === 'accepted' &&
+    currentProposal.projectId &&
+    !nextProposal.projectId
+  ) {
+    return currentProposal
+  }
+
+  return nextProposal
+}
+
 export function countProposalsByStatus(
   proposals: Array<Pick<Proposal, 'status'>>,
   status: ProposalStatus,

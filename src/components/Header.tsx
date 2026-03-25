@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BrandLogo } from './BrandLogo';
 import { useFeedback } from './FeedbackProvider';
+import { HeaderNotificationsMenu } from './HeaderNotificationsMenu';
 import { getToastToneForMessage } from '../lib/feedback';
 import { getErrorMessage } from '../lib/supabase';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -90,6 +91,8 @@ export function Header() {
         </div>
 
         <div className="flex items-center justify-end gap-3 self-start xl:self-auto">
+          <HeaderNotificationsMenu />
+
           <div className="motion-surface hidden min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm shadow-slate-100 xl:flex">
             <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-[#635bff]">
               <ShieldCheck size={18} />
@@ -165,5 +168,4 @@ export function Header() {
     </header>
   );
 }
-
 

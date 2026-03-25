@@ -17,7 +17,11 @@ type DashboardRevenueChartProps = {
 export function DashboardRevenueChart({ data }: DashboardRevenueChartProps) {
   return (
     <div className="h-64 sm:h-80">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+        initialDimension={{ width: 640, height: 256 }}
+      >
         <AreaChart
           data={data}
           margin={{ top: 10, right: 20, left: 0, bottom: 0 }}

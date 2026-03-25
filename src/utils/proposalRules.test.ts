@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
+import type { Proposal } from '../types/proposal'
 import {
   canAcceptProposal,
   canOpenProposalProject,
   getClientRespondedProposals,
   getOpenProposalValue,
   getProposalSendMode,
+  reconcileProposalSnapshot,
 } from './proposalRules'
 
 describe('proposal rules', () => {
@@ -65,5 +67,45 @@ describe('proposal rules', () => {
     ])
 
     expect(total).toBe(1500)
+  })
+
+  it('keeps a realtime accepted proposal when a stale open snapshot arrives later', () => {
+    const currentProposal: Pick<
+      Proposal,
+      | 'id'
+      | 'status'
+      | 'projectId'
+      | 'acceptedAt'
+      | 'rejectedAt'
+      | 'clientRespondedAt'
+    > = {
+      id: '1',
+      status: 'accepted' as const,
+      projectId: 'project-1',
+      acceptedAt: '2026-03-25T10:00:00.000Z',
+      rejectedAt: null,
+      clientRespondedAt: '2026-03-25T10:00:00.000Z',
+    }
+
+    const staleFetchedProposal: Pick<
+      Proposal,
+      | 'id'
+      | 'status'
+      | 'projectId'
+      | 'acceptedAt'
+      | 'rejectedAt'
+      | 'clientRespondedAt'
+    > = {
+      id: '1',
+      status: 'sent' as const,
+      projectId: null,
+      acceptedAt: null,
+      rejectedAt: null,
+      clientRespondedAt: null,
+    }
+
+    expect(
+      reconcileProposalSnapshot(currentProposal, staleFetchedProposal),
+    ).toEqual(currentProposal)
   })
 })

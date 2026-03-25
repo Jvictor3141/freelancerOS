@@ -10,6 +10,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { getActionButtonClassName } from '../../utils/actionButtonStyles'
 import {
   formatCurrency,
   formatDate,
@@ -26,9 +27,6 @@ import {
   hasSharedLinkClientResponse,
   isAcceptedProposal,
 } from '../../utils/proposalRules'
-import {
-  getProposalActionButtonClassName,
-} from '../../utils/proposalsPage'
 import type { ProposalWithClient } from '../../types/viewModels'
 import {
   proposalStatusClassName,
@@ -68,7 +66,7 @@ function ProposalActionButton({
       onClick={onClick}
       aria-label={label}
       title={title}
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName(
+      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getActionButtonClassName(
         tone,
       )}`}
     >
@@ -121,7 +119,15 @@ export function ProposalListSection({
                       </span>
                     </div>
 
-                    <p className="mt-2 text-sm text-slate-500">
+                    <p
+                      className="mt-2 overflow-hidden text-sm text-slate-500"
+                      title={proposal.description || 'Sem escopo detalhado.'}
+                      style={{
+                        display: '-webkit-box',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 3,
+                      }}
+                    >
                       {proposal.description || 'Sem escopo detalhado.'}
                     </p>
                   </div>
@@ -174,7 +180,17 @@ export function ProposalListSection({
                     <span className="font-medium text-slate-900">
                       Observações:
                     </span>{' '}
-                    {proposal.notes}
+                    <span
+                      className="overflow-hidden align-top"
+                      title={proposal.notes}
+                      style={{
+                        display: '-webkit-inline-box',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 2,
+                      }}
+                    >
+                      {proposal.notes}
+                    </span>
                   </div>
                 ) : null}
 
