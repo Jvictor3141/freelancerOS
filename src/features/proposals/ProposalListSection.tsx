@@ -119,7 +119,15 @@ export function ProposalListSection({
                       </span>
                     </div>
 
-                    <p className="mt-2 text-sm text-slate-500">
+                    <p
+                      className="mt-2 overflow-hidden text-sm text-slate-500"
+                      title={proposal.description || 'Sem escopo detalhado.'}
+                      style={{
+                        display: '-webkit-box',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 3,
+                      }}
+                    >
                       {proposal.description || 'Sem escopo detalhado.'}
                     </p>
                   </div>
@@ -172,7 +180,17 @@ export function ProposalListSection({
                     <span className="font-medium text-slate-900">
                       Observações:
                     </span>{' '}
-                    {proposal.notes}
+                    <span
+                      className="overflow-hidden align-top"
+                      title={proposal.notes}
+                      style={{
+                        display: '-webkit-inline-box',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 2,
+                      }}
+                    >
+                      {proposal.notes}
+                    </span>
                   </div>
                 ) : null}
 
