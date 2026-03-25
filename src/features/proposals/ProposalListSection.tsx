@@ -10,6 +10,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { getActionButtonClassName } from '../../utils/actionButtonStyles'
 import {
   formatCurrency,
   formatDate,
@@ -26,9 +27,6 @@ import {
   hasSharedLinkClientResponse,
   isAcceptedProposal,
 } from '../../utils/proposalRules'
-import {
-  getProposalActionButtonClassName,
-} from '../../utils/proposalsPage'
 import type { ProposalWithClient } from '../../types/viewModels'
 import {
   proposalStatusClassName,
@@ -68,7 +66,7 @@ function ProposalActionButton({
       onClick={onClick}
       aria-label={label}
       title={title}
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getProposalActionButtonClassName(
+      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getActionButtonClassName(
         tone,
       )}`}
     >

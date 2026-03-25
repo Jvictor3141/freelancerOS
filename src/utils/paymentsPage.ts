@@ -4,20 +4,6 @@ import type { Project } from '../types/project'
 import type { PaymentWithProjectAndClient } from '../types/viewModels'
 import type { PaymentStatusFilter } from './paymentStatus'
 
-export function getPaymentActionButtonClassName(
-  tone: 'success' | 'neutral' | 'danger',
-) {
-  if (tone === 'success') {
-    return 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-  }
-
-  if (tone === 'danger') {
-    return 'border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100'
-  }
-
-  return 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
-}
-
 export function getPaymentsWithRelations(
   payments: Payment[],
   projects: Project[],

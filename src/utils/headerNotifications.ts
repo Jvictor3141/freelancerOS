@@ -3,6 +3,12 @@ import type {
   ProjectWithClient,
   ProposalWithClient,
 } from '../types/viewModels'
+import {
+  buildScopedStorageKey,
+  excludeItemsById,
+  readStoredStringList,
+  writeStoredStringList,
+} from './persistedStringList'
 import { canMarkPaymentAsPaid } from './paymentRules'
 import { isAcceptedProposal } from './proposalRules'
 import { isActiveProject } from './projectRules'
@@ -105,7 +111,10 @@ function getComparableTimestamp(value: string) {
 }
 
 function getDismissedHeaderNotificationsStorageKey(userId: string | null) {
-  return `${DISMISSED_HEADER_NOTIFICATIONS_STORAGE_PREFIX}:${userId ?? 'anonymous'}`
+  return buildScopedStorageKey(
+    DISMISSED_HEADER_NOTIFICATIONS_STORAGE_PREFIX,
+    userId,
+  )
 }
 
 export function buildHeaderNotificationId(
@@ -117,44 +126,16 @@ export function buildHeaderNotificationId(
 }
 
 export function readDismissedHeaderNotificationIds(userId: string | null) {
-  if (typeof window === 'undefined') {
-    return []
-  }
-
-  try {
-    const rawValue = window.localStorage.getItem(
-      getDismissedHeaderNotificationsStorageKey(userId),
-    )
-
-    if (!rawValue) {
-      return []
-    }
-
-    const parsedValue = JSON.parse(rawValue)
-
-    if (!Array.isArray(parsedValue)) {
-      return []
-    }
-
-    return parsedValue.filter(
-      (value): value is string => typeof value === 'string',
-    )
-  } catch {
-    return []
-  }
+  return readStoredStringList(getDismissedHeaderNotificationsStorageKey(userId))
 }
 
 export function writeDismissedHeaderNotificationIds(
   userId: string | null,
   notificationIds: string[],
 ) {
-  if (typeof window === 'undefined') {
-    return
-  }
-
-  window.localStorage.setItem(
+  writeStoredStringList(
     getDismissedHeaderNotificationsStorageKey(userId),
-    JSON.stringify(notificationIds),
+    notificationIds,
   )
 }
 
@@ -162,9 +143,11 @@ export function getVisibleHeaderNotifications(
   notifications: HeaderNotification[],
   dismissedNotificationIds: string[],
 ) {
-  const dismissedIds = new Set(dismissedNotificationIds)
-
-  return notifications.filter((notification) => !dismissedIds.has(notification.id))
+  return excludeItemsById(
+    notifications,
+    dismissedNotificationIds,
+    (notification) => notification.id,
+  )
 }
 
 function getProposalAcceptedNotifications(

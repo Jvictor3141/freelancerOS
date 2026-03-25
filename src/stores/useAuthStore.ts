@@ -42,17 +42,18 @@ function getAuthStoreError(error: unknown, fallback: string) {
   return getErrorMessage(error, fallback)
 }
 
-function applySession(
-  set: (partial: Partial<AuthStore>) => void,
+function buildSessionState(
   currentSession: Session | null,
   authFlow: AuthFlow,
 ) {
-  set({
+  syncRealtimeAuth(currentSession)
+
+  return {
     user: currentSession?.user ?? null,
     initialized: true,
     loading: false,
     authFlow,
-  })
+  } satisfies Partial<AuthStoreState>
 }
 
 function isExistingAccountSignUpResult(
@@ -118,12 +119,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      syncRealtimeAuth(session)
       set((current) => ({
-        user: session?.user ?? null,
-        initialized: true,
-        loading: false,
-        authFlow: resolveAuthFlow(event, session, current.authFlow),
+        ...buildSessionState(
+          session,
+          resolveAuthFlow(event, session, current.authFlow),
+        ),
       }))
     })
 
@@ -138,8 +138,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         error: getAuthStoreError(error, 'Nao foi possivel carregar a sessao atual.'),
       })
     } else {
-      syncRealtimeAuth(data.session)
-      applySession(set, data.session, resolveInitialAuthFlow(data.session))
+      set(buildSessionState(data.session, resolveInitialAuthFlow(data.session)))
     }
 
     return () => subscription.unsubscribe()
@@ -164,7 +163,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       throw new Error(message)
     }
 
-    applySession(set, data.session, null)
+    set(buildSessionState(data.session, null))
   },
 
   signUp: async (email, password) => {
@@ -194,7 +193,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       throw new Error(message)
     }
 
-    applySession(set, data.session ?? null, null)
+    set(buildSessionState(data.session ?? null, null))
 
     set({
       notice: data.session
@@ -218,6 +217,6 @@ export const useAuthStore = create<AuthStore>((set) => ({
       throw new Error(message)
     }
 
-    applySession(set, null, null)
+    set(buildSessionState(null, null))
   },
 }))
