@@ -32,11 +32,14 @@ export function ProjectsListSection({
           projects.map((project) => (
             <article key={project.id} className="space-y-4 px-5 py-5">
               <div className="flex items-start justify-between gap-3">
-                <div>
+                <div className="min-w-0 flex-1">
                   <p className="text-lg font-semibold text-slate-900">
                     {project.name}
                   </p>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p
+                    className="mt-1 truncate text-sm text-slate-500"
+                    title={project.description || 'Sem descrição'}
+                  >
                     {project.description || 'Sem descrição'}
                   </p>
                 </div>
@@ -129,7 +132,10 @@ export function ProjectsListSection({
                     <p className="font-semibold text-slate-900">
                       {project.name}
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p
+                      className="max-w-[22rem] truncate text-xs text-slate-500"
+                      title={project.description || 'Sem descrição'}
+                    >
                       {project.description || 'Sem descrição'}
                     </p>
                   </div>
