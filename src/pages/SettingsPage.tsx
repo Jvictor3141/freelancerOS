@@ -375,7 +375,7 @@ export function SettingsPage() {
                 <p>Olá, cliente.</p>
                 {profileIntro ? <p className="mt-3">{profileIntro}</p> : null}
                 <p className="mt-3">
-                  Segue a proposta do projeto "Landing Page".
+                  Segue a proposta do projeto "Nome do projeto".
                 </p>
 
                 {profilePreviewLines.length > 0 ? (
