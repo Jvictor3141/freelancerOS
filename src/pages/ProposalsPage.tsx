@@ -1,12 +1,12 @@
 import { useNavigate } from 'react-router-dom'
 import { Modal } from '../components/Modal'
+import { ProposalForm } from '../components/ProposalForm'
 import { PageBanner } from '../components/page/PageBanner'
 import { PageLoadingState } from '../components/page/PageLoadingState'
 import { ProposalFiltersModalContent } from '../features/proposals/ProposalFiltersModalContent'
 import { ProposalListSection } from '../features/proposals/ProposalListSection'
 import { ProposalResponseNotificationsSection } from '../features/proposals/ProposalResponseNotificationsSection'
 import { ProposalShareModalContent } from '../features/proposals/ProposalShareModalContent'
-import { ProposalForm } from '../components/ProposalForm'
 import { ProposalsFiltersSection } from '../features/proposals/ProposalsFiltersSection'
 import { ProposalsOverviewSection } from '../features/proposals/ProposalsOverviewSection'
 import { useProposalsPage } from '../features/proposals/useProposalsPage'
@@ -19,6 +19,7 @@ export function ProposalsPage() {
     filteredProposals,
     generatedShareLink,
     hasActiveFilters,
+    hasLoadError,
     isFilterModalOpen,
     isGeneratingShareLink,
     isLoading,
@@ -45,6 +46,7 @@ export function ProposalsPage() {
     handleProposalSubmit,
     handleRejectProposal,
     handleReopenProposal,
+    handleRetryLoad,
     handleSendProposal,
     handleShareLinkGeneration,
     openCreateModal,
@@ -71,7 +73,20 @@ export function ProposalsPage() {
 
   return (
     <div className="page-stack space-y-6">
-      {combinedError ? <PageBanner>{combinedError}</PageBanner> : null}
+      {combinedError ? (
+        <PageBanner
+          actionLabel={hasLoadError ? 'Tentar novamente' : undefined}
+          onAction={
+            hasLoadError
+              ? () => {
+                  void handleRetryLoad()
+                }
+              : undefined
+          }
+        >
+          {combinedError}
+        </PageBanner>
+      ) : null}
 
       <ProposalsOverviewSection metrics={metrics} onCreate={openCreateModal} />
 
@@ -149,7 +164,7 @@ export function ProposalsPage() {
 
       <Modal
         title="Link seguro da proposta"
-        description="Gere um link protegido por token e compartilhe apenas a visualização pública dessa proposta."
+        description="Gere um link protegido por token e compartilhe apenas a visualizaÃ§Ã£o pÃºblica dessa proposta."
         isOpen={isShareModalOpen}
         onClose={closeShareModal}
       >
@@ -173,4 +188,3 @@ export function ProposalsPage() {
     </div>
   )
 }
-

@@ -16,19 +16,23 @@ import {
   replaceRecordById,
   syncSelectedRecord,
 } from './resourceStoreUtils'
+import {
+  isResourceReady,
+  type ResourceLoadStatus,
+} from './resourceLoadState'
 import { usePaymentStore } from './usePaymentStore'
 
 type ProjectStoreState = {
   projects: Project[]
   selectedProject: Project | null
-  loading: boolean
+  loadStatus: ResourceLoadStatus
   error: string | null
-  initialized: boolean
 }
 
 type ProjectStoreActions = {
-  loadProjects: () => Promise<void>
+  loadProjects: (options?: { force?: boolean }) => Promise<void>
   ensureProjectsLoaded: () => Promise<void>
+  retryLoad: () => Promise<void>
   selectProject: (project: Project | null) => void
   addProject: (data: ProjectInput) => Promise<Project>
   editProject: (id: string, data: ProjectInput) => Promise<Project>
@@ -41,9 +45,8 @@ export type ProjectStore = ProjectStoreState & ProjectStoreActions
 const projectStoreInitialState: ProjectStoreState = {
   projects: [],
   selectedProject: null,
-  loading: false,
+  loadStatus: 'idle',
   error: null,
-  initialized: false,
 }
 
 let loadProjectsPromise: Promise<void> | null = null
@@ -55,9 +58,8 @@ function getProjectStoreError(error: unknown, fallback: string) {
 export const projectStoreSelectors = {
   projects: (state: ProjectStoreState) => state.projects,
   selectedProject: (state: ProjectStoreState) => state.selectedProject,
-  loading: (state: ProjectStoreState) => state.loading,
+  loadStatus: (state: ProjectStoreState) => state.loadStatus,
   error: (state: ProjectStoreState) => state.error,
-  initialized: (state: ProjectStoreState) => state.initialized,
   getById: (state: ProjectStoreState, id: string) =>
     findRecordById(state.projects, id),
 }
@@ -65,27 +67,29 @@ export const projectStoreSelectors = {
 export const useProjectStore = create<ProjectStore>((set, get) => ({
   ...projectStoreInitialState,
 
-  loadProjects: async () => {
+  loadProjects: async (options) => {
     if (loadProjectsPromise) {
       return loadProjectsPromise
     }
 
+    if (!options?.force && isResourceReady(get().loadStatus)) {
+      return
+    }
+
     loadProjectsPromise = (async () => {
-      set({ loading: true, error: null })
+      set({ loadStatus: 'loading', error: null })
 
       try {
         const projects = await getProjects()
         set({
           projects,
-          loading: false,
+          loadStatus: 'ready',
           error: null,
-          initialized: true,
         })
       } catch (error) {
         set({
-          loading: false,
-          error: getProjectStoreError(error, 'Não foi possível carregar os projetos.'),
-          initialized: true,
+          loadStatus: 'error',
+          error: getProjectStoreError(error, 'NÃ£o foi possÃ­vel carregar os projetos.'),
         })
       } finally {
         loadProjectsPromise = null
@@ -96,11 +100,15 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
   },
 
   ensureProjectsLoaded: async () => {
-    if (get().initialized) {
+    if (isResourceReady(get().loadStatus)) {
       return
     }
 
     await get().loadProjects()
+  },
+
+  retryLoad: async () => {
+    await get().loadProjects({ force: true })
   },
 
   selectProject: (project) => {
@@ -119,7 +127,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 
       return newProject
     } catch (error) {
-      const message = getProjectStoreError(error, 'Não foi possível salvar o projeto.')
+      const message = getProjectStoreError(error, 'NÃ£o foi possÃ­vel salvar o projeto.')
 
       set({ error: message })
       throw new Error(message)
@@ -144,7 +152,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     } catch (error) {
       const message = getProjectStoreError(
         error,
-        'Não foi possível atualizar o projeto.',
+        'NÃ£o foi possÃ­vel atualizar o projeto.',
       )
 
       set({ error: message })
@@ -163,9 +171,9 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         selectedProject: clearSelectedRecord(state.selectedProject, id),
       }))
 
-      await usePaymentStore.getState().loadPayments()
+      await usePaymentStore.getState().loadPayments({ force: true })
     } catch (error) {
-      const message = getProjectStoreError(error, 'Não foi possível excluir o projeto.')
+      const message = getProjectStoreError(error, 'NÃ£o foi possÃ­vel excluir o projeto.')
 
       set({ error: message })
       throw new Error(message)

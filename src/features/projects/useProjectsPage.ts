@@ -1,37 +1,43 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useFeedback } from '../../components/FeedbackProvider'
-import type { ProjectInput } from '../../types/inputs'
 import { getToastToneForMessage } from '../../lib/feedback'
 import { getErrorMessage } from '../../lib/supabase'
 import { useClientStore } from '../../stores/useClientStore'
 import { useProjectStore } from '../../stores/useProjectStore'
 import { useProposalStore } from '../../stores/useProposalStore'
+import {
+  hasResourceLoadError,
+  isResourcePending,
+} from '../../stores/resourceLoadState'
+import type { ProjectInput } from '../../types/inputs'
 import type { ProjectWithClient } from '../../types/viewModels'
+import type { ProjectStatusFilter } from '../../utils/projectStatus'
 import {
   getFilteredProjects,
   getProjectsCommercialSummary,
   getProjectsWithClient,
 } from '../../utils/projectsPage'
-import type { ProjectStatusFilter } from '../../utils/projectStatus'
 
 export function useProjectsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
 
   const clients = useClientStore((state) => state.clients)
   const clientError = useClientStore((state) => state.error)
-  const clientsInitialized = useClientStore((state) => state.initialized)
+  const clientsLoadStatus = useClientStore((state) => state.loadStatus)
   const ensureClientsLoaded = useClientStore(
     (state) => state.ensureClientsLoaded,
   )
+  const retryClientsLoad = useClientStore((state) => state.retryLoad)
 
   const projects = useProjectStore((state) => state.projects)
   const selectedProject = useProjectStore((state) => state.selectedProject)
   const projectError = useProjectStore((state) => state.error)
-  const projectsInitialized = useProjectStore((state) => state.initialized)
+  const projectsLoadStatus = useProjectStore((state) => state.loadStatus)
   const ensureProjectsLoaded = useProjectStore(
     (state) => state.ensureProjectsLoaded,
   )
+  const retryProjectsLoad = useProjectStore((state) => state.retryLoad)
   const selectProject = useProjectStore((state) => state.selectProject)
   const addProject = useProjectStore((state) => state.addProject)
   const editProject = useProjectStore((state) => state.editProject)
@@ -39,10 +45,11 @@ export function useProjectsPage() {
 
   const proposals = useProposalStore((state) => state.proposals)
   const proposalError = useProposalStore((state) => state.error)
-  const proposalsInitialized = useProposalStore((state) => state.initialized)
+  const proposalsLoadStatus = useProposalStore((state) => state.loadStatus)
   const ensureProposalsLoaded = useProposalStore(
     (state) => state.ensureProposalsLoaded,
   )
+  const retryProposalsLoad = useProposalStore((state) => state.retryLoad)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
@@ -113,6 +120,14 @@ export function useProjectsPage() {
     setIsModalOpen(false)
   }
 
+  async function handleRetryLoad() {
+    await Promise.all([retryClientsLoad(), retryProjectsLoad()])
+  }
+
+  async function handleRetryCommercialSummaryLoad() {
+    await retryProposalsLoad()
+  }
+
   function resetAllFilters() {
     setSearch('')
     setStatusFilter('all')
@@ -158,7 +173,7 @@ export function useProjectsPage() {
           : 'Projeto criado com sucesso.',
       )
     } catch (submitError) {
-      alert(getErrorMessage(submitError, 'Não foi possível salvar o projeto.'))
+      alert(getErrorMessage(submitError, 'NÃ£o foi possÃ­vel salvar o projeto.'))
     } finally {
       setIsSubmitting(false)
     }
@@ -181,7 +196,7 @@ export function useProjectsPage() {
       await removeProject(project.id)
       alert('Projeto excluido com sucesso.')
     } catch (removeError) {
-      alert(getErrorMessage(removeError, 'Não foi possível excluir o projeto.'))
+      alert(getErrorMessage(removeError, 'NÃ£o foi possÃ­vel excluir o projeto.'))
     }
   }
 
@@ -194,15 +209,21 @@ export function useProjectsPage() {
     filteredProjects,
     hasActiveSelectionFilters:
       statusFilter !== 'all' || clientFilter !== 'all',
+    hasCommercialSummaryLoadError: hasResourceLoadError(proposalsLoadStatus),
+    hasLoadError:
+      hasResourceLoadError(clientsLoadStatus) ||
+      hasResourceLoadError(projectsLoadStatus),
     isFilterModalOpen,
-    isLoading: !clientsInitialized || !projectsInitialized,
+    isLoading:
+      isResourcePending(clientsLoadStatus) ||
+      isResourcePending(projectsLoadStatus),
     isModalOpen,
     isSubmitting,
     proposalError,
     search,
     selectedProject,
     showCommercialSummary:
-      proposalsInitialized && commercialSummary.openCount > 0,
+      proposalsLoadStatus === 'ready' && commercialSummary.openCount > 0,
     statusFilter,
     statusFilterDraft,
     applyFilterModal,
@@ -210,6 +231,8 @@ export function useProjectsPage() {
     closeModal,
     handleProjectRemoval,
     handleProjectSubmit,
+    handleRetryCommercialSummaryLoad,
+    handleRetryLoad,
     openCreateModal,
     openEditModal,
     openFilterModal,
@@ -222,6 +245,3 @@ export function useProjectsPage() {
     setStatusFilterDraft,
   }
 }
-
-
-

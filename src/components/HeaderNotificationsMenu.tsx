@@ -6,6 +6,10 @@ import { useClientStore } from '../stores/useClientStore'
 import { usePaymentStore } from '../stores/usePaymentStore'
 import { useProjectStore } from '../stores/useProjectStore'
 import { useProposalStore } from '../stores/useProposalStore'
+import {
+  hasResourceLoadError,
+  isResourcePending,
+} from '../stores/resourceLoadState'
 import type {
   HeaderNotification,
   HeaderNotificationTone,
@@ -79,28 +83,32 @@ export function HeaderNotificationsMenu() {
   const user = useAuthStore((state) => state.user)
 
   const clients = useClientStore((state) => state.clients)
-  const clientsInitialized = useClientStore((state) => state.initialized)
+  const clientsLoadStatus = useClientStore((state) => state.loadStatus)
   const ensureClientsLoaded = useClientStore(
     (state) => state.ensureClientsLoaded,
   )
+  const retryClientsLoad = useClientStore((state) => state.retryLoad)
 
   const projects = useProjectStore((state) => state.projects)
-  const projectsInitialized = useProjectStore((state) => state.initialized)
+  const projectsLoadStatus = useProjectStore((state) => state.loadStatus)
   const ensureProjectsLoaded = useProjectStore(
     (state) => state.ensureProjectsLoaded,
   )
+  const retryProjectsLoad = useProjectStore((state) => state.retryLoad)
 
   const payments = usePaymentStore((state) => state.payments)
-  const paymentsInitialized = usePaymentStore((state) => state.initialized)
+  const paymentsLoadStatus = usePaymentStore((state) => state.loadStatus)
   const ensurePaymentsLoaded = usePaymentStore(
     (state) => state.ensurePaymentsLoaded,
   )
+  const retryPaymentsLoad = usePaymentStore((state) => state.retryLoad)
 
   const proposals = useProposalStore((state) => state.proposals)
-  const proposalsInitialized = useProposalStore((state) => state.initialized)
+  const proposalsLoadStatus = useProposalStore((state) => state.loadStatus)
   const ensureProposalsLoaded = useProposalStore(
     (state) => state.ensureProposalsLoaded,
   )
+  const retryProposalsLoad = useProposalStore((state) => state.retryLoad)
 
   const [isOpen, setIsOpen] = useState(false)
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState<
@@ -177,10 +185,24 @@ export function HeaderNotificationsMenu() {
 
   const isLoading =
     Boolean(user) &&
-    (!clientsInitialized ||
-      !projectsInitialized ||
-      !paymentsInitialized ||
-      !proposalsInitialized)
+    (isResourcePending(clientsLoadStatus) ||
+      isResourcePending(projectsLoadStatus) ||
+      isResourcePending(paymentsLoadStatus) ||
+      isResourcePending(proposalsLoadStatus))
+  const hasLoadError =
+    hasResourceLoadError(clientsLoadStatus) ||
+    hasResourceLoadError(projectsLoadStatus) ||
+    hasResourceLoadError(paymentsLoadStatus) ||
+    hasResourceLoadError(proposalsLoadStatus)
+
+  async function handleRetryLoad() {
+    await Promise.all([
+      retryClientsLoad(),
+      retryProjectsLoad(),
+      retryPaymentsLoad(),
+      retryProposalsLoad(),
+    ])
+  }
 
   function handleDismissNotification(notificationId: string) {
     setDismissedNotificationIds((currentNotificationIds) => {
@@ -244,6 +266,19 @@ export function HeaderNotificationsMenu() {
             {isLoading ? (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
                 Carregando notificacoes...
+              </div>
+            ) : hasLoadError ? (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-5 text-sm text-amber-800">
+                <p>Algumas notificacoes nao puderam ser atualizadas.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handleRetryLoad()
+                  }}
+                  className="mt-3 inline-flex rounded-2xl border border-amber-300 bg-white/80 px-4 py-2 text-sm font-semibold text-amber-800 transition hover:bg-white"
+                >
+                  Tentar novamente
+                </button>
               </div>
             ) : notifications.length > 0 ? (
               notifications.map((notification) => {

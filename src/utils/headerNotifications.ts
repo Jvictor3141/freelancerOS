@@ -9,6 +9,7 @@ import {
   readStoredStringList,
   writeStoredStringList,
 } from './persistedStringList'
+import { parseCalendarDate } from './dateOnly'
 import { canMarkPaymentAsPaid } from './paymentRules'
 import { isAcceptedProposal } from './proposalRules'
 import { isActiveProject } from './projectRules'
@@ -39,7 +40,6 @@ type HeaderNotificationCollections = {
 }
 
 const ISO_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/
-const ISO_DATE_PREFIX_PATTERN = /^(\d{4})-(\d{2})-(\d{2})/
 const DISMISSED_HEADER_NOTIFICATIONS_STORAGE_PREFIX =
   'dismissed-header-notifications'
 const MILLISECONDS_IN_DAY = 24 * 60 * 60 * 1000
@@ -58,10 +58,7 @@ function parseComparableDate(value: string | null | undefined) {
   }
 
   if (ISO_DATE_ONLY_PATTERN.test(value)) {
-    const [year, month, day] = value.split('-').map(Number)
-    const date = new Date(year, month - 1, day)
-
-    return Number.isNaN(date.getTime()) ? null : date
+    return parseCalendarDate(value)
   }
 
   const date = new Date(value)
@@ -71,23 +68,6 @@ function parseComparableDate(value: string | null | undefined) {
 
 function toCalendarDayTimestamp(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
-}
-
-function parseCalendarDate(value: string | null | undefined) {
-  if (!value) {
-    return null
-  }
-
-  const dateMatch = value.match(ISO_DATE_PREFIX_PATTERN)
-
-  if (!dateMatch) {
-    return parseComparableDate(value)
-  }
-
-  const [, year, month, day] = dateMatch
-  const date = new Date(Number(year), Number(month) - 1, Number(day))
-
-  return Number.isNaN(date.getTime()) ? null : date
 }
 
 function getCalendarDayDifference(
@@ -201,7 +181,7 @@ function getPaymentDueTodayNotifications(
       continue
     }
 
-    if (payment.status === 'overdue' || remainingDays < 0) {
+    if (payment.status === 'overdue') {
       notifications.push({
         id: buildHeaderNotificationId(
           'payment_overdue',

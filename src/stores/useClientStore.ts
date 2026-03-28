@@ -16,20 +16,24 @@ import {
   replaceRecordById,
   syncSelectedRecord,
 } from './resourceStoreUtils'
+import {
+  isResourceReady,
+  type ResourceLoadStatus,
+} from './resourceLoadState'
 import { usePaymentStore } from './usePaymentStore'
 import { useProjectStore } from './useProjectStore'
 
 type ClientStoreState = {
   clients: Client[]
   selectedClient: Client | null
-  loading: boolean
+  loadStatus: ResourceLoadStatus
   error: string | null
-  initialized: boolean
 }
 
 type ClientStoreActions = {
-  loadClients: () => Promise<void>
+  loadClients: (options?: { force?: boolean }) => Promise<void>
   ensureClientsLoaded: () => Promise<void>
+  retryLoad: () => Promise<void>
   selectClient: (client: Client | null) => void
   addClient: (data: ClientInput) => Promise<Client>
   editClient: (id: string, data: ClientInput) => Promise<Client>
@@ -42,9 +46,8 @@ export type ClientStore = ClientStoreState & ClientStoreActions
 const clientStoreInitialState: ClientStoreState = {
   clients: [],
   selectedClient: null,
-  loading: false,
+  loadStatus: 'idle',
   error: null,
-  initialized: false,
 }
 
 let loadClientsPromise: Promise<void> | null = null
@@ -56,9 +59,8 @@ function getClientStoreError(error: unknown, fallback: string) {
 export const clientStoreSelectors = {
   clients: (state: ClientStoreState) => state.clients,
   selectedClient: (state: ClientStoreState) => state.selectedClient,
-  loading: (state: ClientStoreState) => state.loading,
+  loadStatus: (state: ClientStoreState) => state.loadStatus,
   error: (state: ClientStoreState) => state.error,
-  initialized: (state: ClientStoreState) => state.initialized,
   getById: (state: ClientStoreState, id: string) =>
     findRecordById(state.clients, id),
 }
@@ -66,27 +68,29 @@ export const clientStoreSelectors = {
 export const useClientStore = create<ClientStore>((set, get) => ({
   ...clientStoreInitialState,
 
-  loadClients: async () => {
+  loadClients: async (options) => {
     if (loadClientsPromise) {
       return loadClientsPromise
     }
 
+    if (!options?.force && isResourceReady(get().loadStatus)) {
+      return
+    }
+
     loadClientsPromise = (async () => {
-      set({ loading: true, error: null })
+      set({ loadStatus: 'loading', error: null })
 
       try {
         const clients = await getClients()
         set({
           clients,
-          loading: false,
+          loadStatus: 'ready',
           error: null,
-          initialized: true,
         })
       } catch (error) {
         set({
-          loading: false,
-          error: getClientStoreError(error, 'Não foi possível carregar os clientes.'),
-          initialized: true,
+          loadStatus: 'error',
+          error: getClientStoreError(error, 'NÃ£o foi possÃ­vel carregar os clientes.'),
         })
       } finally {
         loadClientsPromise = null
@@ -97,11 +101,15 @@ export const useClientStore = create<ClientStore>((set, get) => ({
   },
 
   ensureClientsLoaded: async () => {
-    if (get().initialized) {
+    if (isResourceReady(get().loadStatus)) {
       return
     }
 
     await get().loadClients()
+  },
+
+  retryLoad: async () => {
+    await get().loadClients({ force: true })
   },
 
   selectClient: (client) => {
@@ -120,7 +128,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
 
       return newClient
     } catch (error) {
-      const message = getClientStoreError(error, 'Não foi possível salvar o cliente.')
+      const message = getClientStoreError(error, 'NÃ£o foi possÃ­vel salvar o cliente.')
 
       set({ error: message })
       throw new Error(message)
@@ -142,7 +150,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
     } catch (error) {
       const message = getClientStoreError(
         error,
-        'Não foi possível atualizar o cliente.',
+        'NÃ£o foi possÃ­vel atualizar o cliente.',
       )
 
       set({ error: message })
@@ -162,11 +170,11 @@ export const useClientStore = create<ClientStore>((set, get) => ({
       }))
 
       await Promise.all([
-        useProjectStore.getState().loadProjects(),
-        usePaymentStore.getState().loadPayments(),
+        useProjectStore.getState().loadProjects({ force: true }),
+        usePaymentStore.getState().loadPayments({ force: true }),
       ])
     } catch (error) {
-      const message = getClientStoreError(error, 'Não foi possível excluir o cliente.')
+      const message = getClientStoreError(error, 'NÃ£o foi possÃ­vel excluir o cliente.')
 
       set({ error: message })
       throw new Error(message)

@@ -1,5 +1,4 @@
 export const projectStatuses = [
-  'proposal',
   'in_progress',
   'review',
   'completed',

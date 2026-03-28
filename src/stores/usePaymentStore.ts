@@ -1,5 +1,4 @@
 import { create } from 'zustand'
-import type { PaymentInput } from '../types/inputs'
 import { getErrorMessage } from '../lib/supabase'
 import {
   createPayment as createPaymentService,
@@ -7,8 +6,14 @@ import {
   getPayments,
   updatePayment as updatePaymentService,
 } from '../services/paymentService'
+import {
+  isResourceReady,
+  type ResourceLoadStatus,
+} from './resourceLoadState'
+import type { PaymentInput } from '../types/inputs'
 import type { Payment } from '../types/payment'
-import { getPaymentsNeedingOverdueStatus } from '../utils/paymentRules'
+import { formatDateInputValue } from '../utils/dateOnly'
+import { toPersistedPaymentStatus } from '../utils/paymentStatus'
 import {
   clearSelectedRecord,
   findRecordById,
@@ -21,20 +26,19 @@ import {
 type PaymentStoreState = {
   payments: Payment[]
   selectedPayment: Payment | null
-  loading: boolean
+  loadStatus: ResourceLoadStatus
   error: string | null
-  initialized: boolean
 }
 
 type PaymentStoreActions = {
-  loadPayments: () => Promise<void>
+  loadPayments: (options?: { force?: boolean }) => Promise<void>
   ensurePaymentsLoaded: () => Promise<void>
+  retryLoad: () => Promise<void>
   selectPayment: (payment: Payment | null) => void
   addPayment: (data: PaymentInput) => Promise<Payment>
   editPayment: (id: string, data: PaymentInput) => Promise<Payment>
   removePayment: (id: string) => Promise<void>
   markAsPaid: (id: string) => Promise<Payment | null>
-  markAsOverdueIfNeeded: () => Promise<void>
   resetStore: () => void
 }
 
@@ -43,9 +47,8 @@ export type PaymentStore = PaymentStoreState & PaymentStoreActions
 const paymentStoreInitialState: PaymentStoreState = {
   payments: [],
   selectedPayment: null,
-  loading: false,
+  loadStatus: 'idle',
   error: null,
-  initialized: false,
 }
 
 let loadPaymentsPromise: Promise<void> | null = null
@@ -60,7 +63,7 @@ function toPaymentInput(payment: Payment): PaymentInput {
     amount: payment.amount,
     dueDate: payment.dueDate,
     paidAt: payment.paidAt,
-    status: payment.status,
+    status: toPersistedPaymentStatus(payment.status),
     method: payment.method,
     notes: payment.notes,
   }
@@ -69,40 +72,41 @@ function toPaymentInput(payment: Payment): PaymentInput {
 export const paymentStoreSelectors = {
   payments: (state: PaymentStoreState) => state.payments,
   selectedPayment: (state: PaymentStoreState) => state.selectedPayment,
-  loading: (state: PaymentStoreState) => state.loading,
+  loadStatus: (state: PaymentStoreState) => state.loadStatus,
   error: (state: PaymentStoreState) => state.error,
-  initialized: (state: PaymentStoreState) => state.initialized,
   getById: (state: PaymentStoreState, id: string) =>
     findRecordById(state.payments, id),
-  overdueCandidates: (state: PaymentStoreState) =>
-    getPaymentsNeedingOverdueStatus(state.payments, new Date()),
 }
 
 export const usePaymentStore = create<PaymentStore>((set, get) => ({
   ...paymentStoreInitialState,
 
-  loadPayments: async () => {
+  loadPayments: async (options) => {
     if (loadPaymentsPromise) {
       return loadPaymentsPromise
     }
 
+    if (!options?.force && isResourceReady(get().loadStatus)) {
+      return
+    }
+
     loadPaymentsPromise = (async () => {
-      set({ loading: true, error: null })
+      set({ loadStatus: 'loading', error: null })
 
       try {
         const payments = await getPayments()
         set({
           payments,
-          loading: false,
+          loadStatus: 'ready',
           error: null,
-          initialized: true,
         })
-        void get().markAsOverdueIfNeeded()
       } catch (error) {
         set({
-          loading: false,
-          error: getPaymentStoreError(error, 'Não foi possível carregar os pagamentos.'),
-          initialized: true,
+          loadStatus: 'error',
+          error: getPaymentStoreError(
+            error,
+            'Nao foi possivel carregar os pagamentos.',
+          ),
         })
       } finally {
         loadPaymentsPromise = null
@@ -113,11 +117,15 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
   },
 
   ensurePaymentsLoaded: async () => {
-    if (get().initialized) {
+    if (isResourceReady(get().loadStatus)) {
       return
     }
 
     await get().loadPayments()
+  },
+
+  retryLoad: async () => {
+    await get().loadPayments({ force: true })
   },
 
   selectPayment: (payment) => {
@@ -136,7 +144,10 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
 
       return newPayment
     } catch (error) {
-      const message = getPaymentStoreError(error, 'Não foi possível salvar o pagamento.')
+      const message = getPaymentStoreError(
+        error,
+        'Nao foi possivel salvar o pagamento.',
+      )
 
       set({ error: message })
       throw new Error(message)
@@ -161,7 +172,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     } catch (error) {
       const message = getPaymentStoreError(
         error,
-        'Não foi possível atualizar o pagamento.',
+        'Nao foi possivel atualizar o pagamento.',
       )
 
       set({ error: message })
@@ -180,7 +191,10 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
         selectedPayment: clearSelectedRecord(state.selectedPayment, id),
       }))
     } catch (error) {
-      const message = getPaymentStoreError(error, 'Não foi possível excluir o pagamento.')
+      const message = getPaymentStoreError(
+        error,
+        'Nao foi possivel excluir o pagamento.',
+      )
 
       set({ error: message })
       throw new Error(message)
@@ -200,7 +214,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
       const updatedPayment = await updatePaymentService(id, {
         ...toPaymentInput(payment),
         status: 'paid',
-        paidAt: new Date().toISOString().slice(0, 10),
+        paidAt: formatDateInputValue(),
       })
 
       set((state) => ({
@@ -215,56 +229,11 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     } catch (error) {
       const message = getPaymentStoreError(
         error,
-        'Não foi possível marcar o pagamento como pago.',
+        'Nao foi possivel marcar o pagamento como pago.',
       )
 
       set({ error: message })
       throw new Error(message)
-    }
-  },
-
-  markAsOverdueIfNeeded: async () => {
-    set({ error: null })
-
-    const overduePayments = getPaymentsNeedingOverdueStatus(
-      get().payments,
-      new Date(),
-    )
-
-    if (overduePayments.length === 0) {
-      return
-    }
-
-    try {
-      const updatedPayments = await Promise.all(
-        overduePayments.map((payment) =>
-          updatePaymentService(payment.id, {
-            ...toPaymentInput(payment),
-            status: 'overdue',
-          }),
-        ),
-      )
-
-      const updatedPaymentsMap = new Map(
-        updatedPayments.map((payment) => [payment.id, payment]),
-      )
-
-      set((state) => ({
-        payments: state.payments.map(
-          (payment) => updatedPaymentsMap.get(payment.id) ?? payment,
-        ),
-        selectedPayment: state.selectedPayment
-          ? updatedPaymentsMap.get(state.selectedPayment.id) ??
-            state.selectedPayment
-          : null,
-      }))
-    } catch (error) {
-      set({
-        error: getPaymentStoreError(
-          error,
-          'Não foi possível atualizar os pagamentos vencidos.',
-        ),
-      })
     }
   },
 

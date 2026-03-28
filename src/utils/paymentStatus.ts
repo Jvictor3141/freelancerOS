@@ -1,7 +1,9 @@
 import {
   paymentMethods,
+  persistedPaymentStatuses,
   paymentStatuses,
   type PaymentMethod,
+  type PersistedPaymentStatus,
   type PaymentStatus,
 } from '../types/payment'
 import { isOneOf } from './typeGuards'
@@ -17,6 +19,12 @@ export function isPaymentStatus(value: string): value is PaymentStatus {
   return isOneOf(paymentStatuses, value)
 }
 
+export function isPersistedPaymentStatus(
+  value: string,
+): value is PersistedPaymentStatus {
+  return isOneOf(persistedPaymentStatuses, value)
+}
+
 export function isPaymentMethod(value: string): value is PaymentMethod {
   return isOneOf(paymentMethods, value)
 }
@@ -27,6 +35,12 @@ export function isPaymentStatusFilter(value: string): value is PaymentStatusFilt
 
 export function parsePaymentStatusFilter(value: string): PaymentStatusFilter {
   return isPaymentStatusFilter(value) ? value : 'all'
+}
+
+export function toPersistedPaymentStatus(
+  status: PaymentStatus,
+): PersistedPaymentStatus {
+  return status === 'paid' ? 'paid' : 'pending'
 }
 
 export const paymentStatusLabel: Record<PaymentStatus, string> = {

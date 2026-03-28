@@ -1,97 +1,144 @@
-import { supabase, getSupabaseErrorMessage } from '../lib/supabase';
+import { supabase, getSupabaseErrorMessage } from '../lib/supabase'
 import {
   mapPaymentRecord,
   toPaymentPayload,
   type PaymentRecord,
-} from '../lib/database';
-import type { PaymentInput } from '../types/inputs';
-import { ensureDatabaseBootstrap } from './bootstrapService';
-import type { Payment } from '../types/payment';
+} from '../lib/database'
+import type { PaymentInput } from '../types/inputs'
+import type { Payment } from '../types/payment'
+import { ensureDatabaseBootstrap } from './bootstrapService'
 
-// O service de pagamentos segue o mesmo owner model do banco usando user_id em todas as operacoes.
+const PAYMENT_READ_MODEL = 'payments_read_model'
+const PAYMENT_READ_MODEL_MIGRATION = '20260328_payment_read_model.sql'
+
+function isMissingPaymentReadModel(error: { message?: string } | null) {
+  if (!error?.message) {
+    return false
+  }
+
+  return (
+    error.message.includes(PAYMENT_READ_MODEL) &&
+    (error.message.includes('does not exist') ||
+      error.message.includes('schema cache'))
+  )
+}
+
+function getPaymentReadMessage(
+  error: { message?: string } | null,
+  fallback: string,
+) {
+  if (isMissingPaymentReadModel(error)) {
+    return `A leitura de pagamentos no Supabase ainda nao foi atualizada. Rode a migration ${PAYMENT_READ_MODEL_MIGRATION}.`
+  }
+
+  return getSupabaseErrorMessage(error, fallback)
+}
+
+async function getPaymentById(id: string, userId: string): Promise<Payment> {
+  const { data, error } = await supabase
+    .from(PAYMENT_READ_MODEL)
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', userId)
+    .single()
+
+  if (error || !data) {
+    throw new Error(
+      getPaymentReadMessage(
+        error,
+        'Nao foi possivel carregar o pagamento atualizado.',
+      ),
+    )
+  }
+
+  return mapPaymentRecord(data as PaymentRecord)
+}
+
+// O service de pagamentos segue o mesmo owner model do banco usando user_id
+// em todas as operacoes.
 export async function getPayments(): Promise<Payment[]> {
-  const userId = await ensureDatabaseBootstrap();
+  const userId = await ensureDatabaseBootstrap()
 
   const { data, error } = await supabase
-    .from('payments')
+    .from(PAYMENT_READ_MODEL)
     .select('*')
     .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
 
   if (error) {
     throw new Error(
-      getSupabaseErrorMessage(
+      getPaymentReadMessage(
         error,
-        'Não foi possível carregar os pagamentos no banco.',
+        'Nao foi possivel carregar os pagamentos no banco.',
       ),
-    );
+    )
   }
 
-  return (data as PaymentRecord[] | null)?.map(mapPaymentRecord) ?? [];
+  return (data as PaymentRecord[] | null)?.map(mapPaymentRecord) ?? []
 }
 
 export async function createPayment(data: PaymentInput): Promise<Payment> {
-  const userId = await ensureDatabaseBootstrap();
+  const userId = await ensureDatabaseBootstrap()
 
   const { data: createdPayment, error } = await supabase
     .from('payments')
     .insert(toPaymentPayload(data, { userId }))
-    .select()
-    .single();
+    .select('id')
+    .single()
 
   if (error || !createdPayment) {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Não foi possível criar o pagamento no banco.',
+        'Nao foi possivel criar o pagamento no banco.',
       ),
-    );
+    )
   }
 
-  return mapPaymentRecord(createdPayment as PaymentRecord);
+  return getPaymentById(createdPayment.id, userId)
 }
 
 export async function updatePayment(
   id: string,
   data: PaymentInput,
 ): Promise<Payment> {
-  const userId = await ensureDatabaseBootstrap();
+  const userId = await ensureDatabaseBootstrap()
 
   const { data: updatedPayment, error } = await supabase
     .from('payments')
     .update(toPaymentPayload(data, { userId }))
     .eq('id', id)
     .eq('user_id', userId)
-    .select()
-    .single();
+    .select('id')
+    .single()
 
   if (error || !updatedPayment) {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Não foi possível atualizar o pagamento no banco.',
+        'Nao foi possivel atualizar o pagamento no banco.',
       ),
-    );
+    )
   }
 
-  return mapPaymentRecord(updatedPayment as PaymentRecord);
+  return getPaymentById(updatedPayment.id, userId)
 }
 
 export async function deletePayment(id: string) {
-  const userId = await ensureDatabaseBootstrap();
+  const userId = await ensureDatabaseBootstrap()
 
   const { error } = await supabase
     .from('payments')
     .delete()
     .eq('id', id)
-    .eq('user_id', userId);
+    .eq('user_id', userId)
 
   if (error) {
     throw new Error(
       getSupabaseErrorMessage(
         error,
-        'Não foi possível excluir o pagamento no banco.',
+        'Nao foi possivel excluir o pagamento no banco.',
       ),
-    );
+    )
   }
 }

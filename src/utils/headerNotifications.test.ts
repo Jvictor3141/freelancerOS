@@ -115,7 +115,7 @@ describe('header notifications', () => {
     expect(notifications.at(-1)?.path).toBe('/projetos')
   })
 
-  it('creates overdue payment notifications for late unpaid items', () => {
+  it('creates overdue payment notifications from overdue payment statuses', () => {
     const notifications = getHeaderNotifications(
       {
         proposals: [],
@@ -128,10 +128,10 @@ describe('header notifications', () => {
             status: 'overdue',
           }),
           createPayment({
-            id: 'payment-overdue-pending',
+            id: 'payment-overdue-second',
             clientName: 'Nova',
             dueDate: '2026-03-23',
-            status: 'pending',
+            status: 'overdue',
           }),
         ],
       },

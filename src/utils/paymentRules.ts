@@ -1,10 +1,10 @@
 import type { Payment, PaymentStatus } from '../types/payment'
+import { parseCalendarDate } from './dateOnly'
 
 export type PaymentAttentionStatus = Extract<PaymentStatus, 'pending' | 'overdue'>
 
 function getComparableDueDate(value: string) {
-  const timestamp = new Date(value).getTime()
-  return Number.isNaN(timestamp) ? Number.POSITIVE_INFINITY : timestamp
+  return parseCalendarDate(value)?.getTime() ?? Number.POSITIVE_INFINITY
 }
 
 export function isPaymentPaid(payment: Pick<Payment, 'status'>): boolean {
@@ -27,23 +27,6 @@ export function requiresPaymentAttention<
   payment: TPayment,
 ): payment is TPayment & { status: PaymentAttentionStatus } {
   return isPaymentAttentionStatus(payment.status)
-}
-
-export function shouldPaymentBeMarkedAsOverdue(
-  payment: Pick<Payment, 'status' | 'dueDate'>,
-  now = new Date(),
-): boolean {
-  if (payment.status === 'paid' || payment.status === 'overdue') {
-    return false
-  }
-
-  return getComparableDueDate(payment.dueDate) < now.getTime()
-}
-
-export function getPaymentsNeedingOverdueStatus<
-  TPayment extends Pick<Payment, 'status' | 'dueDate'>,
->(payments: TPayment[], now = new Date()): TPayment[] {
-  return payments.filter((payment) => shouldPaymentBeMarkedAsOverdue(payment, now))
 }
 
 export function getPaymentsRequiringAttention<

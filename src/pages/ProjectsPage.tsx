@@ -1,11 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import { Modal } from '../components/Modal'
+import { ProjectForm } from '../components/ProjectForm'
 import { PageBanner } from '../components/page/PageBanner'
 import { PageLoadingState } from '../components/page/PageLoadingState'
 import { ProjectFiltersModalContent } from '../features/projects/ProjectFiltersModalContent'
 import { ProjectsCommercialBanner } from '../features/projects/ProjectsCommercialBanner'
 import { ProjectsListSection } from '../features/projects/ProjectsListSection'
-import { ProjectForm } from '../components/ProjectForm'
 import { ProjectsToolbar } from '../features/projects/ProjectsToolbar'
 import { useProjectsPage } from '../features/projects/useProjectsPage'
 
@@ -19,6 +19,8 @@ export function ProjectsPage() {
     commercialSummary,
     filteredProjects,
     hasActiveSelectionFilters,
+    hasCommercialSummaryLoadError,
+    hasLoadError,
     isFilterModalOpen,
     isLoading,
     isModalOpen,
@@ -34,6 +36,8 @@ export function ProjectsPage() {
     closeModal,
     handleProjectRemoval,
     handleProjectSubmit,
+    handleRetryCommercialSummaryLoad,
+    handleRetryLoad,
     openCreateModal,
     openEditModal,
     openFilterModal,
@@ -57,12 +61,37 @@ export function ProjectsPage() {
 
   return (
     <div className="page-stack space-y-6">
-      {combinedError ? <PageBanner>{combinedError}</PageBanner> : null}
+      {combinedError ? (
+        <PageBanner
+          actionLabel={hasLoadError ? 'Tentar novamente' : undefined}
+          onAction={
+            hasLoadError
+              ? () => {
+                  void handleRetryLoad()
+                }
+              : undefined
+          }
+        >
+          {combinedError}
+        </PageBanner>
+      ) : null}
 
       {proposalError ? (
-        <PageBanner tone="warning">
-          Não foi possível carregar o resumo comercial das propostas nesta
-          página. A operação de projetos continua disponível normalmente.
+        <PageBanner
+          tone="warning"
+          actionLabel={
+            hasCommercialSummaryLoadError ? 'Tentar novamente' : undefined
+          }
+          onAction={
+            hasCommercialSummaryLoadError
+              ? () => {
+                  void handleRetryCommercialSummaryLoad()
+                }
+              : undefined
+          }
+        >
+          NÃ£o foi possÃ­vel carregar o resumo comercial das propostas nesta
+          pÃ¡gina. A operaÃ§Ã£o de projetos continua disponÃ­vel normalmente.
         </PageBanner>
       ) : null}
 
@@ -116,7 +145,7 @@ export function ProjectsPage() {
         title={selectedProject ? 'Editar projeto' : 'Novo projeto'}
         description={
           selectedProject
-            ? 'Atualize as informações do projeto.'
+            ? 'Atualize as informaÃ§Ãµes do projeto.'
             : 'Preencha os dados para cadastrar um novo projeto.'
         }
         isOpen={isModalOpen}
@@ -133,4 +162,3 @@ export function ProjectsPage() {
     </div>
   )
 }
-

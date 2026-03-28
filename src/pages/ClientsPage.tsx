@@ -11,6 +11,7 @@ export function ClientsPage() {
   const {
     error,
     filteredClients,
+    hasLoadError,
     isLoading,
     isModalOpen,
     isSubmitting,
@@ -21,6 +22,7 @@ export function ClientsPage() {
     closeModal,
     handleClientRemoval,
     handleClientSubmit,
+    handleRetryLoad,
     openCreateModal,
     openEditModal,
   } = useClientsPage()
@@ -36,7 +38,20 @@ export function ClientsPage() {
 
   return (
     <div className="page-stack space-y-6">
-      {error ? <PageBanner>{error}</PageBanner> : null}
+      {error ? (
+        <PageBanner
+          actionLabel={hasLoadError ? 'Tentar novamente' : undefined}
+          onAction={
+            hasLoadError
+              ? () => {
+                  void handleRetryLoad()
+                }
+              : undefined
+          }
+        >
+          {error}
+        </PageBanner>
+      ) : null}
 
       <ClientsListSection
         clients={filteredClients}
@@ -70,4 +85,3 @@ export function ClientsPage() {
     </div>
   )
 }
-

@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react'
 import { useFeedback } from '../../components/FeedbackProvider'
-import type { ProposalInput } from '../../types/inputs'
 import { getToastToneForMessage } from '../../lib/feedback'
 import { getErrorMessage } from '../../lib/supabase'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useClientStore } from '../../stores/useClientStore'
 import { useProposalStore } from '../../stores/useProposalStore'
+import {
+  hasResourceLoadError,
+  isResourcePending,
+} from '../../stores/resourceLoadState'
+import type { ProposalInput } from '../../types/inputs'
 import type { ProposalSecureShareLink } from '../../types/sharedProposal'
 import type { ProposalWithClient } from '../../types/viewModels'
 import { getFreelancerProfileFromUser } from '../../utils/freelancerProfile'
 import { buildMailtoLink, buildProposalEmail } from '../../utils/proposalEmail'
+import type { ProposalStatusFilter } from '../../utils/proposalStatus'
 import {
   buildClientResponseNotificationId,
   getClientResponseNotifications,
@@ -20,25 +25,26 @@ import {
   readDismissedClientResponseNotificationIds,
   writeDismissedClientResponseNotificationIds,
 } from '../../utils/proposalsPage'
-import type { ProposalStatusFilter } from '../../utils/proposalStatus'
 
 export function useProposalsPage() {
   const user = useAuthStore((state) => state.user)
 
   const clients = useClientStore((state) => state.clients)
   const clientError = useClientStore((state) => state.error)
-  const clientsInitialized = useClientStore((state) => state.initialized)
+  const clientsLoadStatus = useClientStore((state) => state.loadStatus)
   const ensureClientsLoaded = useClientStore(
     (state) => state.ensureClientsLoaded,
   )
+  const retryClientsLoad = useClientStore((state) => state.retryLoad)
 
   const proposals = useProposalStore((state) => state.proposals)
   const selectedProposal = useProposalStore((state) => state.selectedProposal)
   const proposalError = useProposalStore((state) => state.error)
-  const proposalsInitialized = useProposalStore((state) => state.initialized)
+  const proposalsLoadStatus = useProposalStore((state) => state.loadStatus)
   const ensureProposalsLoaded = useProposalStore(
     (state) => state.ensureProposalsLoaded,
   )
+  const retryProposalsLoad = useProposalStore((state) => state.retryLoad)
   const selectProposal = useProposalStore((state) => state.selectProposal)
   const addProposal = useProposalStore((state) => state.addProposal)
   const editProposal = useProposalStore((state) => state.editProposal)
@@ -149,6 +155,10 @@ export function useProposalsPage() {
     setIsShareModalOpen(false)
   }
 
+  async function handleRetryLoad() {
+    await Promise.all([retryClientsLoad(), retryProposalsLoad()])
+  }
+
   function resetAllFilters() {
     setSearch('')
     setStatusFilter('all')
@@ -207,7 +217,7 @@ export function useProposalsPage() {
           : 'Proposta criada com sucesso.',
       )
     } catch (submitError) {
-      alert(getErrorMessage(submitError, 'Não foi possível salvar a proposta.'))
+      alert(getErrorMessage(submitError, 'NÃ£o foi possÃ­vel salvar a proposta.'))
     } finally {
       setIsSubmitting(false)
     }
@@ -230,7 +240,7 @@ export function useProposalsPage() {
       await removeProposal(proposal.id)
       alert('Proposta excluida com sucesso.')
     } catch (removeError) {
-      alert(getErrorMessage(removeError, 'Não foi possível excluir a proposta.'))
+      alert(getErrorMessage(removeError, 'NÃ£o foi possÃ­vel excluir a proposta.'))
     }
   }
 
@@ -253,7 +263,7 @@ export function useProposalsPage() {
       alert(
         getErrorMessage(
           shareError,
-          'Não foi possível gerar o link seguro da proposta.',
+          'NÃ£o foi possÃ­vel gerar o link seguro da proposta.',
         ),
       )
     } finally {
@@ -268,17 +278,17 @@ export function useProposalsPage() {
 
     try {
       await navigator.clipboard.writeText(generatedShareLink.url)
-      setShareFeedback('Link copiado para a área de transferência.')
+      setShareFeedback('Link copiado para a Ã¡rea de transferÃªncia.')
     } catch {
       setShareFeedback(
-        'Não foi possível copiar automaticamente. Copie o link manualmente.',
+        'NÃ£o foi possÃ­vel copiar automaticamente. Copie o link manualmente.',
       )
     }
   }
 
   async function handleSendProposal(proposal: ProposalWithClient) {
     if (!proposal.recipientEmail.trim()) {
-      alert('Defina um e-mail válido antes de enviar a proposta.')
+      alert('Defina um e-mail vÃ¡lido antes de enviar a proposta.')
       return
     }
 
@@ -297,7 +307,7 @@ export function useProposalsPage() {
       )
       alert('Abrindo seu app de e-mail com a proposta preenchida.')
     } catch (sendError) {
-      alert(getErrorMessage(sendError, 'Não foi possível enviar a proposta.'))
+      alert(getErrorMessage(sendError, 'NÃ£o foi possÃ­vel enviar a proposta.'))
     }
   }
 
@@ -321,7 +331,7 @@ export function useProposalsPage() {
       alert(
         getErrorMessage(
           acceptError,
-          'Não foi possível aceitar a proposta e gerar o projeto.',
+          'NÃ£o foi possÃ­vel aceitar a proposta e gerar o projeto.',
         ),
       )
     }
@@ -347,7 +357,7 @@ export function useProposalsPage() {
       alert(
         getErrorMessage(
           rejectError,
-          'Não foi possível marcar a proposta como recusada.',
+          'NÃ£o foi possÃ­vel marcar a proposta como recusada.',
         ),
       )
     }
@@ -358,7 +368,7 @@ export function useProposalsPage() {
       await reopenProposalById(proposal.id)
       alert(`Proposta "${proposal.title}" reaberta como rascunho.`)
     } catch (reopenError) {
-      alert(getErrorMessage(reopenError, 'Não foi possível reabrir a proposta.'))
+      alert(getErrorMessage(reopenError, 'NÃ£o foi possÃ­vel reabrir a proposta.'))
     }
   }
 
@@ -368,9 +378,14 @@ export function useProposalsPage() {
     filteredProposals,
     generatedShareLink,
     hasActiveFilters: search.trim() !== '' || statusFilter !== 'all',
+    hasLoadError:
+      hasResourceLoadError(clientsLoadStatus) ||
+      hasResourceLoadError(proposalsLoadStatus),
     isFilterModalOpen,
     isGeneratingShareLink,
-    isLoading: !clientsInitialized || !proposalsInitialized,
+    isLoading:
+      isResourcePending(clientsLoadStatus) ||
+      isResourcePending(proposalsLoadStatus),
     isModalOpen,
     isShareModalOpen,
     isSubmitting,
@@ -394,6 +409,7 @@ export function useProposalsPage() {
     handleProposalSubmit,
     handleRejectProposal,
     handleReopenProposal,
+    handleRetryLoad,
     handleSendProposal,
     handleShareLinkGeneration,
     openCreateModal,
@@ -409,6 +425,3 @@ export function useProposalsPage() {
     setStatusFilterDraft,
   }
 }
-
-
-
