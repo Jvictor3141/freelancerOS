@@ -144,8 +144,34 @@ describe('header notifications', () => {
     ])
 
     expect(notifications.map((notification) => notification.title)).toEqual([
-      'Pagamento de Atlas esta atrasado',
-      'Pagamento de Nova esta atrasado',
+      'Pagamento de Atlas expirou',
+      'Pagamento de Nova expirou',
+    ])
+  })
+
+  it('treats past-due pending payments as expired notifications', () => {
+    const notifications = getHeaderNotifications(
+      {
+        proposals: [],
+        projects: [],
+        payments: [
+          createPayment({
+            id: 'payment-past-due-pending',
+            clientName: 'Orion',
+            dueDate: '2026-03-24',
+            status: 'pending',
+          }),
+        ],
+      },
+      new Date(2026, 2, 25, 12, 0, 0),
+    )
+
+    expect(notifications.map((notification) => notification.type)).toEqual([
+      'payment_overdue',
+    ])
+
+    expect(notifications.map((notification) => notification.title)).toEqual([
+      'Pagamento de Orion expirou',
     ])
   })
 

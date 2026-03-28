@@ -185,7 +185,7 @@ function getPaymentDueTodayNotifications(
       continue
     }
 
-    if (payment.status === 'overdue') {
+    if (payment.status === 'overdue' || remainingDays < 0) {
       notifications.push({
         id: buildHeaderNotificationId(
           'payment_overdue',
@@ -194,7 +194,7 @@ function getPaymentDueTodayNotifications(
         ),
         type: 'payment_overdue',
         tone: 'danger',
-        title: `Pagamento de ${payment.clientName} esta atrasado`,
+        title: `Pagamento de ${payment.clientName} expirou`,
         description: `Projeto vinculado: ${payment.projectName}.`,
         occurredAt: payment.dueDate,
         path: '/pagamentos',

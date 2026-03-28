@@ -72,7 +72,7 @@ function getNotificationMeta(notification: HeaderNotification) {
   }
 
   if (notification.type === 'payment_overdue') {
-    return `Venceu em ${formatDate(notification.occurredAt)}`
+    return `Expirou em ${formatDate(notification.occurredAt)}`
   }
 
   return `Prazo em ${formatDate(notification.occurredAt)}`
