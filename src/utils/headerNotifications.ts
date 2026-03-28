@@ -90,6 +90,10 @@ function getComparableTimestamp(value: string) {
   return parseComparableDate(value)?.getTime() ?? 0
 }
 
+function formatRemainingDaysLabel(remainingDays: number) {
+  return remainingDays === 1 ? '1 dia' : `${remainingDays} dias`
+}
+
 function getDismissedHeaderNotificationsStorageKey(userId: string | null) {
   return buildScopedStorageKey(
     DISMISSED_HEADER_NOTIFICATIONS_STORAGE_PREFIX,
@@ -248,7 +252,7 @@ function getProjectDeadlineNotifications(
       continue
     }
 
-    if (remainingDays === 3) {
+    if (remainingDays !== null && remainingDays > 0 && remainingDays <= 3) {
       notifications.push({
         id: buildHeaderNotificationId(
           'project_due_soon',
@@ -257,7 +261,9 @@ function getProjectDeadlineNotifications(
         ),
         type: 'project_due_soon',
         tone: 'warning',
-        title: `Projeto ${project.name} vence em 3 dias`,
+        title: `Projeto ${project.name} vence em ${formatRemainingDaysLabel(
+          remainingDays,
+        )}`,
         description: `Cliente: ${project.clientName}.`,
         occurredAt: project.deadline,
         path: '/projetos',

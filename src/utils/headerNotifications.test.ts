@@ -149,6 +149,45 @@ describe('header notifications', () => {
     ])
   })
 
+  it('creates project deadline notifications for 3, 2 and 1 remaining days', () => {
+    const notifications = getHeaderNotifications(
+      {
+        proposals: [],
+        projects: [
+          createProject({
+            id: 'project-three-days',
+            name: 'Landing page',
+            deadline: '2026-03-28',
+          }),
+          createProject({
+            id: 'project-two-days',
+            name: 'Painel admin',
+            deadline: '2026-03-27',
+          }),
+          createProject({
+            id: 'project-one-day',
+            name: 'Portal cliente',
+            deadline: '2026-03-26',
+          }),
+        ],
+        payments: [],
+      },
+      new Date(2026, 2, 25, 12, 0, 0),
+    )
+
+    expect(notifications.map((notification) => notification.type)).toEqual([
+      'project_due_soon',
+      'project_due_soon',
+      'project_due_soon',
+    ])
+
+    expect(notifications.map((notification) => notification.title)).toEqual([
+      'Projeto Landing page vence em 3 dias',
+      'Projeto Painel admin vence em 2 dias',
+      'Projeto Portal cliente vence em 1 dia',
+    ])
+  })
+
   it('ignores items outside the notification rules', () => {
     const notifications = getHeaderNotifications(
       {
@@ -165,8 +204,8 @@ describe('header notifications', () => {
         ],
         projects: [
           createProject({
-            id: 'project-two-days',
-            deadline: '2026-03-27',
+            id: 'project-four-days',
+            deadline: '2026-03-29',
           }),
           createProject({
             id: 'project-completed',
@@ -248,6 +287,33 @@ describe('header notifications', () => {
     expect(notifications.map((notification) => notification.title)).toEqual([
       'Pagamento de Sigma vence hoje',
       'Projeto Portal do cliente vence em 3 dias',
+    ])
+  })
+
+  it('treats one-day remaining deadlines as a deadline notification', () => {
+    const notifications = getHeaderNotifications(
+      {
+        proposals: [],
+        projects: [
+          createProject({
+            id: 'project-one-day-utc',
+            name: 'Area do cliente',
+            clientName: 'Lambda',
+            deadline: '2026-03-26T00:00:00.000Z',
+            status: 'review',
+          }),
+        ],
+        payments: [],
+      },
+      new Date(2026, 2, 25, 12, 0, 0),
+    )
+
+    expect(notifications.map((notification) => notification.type)).toEqual([
+      'project_due_soon',
+    ])
+
+    expect(notifications.map((notification) => notification.title)).toEqual([
+      'Projeto Area do cliente vence em 1 dia',
     ])
   })
 })
