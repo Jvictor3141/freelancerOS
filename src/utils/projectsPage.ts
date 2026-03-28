@@ -56,9 +56,7 @@ export function getFilteredProjects(
 ) {
   const term = filters.search.trim().toLowerCase()
 
-  return projects
-    .filter((project) => project.status !== 'proposal')
-    .filter((project) => {
+  return projects.filter((project) => {
       const matchesSearch =
         !term ||
         project.name.toLowerCase().includes(term) ||

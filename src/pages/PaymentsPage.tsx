@@ -11,6 +11,7 @@ export function PaymentsPage() {
     combinedError,
     filteredPayments,
     hasActiveFilters,
+    hasLoadError,
     isFilterModalOpen,
     isLoading,
     isModalOpen,
@@ -25,6 +26,7 @@ export function PaymentsPage() {
     handleMarkAsPaid,
     handlePaymentRemoval,
     handlePaymentSubmit,
+    handleRetryLoad,
     openCreateModal,
     openEditModal,
     openFilterModal,
@@ -44,7 +46,20 @@ export function PaymentsPage() {
 
   return (
     <div className="page-stack space-y-6">
-      {combinedError ? <PageBanner>{combinedError}</PageBanner> : null}
+      {combinedError ? (
+        <PageBanner
+          actionLabel={hasLoadError ? 'Tentar novamente' : undefined}
+          onAction={
+            hasLoadError
+              ? () => {
+                  void handleRetryLoad()
+                }
+              : undefined
+          }
+        >
+          {combinedError}
+        </PageBanner>
+      ) : null}
 
       <PaymentsListSection
         payments={filteredPayments}
@@ -93,4 +108,3 @@ export function PaymentsPage() {
     </div>
   )
 }
-

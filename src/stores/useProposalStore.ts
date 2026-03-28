@@ -24,19 +24,23 @@ import {
   syncSelectedRecord,
   upsertRecordByCreatedAtDesc,
 } from './resourceStoreUtils'
+import {
+  isResourceReady,
+  type ResourceLoadStatus,
+} from './resourceLoadState'
 import { useProjectStore } from './useProjectStore'
 
 type ProposalStoreState = {
   proposals: Proposal[]
   selectedProposal: Proposal | null
-  loading: boolean
+  loadStatus: ResourceLoadStatus
   error: string | null
-  initialized: boolean
 }
 
 type ProposalStoreActions = {
-  loadProposals: () => Promise<void>
+  loadProposals: (options?: { force?: boolean }) => Promise<void>
   ensureProposalsLoaded: () => Promise<void>
+  retryLoad: () => Promise<void>
   selectProposal: (proposal: Proposal | null) => void
   addProposal: (data: ProposalInput) => Promise<Proposal>
   editProposal: (id: string, data: ProposalInput) => Promise<Proposal>
@@ -57,9 +61,8 @@ export type ProposalStore = ProposalStoreState & ProposalStoreActions
 const proposalStoreInitialState: ProposalStoreState = {
   proposals: [],
   selectedProposal: null,
-  loading: false,
+  loadStatus: 'idle',
   error: null,
-  initialized: false,
 }
 
 let loadProposalsPromise: Promise<void> | null = null
@@ -72,9 +75,8 @@ function getProposalStoreError(error: unknown, fallback: string) {
 export const proposalStoreSelectors = {
   proposals: (state: ProposalStoreState) => state.proposals,
   selectedProposal: (state: ProposalStoreState) => state.selectedProposal,
-  loading: (state: ProposalStoreState) => state.loading,
+  loadStatus: (state: ProposalStoreState) => state.loadStatus,
   error: (state: ProposalStoreState) => state.error,
-  initialized: (state: ProposalStoreState) => state.initialized,
   getById: (state: ProposalStoreState, id: string) =>
     findRecordById(state.proposals, id),
 }
@@ -82,9 +84,16 @@ export const proposalStoreSelectors = {
 export const useProposalStore = create<ProposalStore>((set, get) => ({
   ...proposalStoreInitialState,
 
-  loadProposals: async () => {
+  loadProposals: async (options) => {
+    if (!options?.force && isResourceReady(get().loadStatus)) {
+      return
+    }
+
     if (loadProposalsPromise) {
-      shouldReloadProposalsAfterCurrentLoad = true
+      if (options?.force) {
+        shouldReloadProposalsAfterCurrentLoad = true
+      }
+
       return loadProposalsPromise
     }
 
@@ -92,7 +101,7 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
       try {
         do {
           shouldReloadProposalsAfterCurrentLoad = false
-          set({ loading: true, error: null })
+          set({ loadStatus: 'loading', error: null })
 
           try {
             const proposals = await getProposals()
@@ -103,18 +112,16 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
                   proposal,
                 ),
               ),
-              loading: false,
+              loadStatus: 'ready',
               error: null,
-              initialized: true,
             }))
           } catch (error) {
             set({
-              loading: false,
+              loadStatus: 'error',
               error: getProposalStoreError(
                 error,
-                'Não foi possível carregar as propostas.',
+                'NÃ£o foi possÃ­vel carregar as propostas.',
               ),
-              initialized: true,
             })
           }
         } while (shouldReloadProposalsAfterCurrentLoad)
@@ -127,11 +134,15 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
   },
 
   ensureProposalsLoaded: async () => {
-    if (get().initialized) {
+    if (isResourceReady(get().loadStatus)) {
       return
     }
 
     await get().loadProposals()
+  },
+
+  retryLoad: async () => {
+    await get().loadProposals({ force: true })
   },
 
   selectProposal: (proposal) => {
@@ -152,7 +163,7 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Não foi possível salvar a proposta.',
+        'NÃ£o foi possÃ­vel salvar a proposta.',
       )
 
       set({ error: message })
@@ -178,7 +189,7 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Não foi possível atualizar a proposta.',
+        'NÃ£o foi possÃ­vel atualizar a proposta.',
       )
 
       set({ error: message })
@@ -199,7 +210,7 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Não foi possível excluir a proposta.',
+        'NÃ£o foi possÃ­vel excluir a proposta.',
       )
 
       set({ error: message })
@@ -225,7 +236,7 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Não foi possível enviar a proposta.',
+        'NÃ£o foi possÃ­vel enviar a proposta.',
       )
 
       set({ error: message })
@@ -242,13 +253,13 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
         expiresInDays,
       )
 
-      await get().loadProposals()
+      await get().loadProposals({ force: true })
 
       return shareLink
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Não foi possível gerar o link seguro da proposta.',
+        'NÃ£o foi possÃ­vel gerar o link seguro da proposta.',
       )
 
       set({ error: message })
@@ -274,7 +285,7 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Não foi possível aceitar a proposta.',
+        'NÃ£o foi possÃ­vel aceitar a proposta.',
       )
 
       set({ error: message })
@@ -300,7 +311,7 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Não foi possível recusar a proposta.',
+        'NÃ£o foi possÃ­vel recusar a proposta.',
       )
 
       set({ error: message })
@@ -326,7 +337,7 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
     } catch (error) {
       const message = getProposalStoreError(
         error,
-        'Não foi possível reabrir a proposta.',
+        'NÃ£o foi possÃ­vel reabrir a proposta.',
       )
 
       set({ error: message })

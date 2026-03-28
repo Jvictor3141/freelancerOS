@@ -82,7 +82,9 @@ describe('proposal store', () => {
       proposals: [acceptedProposal],
     }))
 
-    const queuedReloadPromise = useProposalStore.getState().loadProposals()
+    const queuedReloadPromise = useProposalStore
+      .getState()
+      .loadProposals({ force: true })
 
     firstLoad.resolve([staleProposal])
 
@@ -90,5 +92,22 @@ describe('proposal store', () => {
 
     expect(getProposalsMock).toHaveBeenCalledTimes(2)
     expect(useProposalStore.getState().proposals).toEqual([acceptedProposal])
+  })
+
+  it('allows retrying a failed load without reloading the page', async () => {
+    getProposalsMock
+      .mockRejectedValueOnce(new Error('Falha temporaria'))
+      .mockResolvedValueOnce([createProposal()])
+
+    await useProposalStore.getState().ensureProposalsLoaded()
+
+    expect(useProposalStore.getState().loadStatus).toBe('error')
+    expect(useProposalStore.getState().proposals).toEqual([])
+
+    await useProposalStore.getState().ensureProposalsLoaded()
+
+    expect(getProposalsMock).toHaveBeenCalledTimes(2)
+    expect(useProposalStore.getState().loadStatus).toBe('ready')
+    expect(useProposalStore.getState().proposals).toHaveLength(1)
   })
 })

@@ -7,7 +7,6 @@ import {
   isProjectStatus,
   projectEditableStatusOptions,
   projectStatusLabel,
-  proposalProjectEditableStatusOptions,
 } from '../utils/projectStatus';
 
 type ProjectFormState = Omit<ProjectInput, 'value'> & {
@@ -41,10 +40,7 @@ export function ProjectForm({
 }: ProjectFormProps) {
   const [values, setValues] = useState<ProjectFormState>(emptyValues);
   const { notify } = useFeedback();
-  const statusOptions =
-    initialValues?.status === 'proposal'
-      ? proposalProjectEditableStatusOptions
-      : projectEditableStatusOptions;
+  const statusOptions = projectEditableStatusOptions;
 
   function setField<K extends ProjectFormField>(
     field: K,

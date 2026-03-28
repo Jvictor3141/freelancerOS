@@ -3,11 +3,13 @@ import { useFeedback } from './FeedbackProvider';
 import type { PaymentInput } from '../types/inputs';
 import type { Payment } from '../types/payment';
 import type { Project } from '../types/project';
+import { formatDateInputValue } from '../utils/dateOnly';
 import { paymentMethods } from '../types/payment';
 import {
+  isPersistedPaymentStatus,
   isPaymentMethod,
-  isPaymentStatus,
   paymentStatusLabel,
+  toPersistedPaymentStatus,
 } from '../utils/paymentStatus';
 
 type PaymentFormState = Omit<PaymentInput, 'amount'> & {
@@ -60,7 +62,7 @@ export function PaymentForm({
         amount: String(initialValues.amount),
         dueDate: initialValues.dueDate,
         paidAt: initialValues.paidAt,
-        status: initialValues.status,
+        status: toPersistedPaymentStatus(initialValues.status),
         method: initialValues.method,
         notes: initialValues.notes,
       });
@@ -110,13 +112,13 @@ export function PaymentForm({
       return;
     }
 
-    if (name === 'status' && isPaymentStatus(value)) {
+    if (name === 'status' && isPersistedPaymentStatus(value)) {
       setValues((previousValues) => ({
         ...previousValues,
         status: value,
         paidAt:
           value === 'paid'
-            ? previousValues.paidAt || new Date().toISOString().slice(0, 10)
+            ? previousValues.paidAt || formatDateInputValue()
             : null,
       }));
     }
@@ -223,7 +225,6 @@ export function PaymentForm({
           >
             <option value="pending">{paymentStatusLabel.pending}</option>
             <option value="paid">{paymentStatusLabel.paid}</option>
-            <option value="overdue">{paymentStatusLabel.overdue}</option>
           </select>
         </label>
 

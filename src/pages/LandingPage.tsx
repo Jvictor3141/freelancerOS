@@ -329,16 +329,18 @@ export function LandingPage() {
                   </a>
                 </div>
 
-                <div className="grid gap-3 md:grid-cols-2">
+                <div className="grid gap-3 grid-cols-1">
                   {heroPoints.map((item) => (
                     <article
                       key={item}
                       className="motion-surface rounded-[28px] border border-slate-200 bg-white/82 p-5 shadow-[0_18px_40px_rgba(15,23,42,0.06)] backdrop-blur"
                     >
-                      <div className="inline-flex rounded-2xl bg-indigo-50 p-2 text-[#635bff] shadow-sm shadow-slate-200">
-                        <CheckCircle2 size={18} />
+                      <div className='flex items-center'>
+                        <div className="inline-flex rounded-2xl bg-indigo-50 p-2 text-[#635bff] shadow-sm shadow-slate-200">
+                          <CheckCircle2 size={15} />
+                        </div>
+                        <p className="ml-4 text-sm leading-7 text-slate-600">{item}</p>
                       </div>
-                      <p className="mt-4 text-sm leading-7 text-slate-600">{item}</p>
                     </article>
                   ))}
                 </div>

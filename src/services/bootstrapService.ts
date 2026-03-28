@@ -8,6 +8,8 @@ import { getCurrentUserId } from './authService';
 import type { Client } from '../types/client';
 import type { Payment } from '../types/payment';
 import type { Project } from '../types/project';
+import { toPersistedPaymentStatus } from '../utils/paymentStatus';
+import { normalizeProjectStatus } from '../utils/projectStatus';
 
 const CLIENTS_KEY = 'freelanceros:clients';
 const PROJECTS_KEY = 'freelanceros:projects';
@@ -18,6 +20,7 @@ let bootstrapPromise: Promise<void> | null = null;
 let bootstrapUserId: string | null = null;
 
 type MigrationState = 'started' | 'completed' | null;
+type LegacyProject = Omit<Project, 'status'> & { status: string };
 
 function getMigrationStateKey(userId: string) {
   return `${MIGRATION_STATE_PREFIX}:${userId}`;
@@ -88,7 +91,7 @@ async function migrateLegacyData(userId: string) {
   }
 
   const legacyClients = readLegacyCollection<Client>(CLIENTS_KEY);
-  const legacyProjects = readLegacyCollection<Project>(PROJECTS_KEY);
+  const legacyProjects = readLegacyCollection<LegacyProject>(PROJECTS_KEY);
   const legacyPayments = readLegacyCollection<Payment>(PAYMENTS_KEY);
 
   if (
@@ -157,7 +160,7 @@ async function migrateLegacyData(userId: string) {
             description: project.description,
             value: project.value,
             deadline: project.deadline,
-            status: project.status,
+            status: normalizeProjectStatus(project.status),
           },
           {
             id: project.id,
@@ -188,7 +191,7 @@ async function migrateLegacyData(userId: string) {
             amount: payment.amount,
             dueDate: payment.dueDate,
             paidAt: payment.paidAt,
-            status: payment.status,
+            status: toPersistedPaymentStatus(payment.status),
             method: payment.method,
             notes: payment.notes,
           },
@@ -219,11 +222,24 @@ async function migrateLegacyData(userId: string) {
 export async function ensureDatabaseBootstrap() {
   const userId = await getCurrentUserId();
 
-  if (!bootstrapPromise || bootstrapUserId !== userId) {
+  if (bootstrapUserId !== userId) {
+    bootstrapUserId = null;
+    bootstrapPromise = null;
+  }
+
+  if (!bootstrapPromise) {
     bootstrapUserId = userId;
     bootstrapPromise = migrateLegacyData(userId);
   }
 
-  await bootstrapPromise;
-  return userId;
+  try {
+    await bootstrapPromise;
+    return userId;
+  } catch (error) {
+    if (bootstrapUserId === userId) {
+      bootstrapPromise = null;
+    }
+
+    throw error;
+  }
 }

@@ -1,4 +1,7 @@
+import { PencilLine, Trash2 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import type { ProjectWithClient } from '../../types/viewModels'
+import { getActionButtonClassName } from '../../utils/actionButtonStyles'
 import { formatCurrency, formatDate } from '../../utils/formatting'
 import {
   projectStatusClassName,
@@ -9,6 +12,36 @@ type ProjectsListSectionProps = {
   projects: ProjectWithClient[]
   onEdit: (project: ProjectWithClient) => void
   onRemove: (project: ProjectWithClient) => void
+}
+
+type ProjectActionButtonProps = {
+  tone: 'neutral' | 'danger'
+  label: string
+  title: string
+  icon: LucideIcon
+  onClick: () => void
+}
+
+function ProjectActionButton({
+  tone,
+  label,
+  title,
+  icon: Icon,
+  onClick,
+}: ProjectActionButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      title={title}
+      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition sm:h-10 sm:w-10 lg:h-11 lg:w-11 lg:rounded-xl ${getActionButtonClassName(
+        tone,
+      )}`}
+    >
+      <Icon size={15} className="lg:h-4.25 lg:w-4.25" />
+    </button>
+  )
 }
 
 export function ProjectsListSection({
@@ -70,22 +103,22 @@ export function ProjectsListSection({
                 </p>
               </div>
 
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <button
-                  type="button"
+              <div className="inline-flex max-w-full flex-nowrap items-center gap-2">
+                <ProjectActionButton
+                  tone="neutral"
+                  label={`Editar projeto ${project.name}`}
+                  title="Editar projeto"
+                  icon={PencilLine}
                   onClick={() => onEdit(project)}
-                  className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                >
-                  Editar
-                </button>
+                />
 
-                <button
-                  type="button"
+                <ProjectActionButton
+                  tone="danger"
+                  label={`Excluir projeto ${project.name}`}
+                  title="Excluir projeto"
+                  icon={Trash2}
                   onClick={() => onRemove(project)}
-                  className="rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
-                >
-                  Excluir
-                </button>
+                />
               </div>
             </article>
           ))
@@ -168,21 +201,21 @@ export function ProjectsListSection({
 
                 <td className="px-6 py-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
+                    <ProjectActionButton
+                      tone="neutral"
+                      label={`Editar projeto ${project.name}`}
+                      title="Editar projeto"
+                      icon={PencilLine}
                       onClick={() => onEdit(project)}
-                      className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                    >
-                      Editar
-                    </button>
+                    />
 
-                    <button
-                      type="button"
+                    <ProjectActionButton
+                      tone="danger"
+                      label={`Excluir projeto ${project.name}`}
+                      title="Excluir projeto"
+                      icon={Trash2}
                       onClick={() => onRemove(project)}
-                      className="rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-50"
-                    >
-                      Excluir
-                    </button>
+                    />
                   </div>
                 </td>
               </tr>

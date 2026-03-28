@@ -10,11 +10,13 @@ import { useDashboardData } from '../features/dashboard/useDashboardData'
 export function DashboardPage() {
   const {
     combinedError,
+    hasLoadError,
     isLoading,
     metrics,
     paymentAlerts,
     paymentMetrics,
     recentActivities,
+    retryLoad,
     revenue,
   } = useDashboardData()
 
@@ -24,7 +26,18 @@ export function DashboardPage() {
 
   return (
     <div className="page-stack space-y-6">
-      {combinedError ? <DashboardErrorBanner message={combinedError} /> : null}
+      {combinedError ? (
+        <DashboardErrorBanner
+          message={combinedError}
+          onRetry={
+            hasLoadError
+              ? () => {
+                  void retryLoad()
+                }
+              : undefined
+          }
+        />
+      ) : null}
 
       <section className="grid gap-4 xl:grid-cols-12">
         <DashboardFinancialOverview paymentMetrics={paymentMetrics} />
@@ -43,4 +56,3 @@ export function DashboardPage() {
     </div>
   )
 }
-

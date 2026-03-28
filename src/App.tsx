@@ -14,6 +14,7 @@ import { usePaymentStore } from './stores/usePaymentStore';
 import { usePreferencesStore } from './stores/usePreferencesStore';
 import { useProjectStore } from './stores/useProjectStore';
 import { useProposalStore } from './stores/useProposalStore';
+import { useRealtimeInvalidationStore } from './stores/useRealtimeInvalidationStore';
 
 const DashboardPage = lazy(async () => ({
   default: (await import('./pages/DashboardPage')).DashboardPage,
@@ -149,6 +150,7 @@ function App() {
     useProjectStore.getState().resetStore();
     usePaymentStore.getState().resetStore();
     useProposalStore.getState().resetStore();
+    useRealtimeInvalidationStore.getState().reset();
     previousUserIdRef.current = currentUserId;
   }, [user?.id]);
 

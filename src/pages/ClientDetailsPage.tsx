@@ -1,90 +1,48 @@
-import { useEffect, useMemo } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
   CheckCircle2,
   Clock3,
   FolderKanban,
   Wallet,
-} from 'lucide-react';
-import { useClientStore } from '../stores/useClientStore';
-import { usePaymentStore } from '../stores/usePaymentStore';
-import { useProjectStore } from '../stores/useProjectStore';
-import {
-  getClientFinancialSummary,
-  getClientPayments,
-  getClientProjects,
-} from '../utils/clientDetails';
+} from 'lucide-react'
+import { useClientDetailsData } from '../features/clients/useClientDetailsData'
+import { formatDate } from '../utils/formatting'
 import {
   paymentStatusClassName,
   paymentStatusLabel,
-} from '../utils/paymentStatus';
-import { projectStatusClassName, projectStatusLabel } from '../utils/projectStatus';
+} from '../utils/paymentStatus'
+import {
+  projectStatusClassName,
+  projectStatusLabel,
+} from '../utils/projectStatus'
 
 function formatCurrency(value: number) {
   return value.toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL',
-  });
+  })
 }
 
 export function ClientDetailsPage() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const { snapshot, combinedError, hasLoadError, isLoading, retryLoad } =
+    useClientDetailsData(id)
 
-  const {
-    clients,
-    error: clientError,
-    initialized: clientsInitialized,
-    ensureClientsLoaded,
-  } = useClientStore();
-  const {
-    projects,
-    error: projectError,
-    initialized: projectsInitialized,
-    ensureProjectsLoaded,
-  } = useProjectStore();
-  const {
-    payments,
-    error: paymentError,
-    initialized: paymentsInitialized,
-    ensurePaymentsLoaded,
-  } = usePaymentStore();
+  const client = snapshot?.client ?? null
+  const clientProjects = snapshot?.projects ?? []
+  const clientPayments = snapshot?.payments ?? []
+  const summary = snapshot?.summary ?? {
+    totalContracted: 0,
+    totalReceived: 0,
+    totalPending: 0,
+    totalOverdue: 0,
+    totalOutstanding: 0,
+    completedProjects: 0,
+  }
 
-  const combinedError = paymentError ?? projectError ?? clientError;
-
-  useEffect(() => {
-    void Promise.all([
-      ensureClientsLoaded(),
-      ensureProjectsLoaded(),
-      ensurePaymentsLoaded(),
-    ]);
-  }, [ensureClientsLoaded, ensureProjectsLoaded, ensurePaymentsLoaded]);
-
-  const client = useMemo(
-    () => clients.find((item) => item.id === id) ?? null,
-    [clients, id],
-  );
-
-  const clientProjects = useMemo(() => {
-    if (!id) {
-      return [];
-    }
-
-    return getClientProjects(projects, id);
-  }, [projects, id]);
-
-  const clientPayments = useMemo(
-    () => getClientPayments(payments, clientProjects),
-    [payments, clientProjects],
-  );
-
-  const summary = useMemo(
-    () => getClientFinancialSummary(clientProjects, clientPayments),
-    [clientProjects, clientPayments],
-  );
-
-  if (!clientsInitialized || !projectsInitialized || !paymentsInitialized) {
+  if (isLoading) {
     return (
       <section className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-100">
         <p className="text-sm font-medium text-slate-500">Cliente</p>
@@ -92,10 +50,10 @@ export function ClientDetailsPage() {
           Carregando dados do banco...
         </h2>
         <p className="mt-2 text-sm text-slate-500">
-          Buscando clientes, projetos e pagamentos relacionados.
+          Buscando detalhes, projetos e pagamentos relacionados.
         </p>
       </section>
-    );
+    )
   }
 
   if (!client) {
@@ -103,16 +61,29 @@ export function ClientDetailsPage() {
       <div className="page-stack space-y-6">
         {combinedError ? (
           <section className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
-            {combinedError}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>{combinedError}</div>
+              {hasLoadError ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    void retryLoad()
+                  }}
+                  className="inline-flex w-fit items-center justify-center rounded-2xl border border-rose-300 bg-white/80 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-white"
+                >
+                  Tentar novamente
+                </button>
+              ) : null}
+            </div>
           </section>
         ) : null}
 
         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-100">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-            Cliente não encontrado
+            Cliente nao encontrado
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            Esse cliente não existe ou foi removido.
+            Esse cliente nao existe ou foi removido.
           </p>
           <button
             type="button"
@@ -123,14 +94,27 @@ export function ClientDetailsPage() {
           </button>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="page-stack space-y-6">
       {combinedError ? (
         <section className="rounded-3xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700">
-          {combinedError}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>{combinedError}</div>
+            {hasLoadError ? (
+              <button
+                type="button"
+                onClick={() => {
+                  void retryLoad()
+                }}
+                className="inline-flex w-fit items-center justify-center rounded-2xl border border-rose-300 bg-white/80 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-white"
+              >
+                Tentar novamente
+              </button>
+            ) : null}
+          </div>
         </section>
       ) : null}
 
@@ -160,57 +144,57 @@ export function ClientDetailsPage() {
           <div className="max-w-xl rounded-3xl bg-slate-50 p-4 text-sm text-slate-600">
             <p className="font-medium text-slate-800">Notas</p>
             <p className="mt-2 leading-6">
-              {client.notes || 'Nenhuma observação cadastrada para este cliente.'}
+              {client.notes || 'Nenhuma observacao cadastrada para este cliente.'}
             </p>
           </div>
         </div>
       </section>
 
-      <section className="grid gap-4 grid-cols-2 md:grid-cols-4">
+      <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
-          <div className='flex items-center'>
+          <div className="flex items-center">
             <div className="mr-2 inline-flex rounded-2xl bg-blue-100 p-3 text-blue-700">
               <FolderKanban size={16} />
             </div>
             <p className="text-sm font-medium text-slate-500">Projetos</p>
           </div>
-          <p className="flex items-end justify-end mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-slate-950">
+          <p className="mt-2 flex items-end justify-end text-lg font-semibold tracking-tight text-slate-950 sm:text-xl md:text-2xl lg:text-3xl">
             {clientProjects.length}
           </p>
         </div>
 
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
-          <div className='flex items-center'>
+          <div className="flex items-center">
             <div className="mr-2 inline-flex rounded-2xl bg-emerald-100 p-3 text-emerald-700">
               <Wallet size={16} />
             </div>
             <p className="text-sm font-medium text-slate-500">Recebido</p>
           </div>
-          <p className="flex items-end justify-end mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-slate-950">
+          <p className="mt-2 flex items-end justify-end text-lg font-semibold tracking-tight text-slate-950 sm:text-xl md:text-2xl lg:text-3xl">
             {formatCurrency(summary.totalReceived)}
           </p>
         </div>
 
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
-          <div className='flex items-center'>
+          <div className="flex items-center">
             <div className="mr-2 inline-flex rounded-2xl bg-amber-100 p-3 text-amber-700">
               <Clock3 size={16} />
             </div>
             <p className="text-sm font-medium text-slate-500">Pendente</p>
           </div>
-          <p className="flex items-end justify-end mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-slate-950">
+          <p className="mt-2 flex items-end justify-end text-lg font-semibold tracking-tight text-slate-950 sm:text-xl md:text-2xl lg:text-3xl">
             {formatCurrency(summary.totalOutstanding)}
           </p>
         </div>
 
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
-          <div className='flex items-center'>
+          <div className="flex items-center">
             <div className="mr-2 inline-flex rounded-2xl bg-violet-100 p-3 text-violet-700">
               <CheckCircle2 size={16} />
             </div>
-            <p className="text-sm font-medium text-slate-500">Concluídos</p>
+            <p className="text-sm font-medium text-slate-500">Concluidos</p>
           </div>
-          <p className="flex items-end justify-end mt-2 text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold tracking-tight text-slate-950">
+          <p className="mt-2 flex items-end justify-end text-lg font-semibold tracking-tight text-slate-950 sm:text-xl md:text-2xl lg:text-3xl">
             {summary.completedProjects}
           </p>
         </div>
@@ -231,26 +215,23 @@ export function ClientDetailsPage() {
                 <div key={project.id} className="px-6 py-4">
                   <div className="flex flex-col-2 justify-between gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <p className="font-semibold text-slate-900">{project.name}</p>
+                      <p className="font-semibold text-slate-900">
+                        {project.name}
+                      </p>
                       <p className="mt-1 text-sm text-slate-500">
-                        {project.description || 'Sem descrição'}
+                        {project.description || 'Sem descricao'}
                       </p>
                     </div>
 
                     <span
-                      className={`inline-flex rounded-full h-6.5 px-3 py-1 text-xs font-semibold ${projectStatusClassName[project.status]}`}
+                      className={`inline-flex h-6.5 rounded-full px-3 py-1 text-xs font-semibold ${projectStatusClassName[project.status]}`}
                     >
                       {projectStatusLabel[project.status]}
                     </span>
                   </div>
 
                   <div className="mt-3 flex flex-col gap-2 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-                    <span>
-                      Prazo:{' '}
-                      {project.deadline
-                        ? new Date(project.deadline).toLocaleDateString('pt-BR')
-                        : '-'}
-                    </span>
+                    <span>Prazo: {formatDate(project.deadline)}</span>
                     <span className="font-semibold text-slate-900">
                       {formatCurrency(project.value)}
                     </span>
@@ -269,7 +250,7 @@ export function ClientDetailsPage() {
           <div className="border-b border-slate-200 px-6 py-5">
             <p className="text-sm font-medium text-slate-500">Pagamentos</p>
             <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Histórico financeiro
+              Historico financeiro
             </h2>
           </div>
 
@@ -283,13 +264,12 @@ export function ClientDetailsPage() {
                         {formatCurrency(payment.amount)}
                       </p>
                       <p className="mt-1 text-sm text-slate-500">
-                        Vencimento:{' '}
-                        {new Date(payment.dueDate).toLocaleDateString('pt-BR')}
+                        Vencimento: {formatDate(payment.dueDate)}
                       </p>
                     </div>
 
                     <span
-                      className={`inline-flex rounded-full h-6.5 px-3 py-1 text-xs font-semibold ${paymentStatusClassName[payment.status]}`}
+                      className={`inline-flex h-6.5 rounded-full px-3 py-1 text-xs font-semibold ${paymentStatusClassName[payment.status]}`}
                     >
                       {paymentStatusLabel[payment.status]}
                     </span>
@@ -305,7 +285,5 @@ export function ClientDetailsPage() {
         </div>
       </section>
     </div>
-  );
+  )
 }
-
-

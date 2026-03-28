@@ -1,21 +1,25 @@
 import { useEffect, useState } from 'react'
 import { useFeedback } from '../../components/FeedbackProvider'
-import type { ClientInput } from '../../types/inputs'
 import { getToastToneForMessage } from '../../lib/feedback'
 import { getErrorMessage } from '../../lib/supabase'
 import { useClientStore } from '../../stores/useClientStore'
+import {
+  hasResourceLoadError,
+  isResourcePending,
+} from '../../stores/resourceLoadState'
 import type { Client } from '../../types/client'
+import type { ClientInput } from '../../types/inputs'
 import { getFilteredClients } from '../../utils/clientsPage'
 
 export function useClientsPage() {
   const clients = useClientStore((state) => state.clients)
   const selectedClient = useClientStore((state) => state.selectedClient)
-  const loading = useClientStore((state) => state.loading)
+  const loadStatus = useClientStore((state) => state.loadStatus)
   const error = useClientStore((state) => state.error)
-  const initialized = useClientStore((state) => state.initialized)
   const ensureClientsLoaded = useClientStore(
     (state) => state.ensureClientsLoaded,
   )
+  const retryLoad = useClientStore((state) => state.retryLoad)
   const selectClient = useClientStore((state) => state.selectClient)
   const addClient = useClientStore((state) => state.addClient)
   const editClient = useClientStore((state) => state.editClient)
@@ -52,6 +56,10 @@ export function useClientsPage() {
     setIsModalOpen(false)
   }
 
+  async function handleRetryLoad() {
+    await retryLoad()
+  }
+
   async function handleClientSubmit(values: ClientInput) {
     setIsSubmitting(true)
 
@@ -72,7 +80,7 @@ export function useClientsPage() {
           : 'Cliente criado com sucesso.',
       })
     } catch (submitError) {
-      alert(getErrorMessage(submitError, 'Não foi possível salvar o cliente.'))
+      alert(getErrorMessage(submitError, 'NÃ£o foi possÃ­vel salvar o cliente.'))
     } finally {
       setIsSubmitting(false)
     }
@@ -98,29 +106,29 @@ export function useClientsPage() {
         title: 'Cliente excluido com sucesso.',
       })
     } catch (removeError) {
-      alert(getErrorMessage(removeError, 'Não foi possível excluir o cliente.'))
+      alert(getErrorMessage(removeError, 'NÃ£o foi possÃ­vel excluir o cliente.'))
     }
   }
 
   return {
     error,
     filteredClients: getFilteredClients(clients, search),
-    isLoading: !initialized,
+    hasLoadError: hasResourceLoadError(loadStatus),
+    isLoading: isResourcePending(loadStatus),
     isModalOpen,
     isSubmitting,
-    loadingDescription: loading
-      ? 'Buscando a base de clientes no Supabase.'
-      : 'Preparando a sincronização inicial.',
+    loadingDescription:
+      loadStatus === 'loading'
+        ? 'Buscando a base de clientes no Supabase.'
+        : 'Preparando a sincronizaÃ§Ã£o inicial.',
     search,
     selectedClient,
     setSearch,
     closeModal,
     handleClientRemoval,
     handleClientSubmit,
+    handleRetryLoad,
     openCreateModal,
     openEditModal,
   }
 }
-
-
-
