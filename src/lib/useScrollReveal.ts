@@ -13,7 +13,7 @@ export function useScrollReveal(
 ) {
   const rootMargin = options?.rootMargin ?? '0px 0px -10% 0px';
   const selector = options?.selector ?? '[data-scroll-reveal]';
-  const threshold = options?.threshold ?? 0.18;
+  const threshold = options?.threshold ?? 0.12;
 
   useEffect(() => {
     const root = rootRef.current;
@@ -44,6 +44,10 @@ export function useScrollReveal(
     let animationFrame = 0;
     let lastScrollY = window.scrollY;
 
+    const revealTarget = (target: HTMLElement) => {
+      target.dataset.inView = 'true';
+    };
+
     const syncScrollState = () => {
       const nextScrollY = window.scrollY;
       const delta = nextScrollY - lastScrollY;
@@ -72,10 +76,9 @@ export function useScrollReveal(
     const syncInitialVisibility = (target: HTMLElement) => {
       const rect = target.getBoundingClientRect();
       const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-      const isEnteringViewport = rect.top <= viewportHeight * 0.86;
-      const isPastViewport = rect.bottom < viewportHeight * 0.12;
+      const hasReachedRevealPoint = rect.top <= viewportHeight * 0.88;
 
-      target.dataset.inView = isEnteringViewport && !isPastViewport ? 'true' : 'false';
+      target.dataset.inView = hasReachedRevealPoint ? 'true' : 'false';
     };
 
     root.dataset.scrollDirection = 'down';
@@ -88,7 +91,13 @@ export function useScrollReveal(
       (entries) => {
         for (const entry of entries) {
           const target = entry.target as HTMLElement;
-          target.dataset.inView = entry.isIntersecting ? 'true' : 'false';
+
+          if (!entry.isIntersecting) {
+            continue;
+          }
+
+          revealTarget(target);
+          observer.unobserve(target);
         }
       },
       {
@@ -99,6 +108,10 @@ export function useScrollReveal(
     );
 
     for (const target of targets) {
+      if (target.dataset.inView === 'true') {
+        continue;
+      }
+
       observer.observe(target);
     }
 
