@@ -2,7 +2,7 @@
 
 FreelancerOS e um painel SaaS para freelancers organizarem clientes, propostas, projetos e pagamentos em um unico fluxo.
 
-O projeto hoje e uma aplicacao React + Vite com autenticacao no Supabase, persistencia em banco, regras comerciais no front-end e um fluxo publico para compartilhamento seguro de propostas.
+O projeto hoje e uma aplicacao React + Vite com autenticacao no Supabase, persistencia em banco, sincronizacao realtime, read models SQL para dashboard/detalhes e um fluxo publico para compartilhamento seguro de propostas.
 
 ## O que existe no projeto atual
 
@@ -13,9 +13,12 @@ O projeto hoje e uma aplicacao React + Vite com autenticacao no Supabase, persis
 - CRUD de projetos com filtros por status e cliente
 - CRUD de pagamentos com filtros, marcacao manual como pago e leitura de pendencias
 - CRUD de propostas com status `draft`, `sent`, `accepted` e `rejected`
+- envio assistido de propostas via `mailto:` com assunto e corpo preenchidos
 - aceite de proposta gerando projeto automaticamente
-- link seguro de proposta com expiracao e pagina publica para aceite ou recusa
+- link seguro de proposta com expiracao e pagina publica para aceite ou recusa sem login
 - configuracoes de tema, perfil comercial do freelancer e atualizacao de senha
+- notificacoes operacionais no header para aceite de proposta, vencimentos e atrasos
+- sincronizacao realtime das tabelas principais com invalidador de snapshots
 - migracao automatica de dados legados do `localStorage` para o Supabase na primeira sessao autenticada
 
 ## Stack
@@ -38,10 +41,11 @@ O projeto hoje e uma aplicacao React + Vite com autenticacao no Supabase, persis
 - `src/pages`: rotas principais da aplicacao
 - `src/features`: composicao por dominio (`dashboard`, `clients`, `projects`, `payments`, `proposals`)
 - `src/components`: componentes reutilizaveis, formularios e modais
-- `src/services`: integracao com Supabase e fluxos de negocio
+- `src/services`: integracao com Supabase, RPCs e fluxos de negocio
 - `src/stores`: estado global com Zustand
 - `src/utils`: regras puras, formatacao e agregacoes
-- `supabase/schema.sql`: schema consolidado, RLS e RPC `accept_proposal`
+- `supabase/schema.sql`: schema consolidado, RLS, view `payments_read_model` e funcoes SQL de snapshot/aceite
+- `supabase/migrations`: historico de evolucao do banco
 - `supabase/functions/proposal-share`: Edge Function para links seguros de propostas
 
 ## Como rodar localmente
@@ -79,7 +83,9 @@ Esse arquivo ja inclui:
 - tabelas de `clients`, `projects`, `payments`, `proposals` e `proposal_share_links`
 - indices
 - policies com RLS por `user_id`
-- funcao SQL `accept_proposal`
+- view `payments_read_model` para status derivado de pagamentos
+- funcoes SQL `get_dashboard_snapshot` e `get_client_details_snapshot`
+- funcoes SQL `accept_proposal` e `respond_to_shared_proposal`
 
 As migrations em `supabase/migrations` existem como historico da evolucao, mas o ponto de entrada para um ambiente novo e o `schema.sql`.
 
@@ -130,13 +136,26 @@ pnpm check
 
 ## Testes
 
-Os testes automatizados atuais cobrem regras utilitarias centrais, principalmente:
+Os testes automatizados atuais cobrem principalmente regras puras e um fluxo critico de store:
 
 - agregacoes financeiras
+- datas sem drift de timezone
+- validacao de email usada no fluxo de `mailto:`
 - regras de status de pagamentos
 - regras comerciais de propostas
+- notificacoes operacionais do header
+- conciliacao de recarga concorrente na `useProposalStore`
+
+Hoje a suite nao cobre interface via browser nem testes E2E.
+
+## Limites atuais importantes
+
+- o envio de proposta abre o cliente de email do usuario via `mailto:`; o app nao envia email transacional por conta propria
+- a CI em `.github/workflows/ci.yml` roda `lint` e `build`, mas ainda nao executa `pnpm test`
+- a feature de compartilhamento seguro depende da Edge Function `proposal-share`; sem ela, o restante do painel continua funcional
 
 ## Observacoes de deploy
 
 - `vercel.json` ja trata o rewrite da SPA para `index.html`
+- `vercel.json` tambem aplica headers de seguranca como `Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options` e `Referrer-Policy`
 - o link publico de proposta usa `PUBLIC_APP_URL` na Edge Function e `VITE_SITE_URL` no front-end, entao essas URLs precisam apontar para o dominio correto em producao
