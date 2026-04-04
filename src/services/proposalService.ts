@@ -11,8 +11,6 @@ import type { Project } from '../types/project'
 import type { Proposal } from '../types/proposal'
 import { ensureDatabaseBootstrap } from './bootstrapService'
 
-export { createProposalSecureShareLink } from './proposalShareService'
-
 type AcceptProposalResult = {
   proposal: Proposal
   project: Project

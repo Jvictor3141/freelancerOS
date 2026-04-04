@@ -24,7 +24,7 @@ import {
   getVisibleClientResponseNotifications,
   readDismissedClientResponseNotificationIds,
   writeDismissedClientResponseNotificationIds,
-} from '../../utils/proposalsPage'
+} from './proposalsView'
 
 export function useProposalsPage() {
   const user = useAuthStore((state) => state.user)

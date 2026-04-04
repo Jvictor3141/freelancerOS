@@ -14,7 +14,7 @@ import type { PaymentWithProjectAndClient } from '../../types/viewModels'
 import {
   getFilteredPayments,
   getPaymentsWithRelations,
-} from '../../utils/paymentsPage'
+} from './paymentsView'
 import type { PaymentStatusFilter } from '../../utils/paymentStatus'
 
 export function usePaymentsPage() {

@@ -26,7 +26,7 @@ import {
   getProposalSendMode,
   hasSharedLinkClientResponse,
   isAcceptedProposal,
-} from '../../utils/proposalRules'
+} from './proposalRules'
 import type { ProposalWithClient } from '../../types/viewModels'
 import {
   proposalStatusClassName,

@@ -1,4 +1,4 @@
-import type { Project, ProjectStatus } from '../types/project'
+import type { Project, ProjectStatus } from '../../types/project'
 
 export function isActiveProjectStatus(
   status: ProjectStatus,

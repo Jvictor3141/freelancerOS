@@ -11,15 +11,16 @@ import type { Client } from '../types/client'
 import {
   clearSelectedRecord,
   findRecordById,
-  prependRecord,
   removeRecordById,
   replaceRecordById,
   syncSelectedRecord,
+  upsertRecordByCreatedAtDesc,
 } from './resourceStoreUtils'
 import {
   isResourceReady,
   type ResourceLoadStatus,
 } from './resourceLoadState'
+import { invalidateOperationalSnapshots } from './useRealtimeInvalidationStore'
 import { usePaymentStore } from './usePaymentStore'
 import { useProjectStore } from './useProjectStore'
 
@@ -123,8 +124,9 @@ export const useClientStore = create<ClientStore>((set, get) => ({
       const newClient = await createClientService(data)
 
       set((state) => ({
-        clients: prependRecord(state.clients, newClient),
+        clients: upsertRecordByCreatedAtDesc(state.clients, newClient),
       }))
+      invalidateOperationalSnapshots()
 
       return newClient
     } catch (error) {
@@ -145,6 +147,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
         clients: replaceRecordById(state.clients, updatedClient),
         selectedClient: syncSelectedRecord(state.selectedClient, updatedClient),
       }))
+      invalidateOperationalSnapshots()
 
       return updatedClient
     } catch (error) {
@@ -168,6 +171,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
         clients: removeRecordById(state.clients, id),
         selectedClient: clearSelectedRecord(state.selectedClient, id),
       }))
+      invalidateOperationalSnapshots()
 
       await Promise.all([
         useProjectStore.getState().loadProjects({ force: true }),

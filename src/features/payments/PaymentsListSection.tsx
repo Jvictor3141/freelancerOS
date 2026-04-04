@@ -1,7 +1,7 @@
 import { CheckCheck, ListFilter, PencilLine, Trash2 } from 'lucide-react'
 import type { PaymentWithProjectAndClient } from '../../types/viewModels'
 import { formatCurrency, formatDate } from '../../utils/formatting'
-import { canMarkPaymentAsPaid } from '../../utils/paymentRules'
+import { canMarkPaymentAsPaid } from './paymentRules'
 import {
   type PaymentStatusFilter,
   parsePaymentStatusFilter,

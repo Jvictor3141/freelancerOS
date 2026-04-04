@@ -1,4 +1,4 @@
-import type { Proposal, ProposalStatus } from '../types/proposal'
+import type { Proposal, ProposalStatus } from '../../types/proposal'
 
 export type ProposalSendMode = 'send' | 'resend'
 

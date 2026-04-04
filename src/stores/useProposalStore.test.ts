@@ -8,13 +8,16 @@ const { getProposalsMock } = vi.hoisted(() => ({
 vi.mock('../services/proposalService', () => ({
   acceptProposal: vi.fn(),
   createProposal: vi.fn(),
-  createProposalSecureShareLink: vi.fn(),
   deleteProposal: vi.fn(),
   getProposals: getProposalsMock,
   rejectProposal: vi.fn(),
   reopenProposal: vi.fn(),
   sendProposal: vi.fn(),
   updateProposal: vi.fn(),
+}))
+
+vi.mock('../services/proposalShareService', () => ({
+  createProposalSecureShareLink: vi.fn(),
 }))
 
 import { useProposalStore } from './useProposalStore'

@@ -24,7 +24,7 @@ import { useClientStore } from '../stores/useClientStore'
 import { usePaymentStore } from '../stores/usePaymentStore'
 import { useProjectStore } from '../stores/useProjectStore'
 import { useProposalStore } from '../stores/useProposalStore'
-import { useRealtimeInvalidationStore } from '../stores/useRealtimeInvalidationStore'
+import { invalidateOperationalSnapshots } from '../stores/useRealtimeInvalidationStore'
 
 function getPayloadId<TRecord extends { id: string }>(
   payload: RealtimePostgresChangesPayload<TRecord>,
@@ -38,12 +38,6 @@ function hasRequestedResource(status: ResourceLoadStatus) {
 
 function shouldApplyRealtimeMutation(status: ResourceLoadStatus) {
   return status === 'loading' || status === 'ready'
-}
-
-function invalidateSnapshotViews() {
-  useRealtimeInvalidationStore
-    .getState()
-    .bump(['dashboard', 'clientDetails'])
 }
 
 function refreshRequestedRealtimeResources() {
@@ -69,7 +63,7 @@ function refreshRequestedRealtimeResources() {
     reloads.push(proposalStore.loadProposals({ force: true }))
   }
 
-  invalidateSnapshotViews()
+  invalidateOperationalSnapshots()
 
   return Promise.all(reloads)
 }
@@ -140,7 +134,7 @@ export function useSupabaseRealtimeSync(userId: string | null) {
                 }))
               }
 
-              invalidateSnapshotViews()
+              invalidateOperationalSnapshots()
               return
             }
 
@@ -156,7 +150,7 @@ export function useSupabaseRealtimeSync(userId: string | null) {
               }))
             }
 
-            invalidateSnapshotViews()
+            invalidateOperationalSnapshots()
           },
         )
         .on(
@@ -187,7 +181,7 @@ export function useSupabaseRealtimeSync(userId: string | null) {
                 }))
               }
 
-              invalidateSnapshotViews()
+              invalidateOperationalSnapshots()
               return
             }
 
@@ -214,7 +208,7 @@ export function useSupabaseRealtimeSync(userId: string | null) {
               }
             }
 
-            invalidateSnapshotViews()
+            invalidateOperationalSnapshots()
           },
         )
         .on(
@@ -244,7 +238,7 @@ export function useSupabaseRealtimeSync(userId: string | null) {
                 }))
               }
 
-              invalidateSnapshotViews()
+              invalidateOperationalSnapshots()
               return
             }
 
@@ -255,7 +249,7 @@ export function useSupabaseRealtimeSync(userId: string | null) {
               void paymentStore.loadPayments({ force: true })
             }
 
-            invalidateSnapshotViews()
+            invalidateOperationalSnapshots()
           },
         )
         .on(

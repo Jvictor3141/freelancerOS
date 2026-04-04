@@ -1,7 +1,7 @@
 import { getSupabaseErrorMessage, supabase } from '../lib/supabase'
 import type { DashboardViewModel } from '../types/dashboard'
 import { parseCalendarDate } from '../utils/dateOnly'
-import { isPaymentAttentionStatus } from '../utils/paymentRules'
+import { isPaymentAttentionStatus } from '../features/payments/paymentRules'
 import { isPaymentStatus } from '../utils/paymentStatus'
 import { normalizeProjectStatus } from '../utils/projectStatus'
 import { getRecord, type UnknownRecord } from '../utils/typeGuards'
