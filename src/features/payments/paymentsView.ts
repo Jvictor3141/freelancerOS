@@ -1,8 +1,8 @@
-import type { Client } from '../types/client'
-import type { Payment } from '../types/payment'
-import type { Project } from '../types/project'
-import type { PaymentWithProjectAndClient } from '../types/viewModels'
-import type { PaymentStatusFilter } from './paymentStatus'
+import type { Client } from '../../types/client'
+import type { Payment } from '../../types/payment'
+import type { Project } from '../../types/project'
+import type { PaymentWithProjectAndClient } from '../../types/viewModels'
+import type { PaymentStatusFilter } from '../../utils/paymentStatus'
 
 export function getPaymentsWithRelations(
   payments: Payment[],

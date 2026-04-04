@@ -17,7 +17,7 @@ import {
   getFilteredProjects,
   getProjectsCommercialSummary,
   getProjectsWithClient,
-} from '../../utils/projectsPage'
+} from './projectsView'
 
 export function useProjectsPage() {
   const [searchParams, setSearchParams] = useSearchParams()

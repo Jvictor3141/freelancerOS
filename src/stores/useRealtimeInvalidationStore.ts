@@ -40,3 +40,7 @@ export const useRealtimeInvalidationStore =
       set(realtimeInvalidationInitialState)
     },
   }))
+
+export function invalidateOperationalSnapshots() {
+  useRealtimeInvalidationStore.getState().bump(['dashboard', 'clientDetails'])
+}

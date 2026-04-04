@@ -11,15 +11,16 @@ import type { Project } from '../types/project'
 import {
   clearSelectedRecord,
   findRecordById,
-  prependRecord,
   removeRecordById,
   replaceRecordById,
   syncSelectedRecord,
+  upsertRecordByCreatedAtDesc,
 } from './resourceStoreUtils'
 import {
   isResourceReady,
   type ResourceLoadStatus,
 } from './resourceLoadState'
+import { invalidateOperationalSnapshots } from './useRealtimeInvalidationStore'
 import { usePaymentStore } from './usePaymentStore'
 
 type ProjectStoreState = {
@@ -122,8 +123,9 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       const newProject = await createProjectService(data)
 
       set((state) => ({
-        projects: prependRecord(state.projects, newProject),
+        projects: upsertRecordByCreatedAtDesc(state.projects, newProject),
       }))
+      invalidateOperationalSnapshots()
 
       return newProject
     } catch (error) {
@@ -147,6 +149,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
           updatedProject,
         ),
       }))
+      invalidateOperationalSnapshots()
 
       return updatedProject
     } catch (error) {
@@ -170,6 +173,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
         projects: removeRecordById(state.projects, id),
         selectedProject: clearSelectedRecord(state.selectedProject, id),
       }))
+      invalidateOperationalSnapshots()
 
       await usePaymentStore.getState().loadPayments({ force: true })
     } catch (error) {

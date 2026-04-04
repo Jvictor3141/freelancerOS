@@ -4,6 +4,7 @@ import {
   createPayment as createPaymentService,
   deletePayment as deletePaymentService,
   getPayments,
+  markPaymentAsPaid as markPaymentAsPaidService,
   updatePayment as updatePaymentService,
 } from '../services/paymentService'
 import {
@@ -12,16 +13,15 @@ import {
 } from './resourceLoadState'
 import type { PaymentInput } from '../types/inputs'
 import type { Payment } from '../types/payment'
-import { formatDateInputValue } from '../utils/dateOnly'
-import { toPersistedPaymentStatus } from '../utils/paymentStatus'
 import {
   clearSelectedRecord,
   findRecordById,
-  prependRecord,
   removeRecordById,
   replaceRecordById,
   syncSelectedRecord,
+  upsertRecordByCreatedAtDesc,
 } from './resourceStoreUtils'
+import { invalidateOperationalSnapshots } from './useRealtimeInvalidationStore'
 
 type PaymentStoreState = {
   payments: Payment[]
@@ -55,18 +55,6 @@ let loadPaymentsPromise: Promise<void> | null = null
 
 function getPaymentStoreError(error: unknown, fallback: string) {
   return getErrorMessage(error, fallback)
-}
-
-function toPaymentInput(payment: Payment): PaymentInput {
-  return {
-    projectId: payment.projectId,
-    amount: payment.amount,
-    dueDate: payment.dueDate,
-    paidAt: payment.paidAt,
-    status: toPersistedPaymentStatus(payment.status),
-    method: payment.method,
-    notes: payment.notes,
-  }
 }
 
 export const paymentStoreSelectors = {
@@ -139,8 +127,9 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
       const newPayment = await createPaymentService(data)
 
       set((state) => ({
-        payments: prependRecord(state.payments, newPayment),
+        payments: upsertRecordByCreatedAtDesc(state.payments, newPayment),
       }))
+      invalidateOperationalSnapshots()
 
       return newPayment
     } catch (error) {
@@ -167,6 +156,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
           updatedPayment,
         ),
       }))
+      invalidateOperationalSnapshots()
 
       return updatedPayment
     } catch (error) {
@@ -190,6 +180,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
         payments: removeRecordById(state.payments, id),
         selectedPayment: clearSelectedRecord(state.selectedPayment, id),
       }))
+      invalidateOperationalSnapshots()
     } catch (error) {
       const message = getPaymentStoreError(
         error,
@@ -211,11 +202,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     }
 
     try {
-      const updatedPayment = await updatePaymentService(id, {
-        ...toPaymentInput(payment),
-        status: 'paid',
-        paidAt: formatDateInputValue(),
-      })
+      const updatedPayment = await markPaymentAsPaidService(id)
 
       set((state) => ({
         payments: replaceRecordById(state.payments, updatedPayment),
@@ -224,6 +211,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
           updatedPayment,
         ),
       }))
+      invalidateOperationalSnapshots()
 
       return updatedPayment
     } catch (error) {

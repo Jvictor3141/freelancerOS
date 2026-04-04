@@ -1,13 +1,16 @@
-import type { Client } from '../types/client'
-import type { Proposal } from '../types/proposal'
-import type { ProposalMetrics, ProposalWithClient } from '../types/viewModels'
-import type { ProposalStatusFilter } from './proposalStatus'
+import type { Client } from '../../types/client'
+import type { Proposal } from '../../types/proposal'
+import type {
+  ProposalMetrics,
+  ProposalWithClient,
+} from '../../types/viewModels'
+import type { ProposalStatusFilter } from '../../utils/proposalStatus'
 import {
   buildScopedStorageKey,
   excludeItemsById,
   readStoredStringList,
   writeStoredStringList,
-} from './persistedStringList'
+} from '../../utils/persistedStringList'
 import {
   countProposalsByStatus,
   getClientRespondedProposals,

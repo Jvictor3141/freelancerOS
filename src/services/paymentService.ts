@@ -6,6 +6,7 @@ import {
 } from '../lib/database'
 import type { PaymentInput } from '../types/inputs'
 import type { Payment } from '../types/payment'
+import { formatDateInputValue } from '../utils/dateOnly'
 import { ensureDatabaseBootstrap } from './bootstrapService'
 
 const PAYMENT_READ_MODEL = 'payments_read_model'
@@ -117,6 +118,32 @@ export async function updatePayment(
       getSupabaseErrorMessage(
         error,
         'Nao foi possivel atualizar o pagamento no banco.',
+      ),
+    )
+  }
+
+  return getPaymentById(updatedPayment.id, userId)
+}
+
+export async function markPaymentAsPaid(id: string): Promise<Payment> {
+  const userId = await ensureDatabaseBootstrap()
+
+  const { data: updatedPayment, error } = await supabase
+    .from('payments')
+    .update({
+      status: 'paid',
+      paid_at: formatDateInputValue(),
+    })
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select('id')
+    .single()
+
+  if (error || !updatedPayment) {
+    throw new Error(
+      getSupabaseErrorMessage(
+        error,
+        'Nao foi possivel marcar o pagamento como pago.',
       ),
     )
   }

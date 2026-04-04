@@ -1,7 +1,7 @@
 import { X } from 'lucide-react'
 import type { ProposalWithClient } from '../../types/viewModels'
 import { formatDateTime } from '../../utils/formatting'
-import { isAcceptedProposal } from '../../utils/proposalRules'
+import { isAcceptedProposal } from './proposalRules'
 
 type ProposalResponseNotificationsSectionProps = {
   notifications: ProposalWithClient[]

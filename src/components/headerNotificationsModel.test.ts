@@ -7,7 +7,7 @@ import type {
 import {
   getHeaderNotifications,
   getVisibleHeaderNotifications,
-} from './headerNotifications'
+} from './headerNotificationsModel'
 
 function createProposal(
   overrides: Partial<ProposalWithClient> = {},

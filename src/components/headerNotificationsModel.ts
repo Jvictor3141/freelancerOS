@@ -8,11 +8,11 @@ import {
   excludeItemsById,
   readStoredStringList,
   writeStoredStringList,
-} from './persistedStringList'
-import { parseCalendarDate } from './dateOnly'
-import { canMarkPaymentAsPaid } from './paymentRules'
-import { isAcceptedProposal } from './proposalRules'
-import { isActiveProject } from './projectRules'
+} from '../utils/persistedStringList'
+import { parseCalendarDate } from '../utils/dateOnly'
+import { canMarkPaymentAsPaid } from '../features/payments/paymentRules'
+import { isAcceptedProposal } from '../features/proposals/proposalRules'
+import { isActiveProject } from '../features/projects/projectRules'
 
 export type HeaderNotificationType =
   | 'proposal_accepted'

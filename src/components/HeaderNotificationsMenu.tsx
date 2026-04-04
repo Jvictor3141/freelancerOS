@@ -14,16 +14,16 @@ import type {
   HeaderNotification,
   HeaderNotificationTone,
   HeaderNotificationType,
-} from '../utils/headerNotifications'
+} from './headerNotificationsModel'
 import {
   getHeaderNotifications,
   getVisibleHeaderNotifications,
   readDismissedHeaderNotificationIds,
   writeDismissedHeaderNotificationIds,
-} from '../utils/headerNotifications'
-import { getPaymentsWithRelations } from '../utils/paymentsPage'
-import { getProjectsWithClient } from '../utils/projectsPage'
-import { getProposalsWithClient } from '../utils/proposalsPage'
+} from './headerNotificationsModel'
+import { getPaymentsWithRelations } from '../features/payments/paymentsView'
+import { getProjectsWithClient } from '../features/projects/projectsView'
+import { getProposalsWithClient } from '../features/proposals/proposalsView'
 import { formatDate, formatDateTime } from '../utils/formatting'
 
 const MAX_VISIBLE_NOTIFICATIONS = 4

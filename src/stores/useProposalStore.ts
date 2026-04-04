@@ -4,7 +4,6 @@ import { getErrorMessage } from '../lib/supabase'
 import {
   acceptProposal as acceptProposalService,
   createProposal as createProposalService,
-  createProposalSecureShareLink as createProposalSecureShareLinkService,
   deleteProposal as deleteProposalService,
   getProposals,
   rejectProposal as rejectProposalService,
@@ -12,13 +11,13 @@ import {
   sendProposal as sendProposalService,
   updateProposal as updateProposalService,
 } from '../services/proposalService'
+import { createProposalSecureShareLink as createProposalSecureShareLinkService } from '../services/proposalShareService'
 import type { Proposal } from '../types/proposal'
 import type { ProposalSecureShareLink } from '../types/sharedProposal'
-import { reconcileProposalSnapshot } from '../utils/proposalRules'
+import { reconcileProposalSnapshot } from '../features/proposals/proposalRules'
 import {
   clearSelectedRecord,
   findRecordById,
-  prependRecord,
   removeRecordById,
   replaceRecordById,
   syncSelectedRecord,
@@ -28,6 +27,7 @@ import {
   isResourceReady,
   type ResourceLoadStatus,
 } from './resourceLoadState'
+import { invalidateOperationalSnapshots } from './useRealtimeInvalidationStore'
 import { useProjectStore } from './useProjectStore'
 
 type ProposalStoreState = {
@@ -156,7 +156,7 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
       const newProposal = await createProposalService(data)
 
       set((state) => ({
-        proposals: prependRecord(state.proposals, newProposal),
+        proposals: upsertRecordByCreatedAtDesc(state.proposals, newProposal),
       }))
 
       return newProposal
@@ -282,6 +282,7 @@ export const useProposalStore = create<ProposalStore>((set, get) => ({
         projects: upsertRecordByCreatedAtDesc(state.projects, project),
         selectedProject: syncSelectedRecord(state.selectedProject, project),
       }))
+      invalidateOperationalSnapshots()
     } catch (error) {
       const message = getProposalStoreError(
         error,

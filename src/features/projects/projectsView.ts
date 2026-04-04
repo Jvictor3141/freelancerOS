@@ -1,16 +1,16 @@
-import type { Client } from '../types/client'
-import type { Proposal } from '../types/proposal'
-import type { Project } from '../types/project'
+import type { Client } from '../../types/client'
+import type { Proposal } from '../../types/proposal'
+import type { Project } from '../../types/project'
 import type {
   ProjectWithClient,
   ProjectsCommercialSummary,
-} from '../types/viewModels'
-import type { ProjectStatusFilter } from './projectStatus'
+} from '../../types/viewModels'
+import type { ProjectStatusFilter } from '../../utils/projectStatus'
 import {
   countProposalsByStatus,
   getOpenProposalValue,
   isProposalOpen,
-} from './proposalRules'
+} from '../proposals/proposalRules'
 
 export type ProjectListFilters = {
   search: string

@@ -23,7 +23,7 @@ import {
 import {
   isAcceptedProposal,
   isRejectedProposal,
-} from '../utils/proposalRules';
+} from '../features/proposals/proposalRules';
 
 function getTokenFromHash() {
   if (typeof window === 'undefined') {

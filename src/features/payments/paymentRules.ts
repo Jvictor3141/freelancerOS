@@ -1,5 +1,5 @@
-import type { Payment, PaymentStatus } from '../types/payment'
-import { parseCalendarDate } from './dateOnly'
+import type { Payment, PaymentStatus } from '../../types/payment'
+import { parseCalendarDate } from '../../utils/dateOnly'
 
 export type PaymentAttentionStatus = Extract<PaymentStatus, 'pending' | 'overdue'>
 

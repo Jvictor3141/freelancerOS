@@ -2,7 +2,7 @@ import { Copy, ExternalLink } from 'lucide-react'
 import type { ProposalSecureShareLink } from '../../types/sharedProposal'
 import type { ProposalWithClient } from '../../types/viewModels'
 import { formatDateTime } from '../../utils/formatting'
-import { shareExpirationOptions } from '../../utils/proposalsPage'
+import { shareExpirationOptions } from './proposalsView'
 
 type ProposalShareModalContentProps = {
   shareTargetProposal: ProposalWithClient | null
