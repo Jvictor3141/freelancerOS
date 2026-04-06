@@ -202,7 +202,7 @@ export function useSupabaseRealtimeSync(userId: string | null) {
 
               if (hasRequestedResource(proposalStore.loadStatus)) {
                 // O aceite via portal compartilhado atualiza proposta e cria
-                // projeto na mesma operacao. Recarregar so a store de propostas
+                // projeto na mesma operação. Recarregar só a store de propostas
                 // aqui evita um refresh global para cobrir esse caso multi-tabela.
                 void proposalStore.loadProposals({ force: true })
               }

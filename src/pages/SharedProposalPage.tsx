@@ -30,8 +30,8 @@ function getTokenFromHash() {
     return '';
   }
 
-  // O token fica no hash para nao ir ao servidor nem aparecer em logs e referrers.
-  // Se a URL vier malformada, tratamos como link invalido em vez de quebrar a tela.
+  // O token fica no hash para não ir ao servidor nem aparecer em logs e referrers.
+  // Se a URL vier malformada, tratamos como link inválido em vez de quebrar a tela.
   try {
     return decodeURIComponent(window.location.hash.replace(/^#/, '').trim());
   } catch {
@@ -142,12 +142,12 @@ export function SharedProposalPage() {
   const seoTitle = loading
     ? 'Proposta compartilhada | FreelancerOS'
     : error
-      ? 'Link indisponivel | FreelancerOS'
+      ? 'Link indisponível | FreelancerOS'
       : proposal
         ? `${proposal.title} | FreelancerOS`
         : 'Proposta compartilhada | FreelancerOS';
   const seoDescription = error
-    ? 'Esse link de proposta nao esta disponivel no momento.'
+    ? 'Esse link de proposta não está disponível no momento.'
     : proposal
       ? 'Visualize a proposta compartilhada e responda diretamente pelo FreelancerOS.'
       : 'Visualize uma proposta compartilhada no FreelancerOS.';
@@ -215,36 +215,42 @@ export function SharedProposalPage() {
 
                 <div className="mt-8 grid gap-4 sm:grid-cols-3">
                   <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
-                    <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
-                      <FileText size={18} />
+                    <div className='flex items-center'>
+                      <div className="mr-0.5 md:mr-2 inline-flex rounded-2xl bg-white/12 p-2">
+                        <FileText size={15} />
+                      </div>
+                      <p className="text-sm max-[374px]:hidden text-indigo-100">Valor</p>
                     </div>
-                    <p className="text-sm text-indigo-100/90">Valor</p>
                     <p className="mt-2 text-2xl font-semibold">
                       {formatCurrency(proposal.amount)}
                     </p>
                   </div>
 
                   <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
-                    <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
-                      <Clock3 size={18} />
+                    <div className='flex items-center'>
+                      <div className="mr-0.5 md:mr-2 inline-flex rounded-2xl bg-white/12 p-2">
+                        <Clock3 size={15} />
+                      </div>
+                      <p className="text-sm max-[374px]:hidden text-indigo-100">Prazo</p>
                     </div>
-                    <p className="text-sm text-indigo-100/90">Prazo</p>
                     <p className="mt-2 text-2xl font-semibold">
                       {proposal.deliveryDays} dia(s)
                     </p>
                   </div>
 
                   <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
-                    <div className="mb-3 inline-flex rounded-2xl bg-white/12 p-2">
-                      {isAccepted ? (
-                        <CheckCircle2 size={18} />
-                      ) : isRejected ? (
-                        <XCircle size={18} />
-                      ) : (
-                        <ShieldCheck size={18} />
-                      )}
+                    <div className='flex items-center'>
+                      <div className="mr-0.5 md:mr-2 inline-flex rounded-2xl bg-white/12 p-2">
+                        {isAccepted ? (
+                          <CheckCircle2 size={15} />
+                        ) : isRejected ? (
+                          <XCircle size={15} />
+                        ) : (
+                          <ShieldCheck size={15} />
+                        )}
+                      </div>
+                      <p className="text-sm max-[374px]:hidden text-indigo-100">Status</p>
                     </div>
-                    <p className="text-sm text-indigo-100/90">Status</p>
                     <p className="mt-2 text-lg font-semibold">
                       {isAccepted
                         ? 'Aceita'

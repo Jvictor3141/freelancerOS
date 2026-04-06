@@ -159,7 +159,7 @@ export function ProposalForm({
     ) {
       notify({
         tone: 'warning',
-        title: 'Informe um prazo valido em dias.',
+        title: 'Informe um prazo válido em dias.',
       });
       return;
     }
@@ -175,7 +175,7 @@ export function ProposalForm({
     if (!isValidEmailAddress(values.recipientEmail)) {
       notify({
         tone: 'warning',
-        title: 'Informe um email de destinatario valido.',
+        title: 'Informe um email de destinatário válido.',
       });
       return;
     }
@@ -216,7 +216,7 @@ export function ProposalForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Titulo da proposta
+          Título da proposta
         </span>
         <input
           name="title"
@@ -262,7 +262,7 @@ export function ProposalForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          E-mail do destinatario
+          E-mail do destinatário
         </span>
         <input
           name="recipientEmail"
@@ -289,7 +289,7 @@ export function ProposalForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Observacoes internas
+          Observações internas
         </span>
         <textarea
           name="notes"

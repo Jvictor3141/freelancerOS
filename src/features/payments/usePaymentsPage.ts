@@ -139,7 +139,7 @@ export function usePaymentsPage() {
           : 'Pagamento criado com sucesso.',
       )
     } catch (submitError) {
-      alert(getErrorMessage(submitError, 'NÃ£o foi possÃ­vel salvar o pagamento.'))
+      alert(getErrorMessage(submitError, 'Não foi possível salvar o pagamento.'))
     } finally {
       setIsSubmitting(false)
     }
@@ -163,7 +163,7 @@ export function usePaymentsPage() {
       alert('Pagamento excluido com sucesso.')
     } catch (removeError) {
       alert(
-        getErrorMessage(removeError, 'NÃ£o foi possÃ­vel excluir o pagamento.'),
+        getErrorMessage(removeError, 'Não foi possível excluir o pagamento.'),
       )
     }
   }
@@ -174,7 +174,7 @@ export function usePaymentsPage() {
       alert('Pagamento marcado como pago.')
     } catch (markError) {
       alert(
-        getErrorMessage(markError, 'NÃ£o foi possÃ­vel marcar o pagamento como pago.'),
+        getErrorMessage(markError, 'Não foi possível marcar o pagamento como pago.'),
       )
     }
   }

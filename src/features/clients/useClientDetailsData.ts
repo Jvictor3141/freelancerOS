@@ -64,7 +64,7 @@ export function useClientDetailsData(
         setError(
           loadError instanceof Error
             ? loadError.message
-            : 'Nao foi possivel carregar os dados do cliente.',
+            : 'Não foi possível carregar os dados do cliente.',
         )
       }
     }
@@ -93,7 +93,7 @@ export function useClientDetailsData(
       setError(
         loadError instanceof Error
           ? loadError.message
-          : 'Nao foi possivel carregar os dados do cliente.',
+          : 'Não foi possível carregar os dados do cliente.',
       )
     }
   }

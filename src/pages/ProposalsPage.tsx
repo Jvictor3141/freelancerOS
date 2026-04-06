@@ -164,7 +164,7 @@ export function ProposalsPage() {
 
       <Modal
         title="Link seguro da proposta"
-        description="Gere um link protegido por token e compartilhe apenas a visualizaÃ§Ã£o pÃºblica dessa proposta."
+        description="Gere um link protegido por token e compartilhe apenas a visualização pública dessa proposta."
         isOpen={isShareModalOpen}
         onClose={closeShareModal}
       >

@@ -36,7 +36,7 @@ export function ClientsListSection({
             <input
               value={search}
               onChange={(event) => onSearchChange(event.target.value)}
-              placeholder="Buscar por nome, empresa ou email"
+              placeholder="Buscar por nome, empresa ou e-mail"
               className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff] w-32 min-[425px]:flex-none sm:w-60 md:w-72 lg:w-80"
             />
 
@@ -130,7 +130,7 @@ export function ClientsListSection({
                 Empresa
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Email
+                E-mail
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
                 Telefone

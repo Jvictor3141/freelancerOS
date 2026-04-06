@@ -40,7 +40,7 @@ export function RecoveryPasswordPage() {
 
     if (!user) {
       setLocalError(
-        'Esse link nao esta mais ativo. Solicite uma nova recuperacao de senha.',
+        'Esse link não está mais ativo. Solicite uma nova recuperação de senha.',
       );
       return;
     }
@@ -51,7 +51,7 @@ export function RecoveryPasswordPage() {
     }
 
     if (password !== confirmPassword) {
-      setLocalError('A confirmacao da nova senha nao confere.');
+      setLocalError('A confirmação da nova senha não confere.');
       return;
     }
 
@@ -71,7 +71,7 @@ export function RecoveryPasswordPage() {
       });
     } catch (error) {
       setLocalError(
-        getErrorMessage(error, 'Nao foi possivel atualizar a senha da conta.'),
+        getErrorMessage(error, 'Não foi possível atualizar a senha da conta.'),
       );
     }
   }
@@ -90,7 +90,7 @@ export function RecoveryPasswordPage() {
       setLocalError(
         getErrorMessage(
           error,
-          'Nao foi possivel encerrar a sessao temporaria de recuperacao.',
+          'Não foi possível encerrar a sessão temporária de recuperação.',
         ),
       );
     }
@@ -126,13 +126,13 @@ export function RecoveryPasswordPage() {
 
                     <div className="space-y-3">
                       <p className="text-sm font-medium text-slate-500">
-                        Link indisponivel
+                        Link indisponível
                       </p>
                       <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-                        Esse link de redefinicao nao esta ativo.
+                        Esse link de redefinição não está ativo.
                       </h1>
                       <p className="text-sm leading-6 text-slate-500">
-                        Solicite um novo email de recuperacao para gerar outra
+                        Solicite um novo email de recuperação para gerar outra
                         sessao valida e concluir a troca da senha.
                       </p>
                     </div>
@@ -153,7 +153,7 @@ export function RecoveryPasswordPage() {
                     <div className="space-y-3">
                       <p className="text-sm font-medium text-slate-500">
                         {isRecoverySession
-                          ? 'Fluxo protegido de recuperacao'
+                          ? 'Fluxo protegido de recuperação'
                           : 'Atualizacao de senha'}
                       </p>
                       <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
@@ -223,7 +223,7 @@ export function RecoveryPasswordPage() {
                         className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
                       >
                         {isRecoverySession
-                          ? 'Cancelar recuperacao'
+                          ? 'Cancelar recuperação'
                           : 'Voltar ao login'}
                       </button>
                     </form>
@@ -247,13 +247,13 @@ export function RecoveryPasswordPage() {
 
                 <div className="max-w-2xl space-y-4">
                   <p className="text-sm font-semibold uppercase tracking-[0.28em] text-indigo-100/90">
-                    Rota publica de redefinicao
+                    Rota pública de redefinição
                   </p>
                   <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">
                     O callback do Supabase termina sempre nesta tela
                   </h2>
                   <p className="max-w-xl text-base leading-7 text-indigo-100/90 sm:text-lg">
-                    O app nao depende mais de parsing manual espalhado, hacks de
+                    O app não depende mais de parsing manual espalhado, hacks de
                     sessionStorage nem renderizacao fora do router para concluir
                     a troca de senha.
                   </p>
@@ -270,7 +270,7 @@ export function RecoveryPasswordPage() {
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-indigo-100/90">
                     O link do email chega em <code>/auth/callback</code> e a
-                    aplicacao redireciona para a rota publica de recuperacao.
+                    aplicação redireciona para a rota pública de recuperação.
                   </p>
                 </article>
 

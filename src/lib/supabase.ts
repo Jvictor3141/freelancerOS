@@ -50,18 +50,18 @@ export function getSupabaseErrorMessage(
     error.message.includes('relation') &&
     error.message.includes('does not exist')
   ) {
-    return 'As tabelas do Supabase ainda nao existem. Aplique o schema inicial ou as migrations do projeto antes de usar o app.';
+    return 'As tabelas do Supabase ainda não existem. Aplique o schema inicial ou as migrations do projeto antes de usar o app.';
   }
 
   if (
     error.message.includes('function') &&
     error.message.includes('does not exist')
   ) {
-    return 'A funcao esperada no Supabase ainda nao existe. Aplique as migrations mais recentes do projeto.';
+    return 'A função esperada no Supabase ainda não existe. Aplique as migrations mais recentes do projeto.';
   }
 
   if (error.message.includes('schema cache')) {
-    return 'A funcao esperada no Supabase ainda nao esta disponivel no schema cache. Aplique a migration correspondente e tente novamente em alguns segundos.';
+    return 'A função esperada no Supabase ainda não está disponível no schema cache. Aplique a migration correspondente e tente novamente em alguns segundos.';
   }
 
   if (error.code === '23503') {
@@ -76,7 +76,7 @@ export function getSupabaseErrorMessage(
     error.code === '42501' ||
     error.message.includes('row-level security')
   ) {
-    return 'A sessao atual nao tem permissao para acessar esses dados. Verifique a autenticacao e o campo user_id das tabelas.';
+    return 'A sessão atual não tem permissão para acessar esses dados. Verifique a autenticação e o campo user_id das tabelas.';
   }
 
   if (error.message.includes('Anonymous sign-ins are disabled')) {

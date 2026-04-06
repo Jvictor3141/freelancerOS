@@ -102,7 +102,7 @@ export function LoginPage() {
     setLocalError(null);
 
     if (!email.trim() || !password.trim()) {
-      setLocalError('Informe email e senha para continuar.');
+      setLocalError('Informe e-mail e senha para continuar.');
       return;
     }
 
@@ -178,7 +178,7 @@ export function LoginPage() {
         }
         description={
           mode === 'sign_in'
-            ? 'Acesse sua conta do FreelancerOS para gerenciar sua operacao como freelancer.'
+            ? 'Acesse sua conta do FreelancerOS para gerenciar sua operação como freelancer.'
             : 'Crie sua conta no FreelancerOS para centralizar clientes, projetos, propostas e pagamentos.'
         }
         robots="noindex, follow"
@@ -248,7 +248,7 @@ export function LoginPage() {
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-slate-700">
-                    Email
+                    E-mail
                   </span>
                   <input
                     type="email"

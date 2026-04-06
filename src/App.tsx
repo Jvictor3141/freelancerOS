@@ -66,7 +66,7 @@ function SharedProposalRoute() {
           <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
             <LoadingState
               title="Carregando proposta compartilhada"
-              description="Validando o link seguro e preparando a visualizacao."
+              description="Validando o link seguro e preparando a visualização."
             />
           </div>
         </div>
@@ -94,8 +94,8 @@ function ProtectedAppShell() {
       <Suspense
         fallback={
           <LoadingState
-            title="Carregando pagina"
-            description="Montando a interface e buscando os modulos necessarios."
+            title="Carregando página"
+            description="Montando a interface e buscando os módulos necessários."
           />
         }
       >
@@ -159,8 +159,8 @@ function App() {
       <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8">
         <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
           <LoadingState
-            title="Preparando sua sessao"
-            description="Verificando autenticacao e conectando o painel ao Supabase."
+            title="Preparando sua sessão"
+            description="Verificando autenticação e conectando o painel ao Supabase."
           />
         </div>
       </div>

@@ -43,7 +43,7 @@ describe('email utilities', () => {
   })
 
   it('throws with the default message when the mailbox is invalid', () => {
-    expect(() => assertValidEmailAddress('invalido')).toThrow(
+    expect(() => assertValidEmailAddress('inválido')).toThrow(
       'Informe um e-mail valido.',
     )
   })

@@ -269,7 +269,7 @@ async function getAuthenticatedUser(request: Request) {
   const authorizationHeader = request.headers.get('Authorization');
 
   if (!authorizationHeader) {
-    throw new Error('FaÃ§a login para gerar o link seguro da proposta.');
+    throw new Error('Faça login para gerar o link seguro da proposta.');
   }
 
   const authClient = getAuthClient(authorizationHeader);
@@ -279,7 +279,7 @@ async function getAuthenticatedUser(request: Request) {
   } = await authClient.auth.getUser();
 
   if (error || !user) {
-    throw new Error('SessÃ£o invÃ¡lida. FaÃ§a login novamente.');
+    throw new Error('Sessão inválida. Faça login novamente.');
   }
 
   return {
@@ -319,7 +319,7 @@ async function getProposalById(proposalId: string) {
     .single();
 
   if (error || !data) {
-    throw new Error('NÃ£o foi possÃ­vel localizar a proposta compartilhada.');
+    throw new Error('Não foi possível localizar a proposta compartilhada.');
   }
 
   return data as ProposalRow;
@@ -333,7 +333,7 @@ async function getShareById(shareId: string) {
     .single();
 
   if (error || !data) {
-    throw new Error('Esse link nÃ£o existe ou jÃ¡ foi removido.');
+    throw new Error('Esse link não existe ou já foi removido.');
   }
 
   return data as ProposalShareRow;
@@ -355,7 +355,7 @@ async function validateShareToken(shareId: string, token: string) {
   // A comparacao constante evita vazar, por tempo de resposta, em que ponto a
   // verificacao do token publico falhou.
   if (!timingSafeEqual(providedHash, share.token_hash)) {
-    throw new Error('Esse link Ã© invÃ¡lido ou foi alterado.');
+    throw new Error('Esse link é inválido ou foi alterado.');
   }
 
   return share;
@@ -418,7 +418,7 @@ async function handleCreateShareLink(
     expiresInDays < 1 ||
     expiresInDays > 30
   ) {
-    throw new Error('Defina uma expiraÃ§Ã£o entre 1 e 30 dias.');
+    throw new Error('Defina uma expiração entre 1 e 30 dias.');
   }
 
   const { data: proposal, error: proposalError } = await authClient
@@ -428,12 +428,12 @@ async function handleCreateShareLink(
     .single();
 
   if (proposalError || !proposal) {
-    throw new Error('NÃ£o foi possÃ­vel localizar essa proposta no seu painel.');
+    throw new Error('Não foi possível localizar essa proposta no seu painel.');
   }
 
   if (proposal.status === 'accepted') {
     throw new Error(
-      'NÃ£o Ã© possÃ­vel compartilhar novamente uma proposta jÃ¡ aceita.',
+      'Não é possível compartilhar novamente uma proposta já aceita.',
     );
   }
 
@@ -456,7 +456,7 @@ async function handleCreateShareLink(
 
   if (updateProposalError) {
     throw new Error(
-      'NÃ£o foi possÃ­vel preparar a proposta para o compartilhamento.',
+      'Não foi possível preparar a proposta para o compartilhamento.',
     );
   }
 
@@ -478,7 +478,7 @@ async function handleCreateShareLink(
     .single();
 
   if (shareError || !share) {
-    throw new Error('NÃ£o foi possÃ­vel gerar o link seguro da proposta.');
+    throw new Error('Não foi possível gerar o link seguro da proposta.');
   }
 
   const baseUrl = resolvePublicAppUrl(request);
@@ -517,7 +517,7 @@ async function handleSharedProposalResponse(
     throw new Error(
       getErrorMessage(
         error,
-        'NÃ£o foi possÃ­vel registrar a resposta da proposta compartilhada.',
+        'Não foi possível registrar a resposta da proposta compartilhada.',
       ),
     );
   }
@@ -546,13 +546,13 @@ Deno.serve(async (request) => {
       return await handleSharedProposalResponse(payload);
     }
 
-    return jsonResponse({ error: 'AÃ§Ã£o invÃ¡lida.' }, 400);
+    return jsonResponse({ error: 'Ação inválida.' }, 400);
   } catch (error) {
     return jsonResponse(
       {
         error: getErrorMessage(
           error,
-          'NÃ£o foi possÃ­vel concluir a operaÃ§Ã£o da proposta compartilhada.',
+          'Não foi possível concluir a operação da proposta compartilhada.',
         ),
       },
       400,

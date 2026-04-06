@@ -61,7 +61,7 @@ export function ClientForm({
     if (!values.name.trim() || !values.email.trim()) {
       notify({
         tone: 'warning',
-        title: 'Nome e e-mail sao obrigatorios.',
+        title: 'Nome e e-mail são obrigatórios.',
       });
       return;
     }
@@ -69,7 +69,7 @@ export function ClientForm({
     if (!isValidEmailAddress(values.email)) {
       notify({
         tone: 'warning',
-        title: 'Informe um email valido para o cliente.',
+        title: 'Informe um e-mail válido para o cliente.',
       });
       return;
     }
@@ -113,7 +113,7 @@ export function ClientForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Email
+          E-mail
         </span>
         <input
           name="email"

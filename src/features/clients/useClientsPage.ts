@@ -80,7 +80,7 @@ export function useClientsPage() {
           : 'Cliente criado com sucesso.',
       })
     } catch (submitError) {
-      alert(getErrorMessage(submitError, 'NÃ£o foi possÃ­vel salvar o cliente.'))
+      alert(getErrorMessage(submitError, 'Não foi possível salvar o cliente.'))
     } finally {
       setIsSubmitting(false)
     }
@@ -106,7 +106,7 @@ export function useClientsPage() {
         title: 'Cliente excluido com sucesso.',
       })
     } catch (removeError) {
-      alert(getErrorMessage(removeError, 'NÃ£o foi possÃ­vel excluir o cliente.'))
+      alert(getErrorMessage(removeError, 'Não foi possível excluir o cliente.'))
     }
   }
 
@@ -120,7 +120,7 @@ export function useClientsPage() {
     loadingDescription:
       loadStatus === 'loading'
         ? 'Buscando a base de clientes no Supabase.'
-        : 'Preparando a sincronizaÃ§Ã£o inicial.',
+        : 'Preparando a sincronização inicial.',
     search,
     selectedClient,
     setSearch,

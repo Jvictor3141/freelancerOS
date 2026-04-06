@@ -91,7 +91,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
       } catch (error) {
         set({
           loadStatus: 'error',
-          error: getClientStoreError(error, 'NÃ£o foi possÃ­vel carregar os clientes.'),
+          error: getClientStoreError(error, 'Não foi possível carregar os clientes.'),
         })
       } finally {
         loadClientsPromise = null
@@ -130,7 +130,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
 
       return newClient
     } catch (error) {
-      const message = getClientStoreError(error, 'NÃ£o foi possÃ­vel salvar o cliente.')
+      const message = getClientStoreError(error, 'Não foi possível salvar o cliente.')
 
       set({ error: message })
       throw new Error(message)
@@ -153,7 +153,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
     } catch (error) {
       const message = getClientStoreError(
         error,
-        'NÃ£o foi possÃ­vel atualizar o cliente.',
+        'Não foi possível atualizar o cliente.',
       )
 
       set({ error: message })
@@ -178,7 +178,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
         usePaymentStore.getState().loadPayments({ force: true }),
       ])
     } catch (error) {
-      const message = getClientStoreError(error, 'NÃ£o foi possÃ­vel excluir o cliente.')
+      const message = getClientStoreError(error, 'Não foi possível excluir o cliente.')
 
       set({ error: message })
       throw new Error(message)

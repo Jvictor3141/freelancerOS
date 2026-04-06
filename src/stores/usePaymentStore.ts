@@ -93,7 +93,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
           loadStatus: 'error',
           error: getPaymentStoreError(
             error,
-            'Nao foi possivel carregar os pagamentos.',
+            'Não foi possível carregar os pagamentos.',
           ),
         })
       } finally {
@@ -135,7 +135,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     } catch (error) {
       const message = getPaymentStoreError(
         error,
-        'Nao foi possivel salvar o pagamento.',
+        'Não foi possível salvar o pagamento.',
       )
 
       set({ error: message })
@@ -162,7 +162,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     } catch (error) {
       const message = getPaymentStoreError(
         error,
-        'Nao foi possivel atualizar o pagamento.',
+        'Não foi possível atualizar o pagamento.',
       )
 
       set({ error: message })
@@ -184,7 +184,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     } catch (error) {
       const message = getPaymentStoreError(
         error,
-        'Nao foi possivel excluir o pagamento.',
+        'Não foi possível excluir o pagamento.',
       )
 
       set({ error: message })
@@ -217,7 +217,7 @@ export const usePaymentStore = create<PaymentStore>((set, get) => ({
     } catch (error) {
       const message = getPaymentStoreError(
         error,
-        'Nao foi possivel marcar o pagamento como pago.',
+        'Não foi possível marcar o pagamento como pago.',
       )
 
       set({ error: message })

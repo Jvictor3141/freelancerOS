@@ -173,7 +173,7 @@ export function useProjectsPage() {
           : 'Projeto criado com sucesso.',
       )
     } catch (submitError) {
-      alert(getErrorMessage(submitError, 'NÃ£o foi possÃ­vel salvar o projeto.'))
+      alert(getErrorMessage(submitError, 'Não foi possível salvar o projeto.'))
     } finally {
       setIsSubmitting(false)
     }
@@ -196,7 +196,7 @@ export function useProjectsPage() {
       await removeProject(project.id)
       alert('Projeto excluido com sucesso.')
     } catch (removeError) {
-      alert(getErrorMessage(removeError, 'NÃ£o foi possÃ­vel excluir o projeto.'))
+      alert(getErrorMessage(removeError, 'Não foi possível excluir o projeto.'))
     }
   }
 

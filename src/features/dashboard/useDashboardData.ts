@@ -54,7 +54,7 @@ export function useDashboardData() {
         setError(
           loadError instanceof Error
             ? loadError.message
-            : 'Nao foi possivel carregar o dashboard.',
+            : 'Não foi possível carregar o dashboard.',
         )
       }
     }
@@ -83,7 +83,7 @@ export function useDashboardData() {
       setError(
         loadError instanceof Error
           ? loadError.message
-          : 'Nao foi possivel carregar o dashboard.',
+          : 'Não foi possível carregar o dashboard.',
       )
     }
   }

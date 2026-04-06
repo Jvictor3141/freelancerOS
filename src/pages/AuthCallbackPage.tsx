@@ -95,7 +95,7 @@ export function AuthCallbackPage() {
           state: {
             authFeedback: {
               tone: 'error',
-              message: 'Nao foi possivel validar a sessao retornada pelo Supabase.',
+              message: 'Não foi possível validar a sessão retornada pelo Supabase.',
             },
           },
         });
