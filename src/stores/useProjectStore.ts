@@ -90,7 +90,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
       } catch (error) {
         set({
           loadStatus: 'error',
-          error: getProjectStoreError(error, 'NÃ£o foi possÃ­vel carregar os projetos.'),
+          error: getProjectStoreError(error, 'Não foi possível carregar os projetos.'),
         })
       } finally {
         loadProjectsPromise = null
@@ -129,7 +129,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 
       return newProject
     } catch (error) {
-      const message = getProjectStoreError(error, 'NÃ£o foi possÃ­vel salvar o projeto.')
+      const message = getProjectStoreError(error, 'Não foi possível salvar o projeto.')
 
       set({ error: message })
       throw new Error(message)
@@ -155,7 +155,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
     } catch (error) {
       const message = getProjectStoreError(
         error,
-        'NÃ£o foi possÃ­vel atualizar o projeto.',
+        'Não foi possível atualizar o projeto.',
       )
 
       set({ error: message })
@@ -177,7 +177,7 @@ export const useProjectStore = create<ProjectStore>((set, get) => ({
 
       await usePaymentStore.getState().loadPayments({ force: true })
     } catch (error) {
-      const message = getProjectStoreError(error, 'NÃ£o foi possÃ­vel excluir o projeto.')
+      const message = getProjectStoreError(error, 'Não foi possível excluir o projeto.')
 
       set({ error: message })
       throw new Error(message)

@@ -133,7 +133,7 @@ export function ProjectForm({
     if (Number.isNaN(numericValue) || numericValue < 0) {
       notify({
         tone: 'warning',
-        title: 'O valor do projeto nao pode ser negativo.',
+        title: 'O valor do projeto não pode ser negativo.',
       });
       return;
     }

@@ -90,8 +90,8 @@ export function ProjectsPage() {
               : undefined
           }
         >
-          NÃ£o foi possÃ­vel carregar o resumo comercial das propostas nesta
-          pÃ¡gina. A operaÃ§Ã£o de projetos continua disponÃ­vel normalmente.
+          Não foi possível carregar o resumo comercial das propostas nesta
+          página. A operação de projetos continua disponível normalmente.
         </PageBanner>
       ) : null}
 
@@ -145,7 +145,7 @@ export function ProjectsPage() {
         title={selectedProject ? 'Editar projeto' : 'Novo projeto'}
         description={
           selectedProject
-            ? 'Atualize as informaÃ§Ãµes do projeto.'
+            ? 'Atualize as informações do projeto.'
             : 'Preencha os dados para cadastrar um novo projeto.'
         }
         isOpen={isModalOpen}

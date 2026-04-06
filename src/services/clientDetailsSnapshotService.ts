@@ -35,7 +35,7 @@ function getClientDetailsSnapshotError(
   fallback: string,
 ) {
   if (isMissingClientDetailsSnapshotFunction(error)) {
-    return `A leitura detalhada de clientes no Supabase ainda nao foi atualizada. Rode a migration ${CLIENT_DETAILS_SNAPSHOT_MIGRATION}.`
+    return `A leitura detalhada de clientes no Supabase ainda não foi atualizada. Rode a migration ${CLIENT_DETAILS_SNAPSHOT_MIGRATION}.`
   }
 
   return getSupabaseErrorMessage(error, fallback)
@@ -138,7 +138,7 @@ export async function getClientDetailsSnapshot(
     throw new Error(
       getClientDetailsSnapshotError(
         error,
-        'Nao foi possivel carregar o detalhamento do cliente.',
+        'Não foi possível carregar o detalhamento do cliente.',
       ),
     )
   }

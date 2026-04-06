@@ -135,7 +135,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         initialized: true,
         authFlow: null,
         loading: false,
-        error: getAuthStoreError(error, 'Nao foi possivel carregar a sessao atual.'),
+        error: getAuthStoreError(error, 'Não foi possível carregar a sessão atual.'),
       })
     } else {
       set(buildSessionState(data.session, resolveInitialAuthFlow(data.session)))
@@ -156,7 +156,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (error) {
       const message = getAuthStoreError(
         error,
-        'Nao foi possivel entrar com essa conta.',
+        'Não foi possível entrar com essa conta.',
       )
 
       set({ loading: false, error: message })
@@ -173,7 +173,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     const { data, error } = await signUpService(normalizedEmail, password)
 
     if (error) {
-      const message = getAuthStoreError(error, 'Nao foi possivel criar a conta.')
+      const message = getAuthStoreError(error, 'Não foi possível criar a conta.')
 
       set({ loading: false, error: message })
       throw new Error(message)
@@ -187,7 +187,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       )
     ) {
       const message =
-        'Ja existe uma conta ativa com esse e-mail. Entre no app ou use a recuperacao de senha.'
+        'Já existe uma conta ativa com esse e-mail. Entre no app ou use a recuperação de senha.'
 
       set({ loading: false, error: message })
       throw new Error(message)
@@ -198,7 +198,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({
       notice: data.session
         ? 'Conta criada e sessao iniciada com sucesso.'
-        : 'Conta criada. Confirme seu email para entrar no app.',
+        : 'Cadastro iniciado. Se o e-mail estiver correto, você receberá uma mensagem de confirmação para entrar no app.',
     })
   },
 
@@ -210,7 +210,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     if (error) {
       const message = getAuthStoreError(
         error,
-        'Nao foi possivel encerrar a sessao.',
+        'Não foi possível encerrar a sessão.',
       )
 
       set({ loading: false, error: message })

@@ -226,7 +226,7 @@ export function HeaderNotificationsMenu() {
       <button
         type="button"
         onClick={() => setIsOpen((currentValue) => !currentValue)}
-        aria-label="Abrir notificacoes"
+        aria-label="Abrir notificações"
         aria-expanded={isOpen}
         className={`relative inline-flex h-14 w-14 items-center justify-center rounded-2xl border bg-white text-slate-700 shadow-sm shadow-slate-100 transition ${
           isOpen
@@ -265,11 +265,11 @@ export function HeaderNotificationsMenu() {
           >
             {isLoading ? (
               <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
-                Carregando notificacoes...
+                Carregando notificações...
               </div>
             ) : hasLoadError ? (
               <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-5 text-sm text-amber-800">
-                <p>Algumas notificacoes nao puderam ser atualizadas.</p>
+                <p>Algumas notificações não puderam ser atualizadas.</p>
                 <button
                   type="button"
                   onClick={() => {

@@ -54,7 +54,7 @@ function getDashboardSnapshotError(
   fallback: string,
 ) {
   if (isMissingDashboardSnapshotFunction(error)) {
-    return `A leitura do dashboard no Supabase ainda nao foi atualizada. Rode a migration ${DASHBOARD_SNAPSHOT_MIGRATION}.`
+    return `A leitura do dashboard no Supabase ainda não foi atualizada. Rode a migration ${DASHBOARD_SNAPSHOT_MIGRATION}.`
   }
 
   return getSupabaseErrorMessage(error, fallback)
@@ -165,7 +165,7 @@ export async function getDashboardSnapshot(): Promise<DashboardViewModel> {
     throw new Error(
       getDashboardSnapshotError(
         error,
-        'Nao foi possivel carregar os dados do dashboard.',
+        'Não foi possível carregar os dados do dashboard.',
       ),
     )
   }

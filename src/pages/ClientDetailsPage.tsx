@@ -80,10 +80,10 @@ export function ClientDetailsPage() {
 
         <div className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm shadow-slate-100">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
-            Cliente nao encontrado
+            Cliente não encontrado
           </h2>
           <p className="mt-2 text-sm text-slate-500">
-            Esse cliente nao existe ou foi removido.
+            Esse cliente não existe ou foi removido.
           </p>
           <button
             type="button"

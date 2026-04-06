@@ -217,7 +217,7 @@ export function useProposalsPage() {
           : 'Proposta criada com sucesso.',
       )
     } catch (submitError) {
-      alert(getErrorMessage(submitError, 'NÃ£o foi possÃ­vel salvar a proposta.'))
+      alert(getErrorMessage(submitError, 'Não foi possível salvar a proposta.'))
     } finally {
       setIsSubmitting(false)
     }
@@ -240,7 +240,7 @@ export function useProposalsPage() {
       await removeProposal(proposal.id)
       alert('Proposta excluida com sucesso.')
     } catch (removeError) {
-      alert(getErrorMessage(removeError, 'NÃ£o foi possÃ­vel excluir a proposta.'))
+      alert(getErrorMessage(removeError, 'Não foi possível excluir a proposta.'))
     }
   }
 
@@ -263,7 +263,7 @@ export function useProposalsPage() {
       alert(
         getErrorMessage(
           shareError,
-          'NÃ£o foi possÃ­vel gerar o link seguro da proposta.',
+          'Não foi possível gerar o link seguro da proposta.',
         ),
       )
     } finally {
@@ -278,17 +278,17 @@ export function useProposalsPage() {
 
     try {
       await navigator.clipboard.writeText(generatedShareLink.url)
-      setShareFeedback('Link copiado para a Ã¡rea de transferÃªncia.')
+      setShareFeedback('Link copiado para a área de transferência.')
     } catch {
       setShareFeedback(
-        'NÃ£o foi possÃ­vel copiar automaticamente. Copie o link manualmente.',
+        'Não foi possível copiar automaticamente. Copie o link manualmente.',
       )
     }
   }
 
   async function handleSendProposal(proposal: ProposalWithClient) {
     if (!proposal.recipientEmail.trim()) {
-      alert('Defina um e-mail vÃ¡lido antes de enviar a proposta.')
+      alert('Defina um e-mail válido antes de enviar a proposta.')
       return
     }
 
@@ -307,7 +307,7 @@ export function useProposalsPage() {
       )
       alert('Abrindo seu app de e-mail com a proposta preenchida.')
     } catch (sendError) {
-      alert(getErrorMessage(sendError, 'NÃ£o foi possÃ­vel enviar a proposta.'))
+      alert(getErrorMessage(sendError, 'Não foi possível enviar a proposta.'))
     }
   }
 
@@ -331,7 +331,7 @@ export function useProposalsPage() {
       alert(
         getErrorMessage(
           acceptError,
-          'NÃ£o foi possÃ­vel aceitar a proposta e gerar o projeto.',
+          'Não foi possível aceitar a proposta e gerar o projeto.',
         ),
       )
     }
@@ -357,7 +357,7 @@ export function useProposalsPage() {
       alert(
         getErrorMessage(
           rejectError,
-          'NÃ£o foi possÃ­vel marcar a proposta como recusada.',
+          'Não foi possível marcar a proposta como recusada.',
         ),
       )
     }
@@ -368,7 +368,7 @@ export function useProposalsPage() {
       await reopenProposalById(proposal.id)
       alert(`Proposta "${proposal.title}" reaberta como rascunho.`)
     } catch (reopenError) {
-      alert(getErrorMessage(reopenError, 'NÃ£o foi possÃ­vel reabrir a proposta.'))
+      alert(getErrorMessage(reopenError, 'Não foi possível reabrir a proposta.'))
     }
   }
 

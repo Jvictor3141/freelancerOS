@@ -4,7 +4,7 @@ export function getToastToneForMessage(message: string): FeedbackMessageTone {
   const normalizedMessage = message.trim().toLowerCase();
 
   if (
-    normalizedMessage.includes('nao foi possivel') ||
+    normalizedMessage.includes('não foi possível') ||
     normalizedMessage.includes('não foi possível')
   ) {
     return 'error';
