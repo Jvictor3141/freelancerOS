@@ -44,7 +44,7 @@ export function Modal({
   }
 
   return createPortal(
-    <div className="motion-overlay fixed inset-0 z-[100] overflow-x-hidden overflow-y-auto bg-slate-950/34 p-4 backdrop-blur-sm sm:p-6">
+    <div className="motion-overlay fixed inset-0 z-100 overflow-x-hidden overflow-y-auto bg-slate-950/34 p-4 backdrop-blur-sm sm:p-6">
       <div className="flex min-h-[calc(100dvh-2rem)] items-start justify-center py-4 sm:min-h-[calc(100dvh-3rem)] sm:items-center">
         <div
           role="dialog"

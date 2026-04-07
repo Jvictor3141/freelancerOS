@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useFeedback } from '../../components/FeedbackProvider'
-import { getToastToneForMessage } from '../../lib/feedback'
-import { getErrorMessage } from '../../lib/supabase'
+import { useAlert } from '../../lib/useAlert'
+import { useRemovalHandler } from '../../lib/useRemovalHandler'
+import { useSubmitHandler } from '../../lib/useSubmitHandler'
 import { useClientStore } from '../../stores/useClientStore'
 import {
   hasResourceLoadError,
@@ -26,16 +26,24 @@ export function useClientsPage() {
   const removeClient = useClientStore((state) => state.removeClient)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [search, setSearch] = useState('')
-  const { confirm, notify } = useFeedback()
-
-  function alert(message: string) {
-    notify({
-      tone: getToastToneForMessage(message),
-      title: message,
-    })
-  }
+  const { alert } = useAlert()
+  const handleClientRemoval = useRemovalHandler<Client>({
+    confirmLabel: 'Excluir cliente',
+    description: (client) => `Deseja excluir o cliente "${client.name}"?`,
+    remove: removeClient,
+    successMessage: 'Cliente excluido com sucesso.',
+    errorMessage: 'Não foi possível excluir o cliente.',
+  })
+  const { isSubmitting, handleSubmit: handleClientSubmit } = useSubmitHandler<ClientInput, Client>({
+    selected: selectedClient,
+    add: addClient,
+    edit: editClient,
+    onSuccess: closeModal,
+    createdMessage: 'Cliente criado com sucesso.',
+    updatedMessage: 'Cliente atualizado com sucesso.',
+    errorMessage: 'Não foi possível salvar o cliente.',
+  })
 
   useEffect(() => {
     void ensureClientsLoaded()
@@ -58,56 +66,6 @@ export function useClientsPage() {
 
   async function handleRetryLoad() {
     await retryLoad()
-  }
-
-  async function handleClientSubmit(values: ClientInput) {
-    setIsSubmitting(true)
-
-    try {
-      const isEditing = Boolean(selectedClient)
-
-      if (selectedClient) {
-        await editClient(selectedClient.id, values)
-      } else {
-        await addClient(values)
-      }
-
-      closeModal()
-      notify({
-        tone: 'success',
-        title: isEditing
-          ? 'Cliente atualizado com sucesso.'
-          : 'Cliente criado com sucesso.',
-      })
-    } catch (submitError) {
-      alert(getErrorMessage(submitError, 'Não foi possível salvar o cliente.'))
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  async function handleClientRemoval(client: Client) {
-    const confirmed = await confirm({
-      title: 'Excluir cliente?',
-      description: `Deseja excluir o cliente "${client.name}"?`,
-      confirmLabel: 'Excluir cliente',
-      cancelLabel: 'Cancelar',
-      tone: 'danger',
-    })
-
-    if (!confirmed) {
-      return
-    }
-
-    try {
-      await removeClient(client.id)
-      notify({
-        tone: 'success',
-        title: 'Cliente excluido com sucesso.',
-      })
-    } catch (removeError) {
-      alert(getErrorMessage(removeError, 'Não foi possível excluir o cliente.'))
-    }
   }
 
   return {

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useFeedback } from '../../components/FeedbackProvider'
-import { getToastToneForMessage } from '../../lib/feedback'
+import { useFilterModal } from '../../lib/useFilterModal'
 import { getErrorMessage } from '../../lib/supabase'
+import { useAlert } from '../../lib/useAlert'
+import { useRemovalHandler } from '../../lib/useRemovalHandler'
+import { useSubmitHandler } from '../../lib/useSubmitHandler'
 import { useClientStore } from '../../stores/useClientStore'
 import { usePaymentStore } from '../../stores/usePaymentStore'
 import { useProjectStore } from '../../stores/useProjectStore'
@@ -49,19 +51,24 @@ export function usePaymentsPage() {
   const markAsPaid = usePaymentStore((state) => state.markAsPaid)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [statusFilter, setStatusFilter] = useState<PaymentStatusFilter>('all')
-  const [statusFilterDraft, setStatusFilterDraft] =
-    useState<PaymentStatusFilter>('all')
-  const { confirm, notify } = useFeedback()
-
-  function alert(message: string) {
-    notify({
-      tone: getToastToneForMessage(message),
-      title: message,
-    })
-  }
+  const statusFilterModal = useFilterModal<PaymentStatusFilter>('all')
+  const { alert } = useAlert()
+  const handlePaymentRemoval = useRemovalHandler<PaymentWithProjectAndClient>({
+    confirmLabel: 'Excluir pagamento',
+    description: () => 'Deseja excluir este pagamento?',
+    remove: removePayment,
+    successMessage: 'Pagamento excluido com sucesso.',
+    errorMessage: 'Não foi possível excluir o pagamento.',
+  })
+  const { isSubmitting, handleSubmit: handlePaymentSubmit } = useSubmitHandler<PaymentInput, PaymentWithProjectAndClient>({
+    selected: selectedPayment,
+    add: addPayment,
+    edit: editPayment,
+    onSuccess: closeModal,
+    createdMessage: 'Pagamento criado com sucesso.',
+    updatedMessage: 'Pagamento atualizado com sucesso.',
+    errorMessage: 'Não foi possível salvar o pagamento.',
+  })
 
   useEffect(() => {
     void Promise.all([
@@ -76,7 +83,7 @@ export function usePaymentsPage() {
     projects,
     clients,
   )
-  const filteredPayments = getFilteredPayments(paymentsWithRelations, statusFilter)
+  const filteredPayments = getFilteredPayments(paymentsWithRelations, statusFilterModal.value)
 
   function openCreateModal() {
     if (projects.length === 0) {
@@ -106,68 +113,6 @@ export function usePaymentsPage() {
     ])
   }
 
-  function openFilterModal() {
-    setStatusFilterDraft(statusFilter)
-    setIsFilterModalOpen(true)
-  }
-
-  function applyFilterModal() {
-    setStatusFilter(statusFilterDraft)
-    setIsFilterModalOpen(false)
-  }
-
-  function clearFilterModal() {
-    setStatusFilterDraft('all')
-    setStatusFilter('all')
-  }
-
-  async function handlePaymentSubmit(values: PaymentInput) {
-    const isEditing = Boolean(selectedPayment)
-    setIsSubmitting(true)
-
-    try {
-      if (selectedPayment) {
-        await editPayment(selectedPayment.id, values)
-      } else {
-        await addPayment(values)
-      }
-
-      closeModal()
-      alert(
-        isEditing
-          ? 'Pagamento atualizado com sucesso.'
-          : 'Pagamento criado com sucesso.',
-      )
-    } catch (submitError) {
-      alert(getErrorMessage(submitError, 'Não foi possível salvar o pagamento.'))
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  async function handlePaymentRemoval(payment: PaymentWithProjectAndClient) {
-    const confirmed = await confirm({
-      title: 'Excluir pagamento?',
-      description: 'Deseja excluir este pagamento?',
-      confirmLabel: 'Excluir pagamento',
-      cancelLabel: 'Cancelar',
-      tone: 'danger',
-    })
-
-    if (!confirmed) {
-      return
-    }
-
-    try {
-      await removePayment(payment.id)
-      alert('Pagamento excluido com sucesso.')
-    } catch (removeError) {
-      alert(
-        getErrorMessage(removeError, 'Não foi possível excluir o pagamento.'),
-      )
-    }
-  }
-
   async function handleMarkAsPaid(paymentId: string) {
     try {
       await markAsPaid(paymentId)
@@ -182,12 +127,12 @@ export function usePaymentsPage() {
   return {
     combinedError: paymentError ?? projectError ?? clientError,
     filteredPayments,
-    hasActiveFilters: statusFilter !== 'all',
+    hasActiveFilters: statusFilterModal.value !== 'all',
     hasLoadError:
       hasResourceLoadError(clientsLoadStatus) ||
       hasResourceLoadError(projectsLoadStatus) ||
       hasResourceLoadError(paymentsLoadStatus),
-    isFilterModalOpen,
+    isFilterModalOpen: statusFilterModal.isOpen,
     isLoading:
       isResourcePending(clientsLoadStatus) ||
       isResourcePending(projectsLoadStatus) ||
@@ -196,10 +141,10 @@ export function usePaymentsPage() {
     isSubmitting,
     projects,
     selectedPayment,
-    statusFilter,
-    statusFilterDraft,
-    applyFilterModal,
-    clearFilterModal,
+    statusFilter: statusFilterModal.value,
+    statusFilterDraft: statusFilterModal.draft,
+    applyFilterModal: statusFilterModal.apply,
+    clearFilterModal: statusFilterModal.clear,
     closeModal,
     handleMarkAsPaid,
     handlePaymentRemoval,
@@ -207,9 +152,9 @@ export function usePaymentsPage() {
     handleRetryLoad,
     openCreateModal,
     openEditModal,
-    openFilterModal,
-    setIsFilterModalOpen,
-    setStatusFilter,
-    setStatusFilterDraft,
+    openFilterModal: statusFilterModal.open,
+    setIsFilterModalOpen: statusFilterModal.setIsOpen,
+    setStatusFilter: statusFilterModal.setValue,
+    setStatusFilterDraft: statusFilterModal.setDraft,
   }
 }
