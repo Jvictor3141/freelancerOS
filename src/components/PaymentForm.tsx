@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useFeedback } from './FeedbackProvider';
+import { SelectField } from './SelectField';
 import type { PaymentInput } from '../types/inputs';
 import type { Payment } from '../types/payment';
 import type { Project } from '../types/project';
@@ -75,17 +76,8 @@ export function PaymentForm({
     });
   }, [initialValues, projects]);
 
-  function handleChange(
-    event: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) {
+  function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = event.target;
-
-    if (name === 'projectId') {
-      setField('projectId', value);
-      return;
-    }
 
     if (name === 'amount') {
       setField('amount', value);
@@ -107,21 +99,6 @@ export function PaymentForm({
       return;
     }
 
-    if (name === 'method' && isPaymentMethod(value)) {
-      setField('method', value);
-      return;
-    }
-
-    if (name === 'status' && isPersistedPaymentStatus(value)) {
-      setValues((previousValues) => ({
-        ...previousValues,
-        status: value,
-        paidAt:
-          value === 'paid'
-            ? previousValues.paidAt || formatDateInputValue()
-            : null,
-      }));
-    }
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -172,19 +149,19 @@ export function PaymentForm({
     <form onSubmit={handleSubmit} className="space-y-5">
       <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
         Projeto
-        <select
+        <SelectField
           name="projectId"
           value={values.projectId}
-          onChange={handleChange}
-          className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-        >
-          <option value="">Selecione um projeto</option>
-          {projects.map((project) => (
-            <option key={project.id} value={project.id}>
-              {project.name}
-            </option>
-          ))}
-        </select>
+          onChange={(nextValue) => setField('projectId', nextValue)}
+          buttonClassName="bg-white text-slate-900"
+          options={[
+            { value: '', label: 'Selecione um projeto' },
+            ...projects.map((project) => ({
+              value: project.id,
+              label: project.name,
+            })),
+          ]}
+        />
       </label>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -217,37 +194,46 @@ export function PaymentForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
           Status
-          <select
+          <SelectField
             name="status"
             value={values.status}
-            onChange={handleChange}
-            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-          >
-            <option value="pending">{paymentStatusLabel.pending}</option>
-            <option value="paid">{paymentStatusLabel.paid}</option>
-          </select>
+            onChange={(nextValue) => {
+              if (!isPersistedPaymentStatus(nextValue)) return
+              setValues((prev) => ({
+                ...prev,
+                status: nextValue,
+                paidAt: nextValue === 'paid' ? prev.paidAt || formatDateInputValue() : null,
+              }))
+            }}
+            buttonClassName="bg-white text-slate-900"
+            options={[
+              { value: 'pending', label: paymentStatusLabel.pending },
+              { value: 'paid', label: paymentStatusLabel.paid },
+            ]}
+          />
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
           Metodo
-          <select
+          <SelectField
             name="method"
             value={values.method}
-            onChange={handleChange}
-            className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-          >
-            {paymentMethods.map((method) => (
-              <option key={method} value={method}>
-                {method === 'pix'
+            onChange={(nextValue) => {
+              if (isPaymentMethod(nextValue)) setField('method', nextValue)
+            }}
+            buttonClassName="bg-white text-slate-900"
+            options={paymentMethods.map((method) => ({
+              value: method,
+              label:
+                method === 'pix'
                   ? 'Pix'
                   : method === 'card'
                     ? 'Cartão'
                     : method === 'bank_transfer'
                       ? 'Transferência'
-                      : 'Dinheiro'}
-              </option>
-            ))}
-          </select>
+                      : 'Dinheiro',
+            }))}
+          />
         </label>
       </div>
 

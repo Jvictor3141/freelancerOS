@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useFeedback } from './FeedbackProvider';
+import { SelectField } from './SelectField';
 import type { Client } from '../types/client';
 import type { Project } from '../types/project';
 import type { ProjectInput } from '../types/inputs';
@@ -71,17 +72,8 @@ export function ProjectForm({
     });
   }, [initialValues, clients]);
 
-  function handleChange(
-    event: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) {
+  function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = event.target;
-
-    if (name === 'clientId') {
-      setField('clientId', value);
-      return;
-    }
 
     if (name === 'name') {
       setField('name', value);
@@ -103,9 +95,6 @@ export function ProjectForm({
       return;
     }
 
-    if (name === 'status' && isProjectStatus(value)) {
-      setField('status', value);
-    }
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -154,20 +143,18 @@ export function ProjectForm({
         <span className="mb-2 block text-sm font-medium text-slate-700">
           Cliente
         </span>
-        <select
+        <SelectField
           name="clientId"
           value={values.clientId}
-          onChange={handleChange}
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-        >
-          <option value="">Selecione um cliente</option>
-          {clients.map((client) => (
-            <option key={client.id} value={client.id}>
-              {client.name}
-              {client.company ? ` - ${client.company}` : ''}
-            </option>
-          ))}
-        </select>
+          onChange={(nextValue) => setField('clientId', nextValue)}
+          options={[
+            { value: '', label: 'Selecione um cliente' },
+            ...clients.map((client) => ({
+              value: client.id,
+              label: `${client.name}${client.company ? ` - ${client.company}` : ''}`,
+            })),
+          ]}
+        />
       </label>
 
       <label>
@@ -231,18 +218,17 @@ export function ProjectForm({
         <span className="mb-2 block text-sm font-medium text-slate-700">
           Status
         </span>
-        <select
+        <SelectField
           name="status"
           value={values.status}
-          onChange={handleChange}
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-        >
-          {statusOptions.map((status) => (
-            <option key={status} value={status}>
-              {projectStatusLabel[status]}
-            </option>
-          ))}
-        </select>
+          onChange={(nextValue) => {
+            if (isProjectStatus(nextValue)) setField('status', nextValue)
+          }}
+          options={statusOptions.map((status) => ({
+            value: status,
+            label: projectStatusLabel[status],
+          }))}
+        />
       </label>
 
       <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">

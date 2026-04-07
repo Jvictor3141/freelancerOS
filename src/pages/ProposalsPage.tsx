@@ -3,10 +3,12 @@ import { Modal } from '../components/Modal'
 import { ProposalForm } from '../components/ProposalForm'
 import { PageBanner } from '../components/page/PageBanner'
 import { PageLoadingState } from '../components/page/PageLoadingState'
+import { ProposalDetailModalContent } from '../features/proposals/ProposalDetailModalContent'
 import { ProposalFiltersModalContent } from '../features/proposals/ProposalFiltersModalContent'
 import { ProposalListSection } from '../features/proposals/ProposalListSection'
 import { ProposalResponseNotificationsSection } from '../features/proposals/ProposalResponseNotificationsSection'
 import { ProposalShareModalContent } from '../features/proposals/ProposalShareModalContent'
+import { canEditProposal } from '../features/proposals/proposalRules'
 import { ProposalsFiltersSection } from '../features/proposals/ProposalsFiltersSection'
 import { ProposalsOverviewSection } from '../features/proposals/ProposalsOverviewSection'
 import { useProposalsPage } from '../features/proposals/useProposalsPage'
@@ -20,6 +22,7 @@ export function ProposalsPage() {
     generatedShareLink,
     hasActiveFilters,
     hasLoadError,
+    isDetailModalOpen,
     isFilterModalOpen,
     isGeneratingShareLink,
     isLoading,
@@ -29,6 +32,7 @@ export function ProposalsPage() {
     metrics,
     search,
     selectedProposal,
+    viewProposal,
     shareExpiresInDays,
     shareFeedback,
     shareTargetProposal,
@@ -37,6 +41,7 @@ export function ProposalsPage() {
     visibleClientResponseNotifications,
     applyFilterModal,
     clearFilterModal,
+    closeDetailModal,
     closeModal,
     closeShareModal,
     handleAcceptProposal,
@@ -50,6 +55,7 @@ export function ProposalsPage() {
     handleSendProposal,
     handleShareLinkGeneration,
     openCreateModal,
+    openDetailModal,
     openEditModal,
     openFilterModal,
     openShareModal,
@@ -109,6 +115,7 @@ export function ProposalsPage() {
 
       <ProposalListSection
         proposals={filteredProposals}
+        onView={openDetailModal}
         onEdit={openEditModal}
         onOpenShare={openShareModal}
         onSend={(proposal) => {
@@ -128,6 +135,23 @@ export function ProposalsPage() {
           void handleProposalRemoval(proposal)
         }}
       />
+
+      <Modal
+        title={viewProposal?.title ?? ''}
+        isOpen={isDetailModalOpen}
+        onClose={closeDetailModal}
+      >
+        {viewProposal ? (
+          <ProposalDetailModalContent
+            proposal={viewProposal}
+            canEdit={canEditProposal(viewProposal)}
+            onEdit={() => {
+              closeDetailModal()
+              openEditModal(viewProposal)
+            }}
+          />
+        ) : null}
+      </Modal>
 
       <Modal
         title="Filtrar propostas"

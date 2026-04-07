@@ -39,7 +39,7 @@ export function DashboardPage() {
         />
       ) : null}
 
-      <section className="grid gap-4 xl:grid-cols-12">
+      <section className="grid gap-4 grid-cols-1 xl:grid-cols-12">
         <DashboardFinancialOverview paymentMetrics={paymentMetrics} />
         <DashboardAlertsPanel alerts={paymentAlerts} />
       </section>

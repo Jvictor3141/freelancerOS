@@ -314,6 +314,38 @@ summary:focus-visible {
     radial-gradient(circle at center, rgba(255, 255, 255, 0) 48%, rgba(255, 255, 255, 0.32) 100%);
 }
 
+/* ── Marquee ticker ────────────────────────────────────────────────────────── */
+
+.marquee-track {
+  animation: marquee-scroll 32s linear infinite;
+  will-change: transform;
+}
+
+.marquee-outer:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Hero subtle grid ──────────────────────────────────────────────────────── */
+
+.landing-hero-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 52px 52px;
+}
+
+/* ── Theme overrides ───────────────────────────────────────────────────────── */
+
 .bg-\[\#635bff\] {
   background-color: var(--accent) !important;
 }

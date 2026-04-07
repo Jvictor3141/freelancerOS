@@ -1,4 +1,5 @@
 import { CheckCheck, ListFilter, PencilLine, Trash2 } from 'lucide-react'
+import { SelectField } from '../../components/SelectField'
 import type { PaymentWithProjectAndClient } from '../../types/viewModels'
 import { formatCurrency, formatDate } from '../../utils/formatting'
 import { canMarkPaymentAsPaid } from './paymentRules'
@@ -45,21 +46,21 @@ export function PaymentsListSection({
           </div>
 
           <div className="flex shrink-0 items-center gap-3">
-            <select
+            <SelectField
               value={statusFilter}
-              onChange={(event) =>
-                onStatusFilterChange(parsePaymentStatusFilter(event.target.value))
+              className="w-44 sm:w-52 md:w-56 max-[425px]:hidden"
+              ariaLabel="Filtrar pagamentos por status"
+              onChange={(nextValue) =>
+                onStatusFilterChange(parsePaymentStatusFilter(nextValue))
               }
-              className="w-44 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff] sm:w-52 md:w-56 max-[425px]:hidden"
-            >
-              {paymentStatusFilterOptions.map((status) => (
-                <option key={status} value={status}>
-                  {status === 'all'
+              options={paymentStatusFilterOptions.map((status) => ({
+                value: status,
+                label:
+                  status === 'all'
                     ? 'Todos os status'
-                    : paymentStatusLabel[status]}
-                </option>
-              ))}
-            </select>
+                    : paymentStatusLabel[status],
+              }))}
+            />
 
             <button
               type="button"

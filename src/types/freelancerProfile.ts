@@ -7,6 +7,7 @@ export type FreelancerProfile = {
   city: string;
   website: string;
   whatsapp: string;
+  pixKey: string;
   bio: string;
   proposalSignature: string;
 };

@@ -1,4 +1,11 @@
 import {
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  X,
+  XCircle,
+} from 'lucide-react';
+import {
   createContext,
   useCallback,
   useContext,
@@ -6,6 +13,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ComponentType,
   type ReactNode,
 } from 'react';
 import { Modal } from './Modal';
@@ -69,81 +77,110 @@ type ConfirmationDialogProps = {
   onCancel: () => void;
 };
 
+type ToneConfig = {
+  icon: ComponentType<{ size?: number; className?: string }>;
+  iconBg: string;
+  iconColor: string;
+  progressColor: string;
+};
+
+const toneConfig: Record<ToastTone, ToneConfig> = {
+  success: {
+    icon: CheckCircle2,
+    iconBg: 'bg-emerald-50',
+    iconColor: 'text-emerald-600',
+    progressColor: 'bg-emerald-500',
+  },
+  error: {
+    icon: XCircle,
+    iconBg: 'bg-rose-50',
+    iconColor: 'text-rose-600',
+    progressColor: 'bg-rose-500',
+  },
+  warning: {
+    icon: AlertTriangle,
+    iconBg: 'bg-amber-50',
+    iconColor: 'text-amber-600',
+    progressColor: 'bg-amber-500',
+  },
+  info: {
+    icon: Info,
+    iconBg: 'bg-slate-100',
+    iconColor: 'text-slate-600',
+    progressColor: 'bg-[#635bff]',
+  },
+};
+
 const FeedbackContext = createContext<FeedbackContextValue | null>(null);
 
-function getToastToneClassName(tone: ToastTone) {
-  if (tone === 'success') {
-    return 'border-emerald-200 bg-emerald-50 text-emerald-900';
-  }
-
-  if (tone === 'error') {
-    return 'border-rose-200 bg-rose-50 text-rose-900';
-  }
-
-  if (tone === 'warning') {
-    return 'border-amber-200 bg-amber-50 text-amber-900';
-  }
-
-  return 'border-slate-200 bg-white text-slate-900';
-}
-
-function getToastAccentClassName(tone: ToastTone) {
-  if (tone === 'success') {
-    return 'bg-emerald-500';
-  }
-
-  if (tone === 'error') {
-    return 'bg-rose-500';
-  }
-
-  if (tone === 'warning') {
-    return 'bg-amber-500';
-  }
-
-  return 'bg-[#635bff]';
-}
-
 function ToastCard({ toast, onDismiss }: ToastCardProps) {
+  const [visible, setVisible] = useState(false);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const { icon: Icon, iconBg, iconColor, progressColor } = toneConfig[toast.tone];
+
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      onDismiss(toast.id);
-    }, toast.durationMs);
+    const frameId = requestAnimationFrame(() => setVisible(true));
+    const timeoutId = window.setTimeout(() => onDismiss(toast.id), toast.durationMs);
 
     return () => {
+      cancelAnimationFrame(frameId);
       window.clearTimeout(timeoutId);
     };
   }, [onDismiss, toast.durationMs, toast.id]);
 
+  useEffect(() => {
+    const bar = progressRef.current;
+
+    if (!bar) {
+      return;
+    }
+
+    const animation = bar.animate(
+      [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }],
+      { duration: toast.durationMs, easing: 'linear', fill: 'forwards' },
+    );
+
+    return () => {
+      animation.cancel();
+    };
+  }, [toast.durationMs]);
+
   return (
     <div
       role={toast.tone === 'error' ? 'alert' : 'status'}
-      className={`pointer-events-auto relative overflow-hidden rounded-3xl border shadow-[0_20px_45px_rgba(15,23,42,0.12)] ${getToastToneClassName(toast.tone)}`}
+      className={`pointer-events-auto relative overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-[0_24px_60px_rgba(15,23,42,0.14)] transition-all duration-300 ease-out ${
+        visible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
+      }`}
     >
-      <span
-        aria-hidden="true"
-        className={`absolute inset-y-0 left-0 w-1.5 ${getToastAccentClassName(toast.tone)}`}
-      />
-
-      <div className="pl-5 pr-4 py-4 sm:pl-6">
-        <div className="flex items-start gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold leading-5">{toast.title}</p>
-            {toast.description ? (
-              <p className="mt-1 text-sm leading-5 text-slate-600">
-                {toast.description}
-              </p>
-            ) : null}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => onDismiss(toast.id)}
-            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-current/10 text-sm font-semibold text-slate-500 transition hover:bg-white/60"
-            aria-label="Dispensar notificacao"
-          >
-            x
-          </button>
+      <div className="flex items-start gap-3 px-4 py-4">
+        <div className={`mt-0.5 inline-flex shrink-0 rounded-xl p-2 ${iconBg}`}>
+          <Icon size={14} className={iconColor} />
         </div>
+
+        <div className="min-w-0 flex-1 pt-1">
+          <p className="text-sm font-semibold text-slate-900">{toast.title}</p>
+          {toast.description ? (
+            <p className="mt-0.5 text-sm leading-5 text-slate-500">
+              {toast.description}
+            </p>
+          ) : null}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onDismiss(toast.id)}
+          className="mt-0.5 inline-flex shrink-0 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+          aria-label="Dispensar notificação"
+        >
+          <X size={14} />
+        </button>
+      </div>
+
+      <div className="absolute inset-x-0 bottom-0 h-0.75 bg-slate-100">
+        <div
+          ref={progressRef}
+          className={`h-full origin-left ${progressColor}`}
+        />
       </div>
     </div>
   );

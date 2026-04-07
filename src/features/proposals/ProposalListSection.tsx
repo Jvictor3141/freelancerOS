@@ -35,6 +35,7 @@ import {
 
 type ProposalListSectionProps = {
   proposals: ProposalWithClient[]
+  onView: (proposal: ProposalWithClient) => void
   onEdit: (proposal: ProposalWithClient) => void
   onOpenShare: (proposal: ProposalWithClient) => void
   onSend: (proposal: ProposalWithClient) => void
@@ -77,6 +78,7 @@ function ProposalActionButton({
 
 export function ProposalListSection({
   proposals,
+  onView,
   onEdit,
   onOpenShare,
   onSend,
@@ -106,106 +108,112 @@ export function ProposalListSection({
 
             return (
               <article key={proposal.id} className="space-y-4 px-5 py-5 sm:px-6">
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <div className="flex justify-between gap-2 sm:flex-row sm:items-center">
-                      <p className="text-lg font-semibold text-slate-900">
-                        {proposal.title}
-                      </p>
-                      <span
-                        className={`inline-flex w-fit h-7 rounded-full px-3 py-1 text-xs font-semibold ${proposalStatusClassName[proposal.status]}`}
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => onView(proposal)}
+                          className="text-left text-xl font-bold text-slate-900 hover:underline"
+                        >
+                          {proposal.title}
+                        </button>
+                        <span
+                          className={`inline-flex h-7 w-fit rounded-full px-3 py-1 text-xs font-semibold ${proposalStatusClassName[proposal.status]}`}
+                        >
+                          {proposalStatusLabel[proposal.status]}
+                        </span>
+                      </div>
+
+                      <p
+                        className="mt-2 overflow-hidden text-sm text-slate-500"
+                        title={proposal.description || 'Sem escopo detalhado.'}
+                        style={{
+                          display: '-webkit-box',
+                          WebkitBoxOrient: 'vertical',
+                          WebkitLineClamp: 3,
+                        }}
                       >
-                        {proposalStatusLabel[proposal.status]}
-                      </span>
+                        {proposal.description || 'Sem escopo detalhado.'}
+                      </p>
                     </div>
 
-                    <p
-                      className="mt-2 overflow-hidden text-sm text-slate-500"
-                      title={proposal.description || 'Sem escopo detalhado.'}
-                      style={{
-                        display: '-webkit-box',
-                        WebkitBoxOrient: 'vertical',
-                        WebkitLineClamp: 3,
-                      }}
-                    >
-                      {proposal.description || 'Sem escopo detalhado.'}
+                    <div className="shrink-0 rounded-2xl bg-slate-100 px-4 py-3 text-sm">
+                      <p className="text-slate-500">Valor da proposta</p>
+                      <p className="mt-1 font-semibold text-slate-950">
+                        {formatCurrency(proposal.amount)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2 text-sm text-slate-600 md:grid-cols-2 xl:grid-cols-4">
+                    <p>
+                      <span className="font-medium text-slate-900">Cliente:</span>{' '}
+                      {proposal.clientName}
                     </p>
-                  </div>
-
-                  <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
-                    <p className="text-slate-500">Valor da proposta</p>
-                    <p className="mt-1 font-semibold text-slate-950">
-                      {formatCurrency(proposal.amount)}
+                    <p>
+                      <span className="font-medium text-slate-900">Empresa:</span>{' '}
+                      {proposal.clientCompany || '-'}
                     </p>
+                    <p className="break-all">
+                      <span className="font-medium text-slate-900">E-mail:</span>{' '}
+                      {proposal.recipientEmail}
+                    </p>
+                    <p>
+                      <span className="font-medium text-slate-900">Prazo:</span>{' '}
+                      {proposal.deliveryDays} dia(s)
+                    </p>
+                    <p>
+                      <span className="font-medium text-slate-900">Criada em:</span>{' '}
+                      {formatDate(proposal.createdAt)}
+                    </p>
+                    <p>
+                      <span className="font-medium text-slate-900">Enviada em:</span>{' '}
+                      {formatDate(proposal.sentAt)}
+                    </p>
+                    {proposal.acceptedAt ? (
+                      <p>
+                        <span className="font-medium text-slate-900">Aceita em:</span>{' '}
+                        {formatDate(proposal.acceptedAt)}
+                      </p>
+                    ) : null}
+                    {proposal.rejectedAt ? (
+                      <p>
+                        <span className="font-medium text-slate-900">Recusada em:</span>{' '}
+                        {formatDate(proposal.rejectedAt)}
+                      </p>
+                    ) : null}
                   </div>
-                </div>
 
-                <div className="grid gap-2 text-sm text-slate-600 md:grid-cols-2 xl:grid-cols-4">
-                  <p>
-                    <span className="font-medium text-slate-900">Cliente:</span>{' '}
-                    {proposal.clientName}
-                  </p>
-                  <p>
-                    <span className="font-medium text-slate-900">Empresa:</span>{' '}
-                    {proposal.clientCompany || '-'}
-                  </p>
-                  <p className="break-all">
-                    <span className="font-medium text-slate-900">E-mail:</span>{' '}
-                    {proposal.recipientEmail}
-                  </p>
-                  <p>
-                    <span className="font-medium text-slate-900">Prazo:</span>{' '}
-                    {proposal.deliveryDays} dia(s)
-                  </p>
-                  <p>
-                    <span className="font-medium text-slate-900">Criada em:</span>{' '}
-                    {formatDate(proposal.createdAt)}
-                  </p>
-                  <p>
-                    <span className="font-medium text-slate-900">Enviada em:</span>{' '}
-                    {formatDate(proposal.sentAt)}
-                  </p>
-                  <p>
-                    <span className="font-medium text-slate-900">Aceita em:</span>{' '}
-                    {formatDate(proposal.acceptedAt)}
-                  </p>
-                  <p>
-                    <span className="font-medium text-slate-900">Recusada em:</span>{' '}
-                    {formatDate(proposal.rejectedAt)}
-                  </p>
-                </div>
+                  {proposal.notes ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                      <span className="font-medium text-slate-900">Observações:</span>{' '}
+                      <span
+                        className="overflow-hidden align-top"
+                        title={proposal.notes}
+                        style={{
+                          display: '-webkit-inline-box',
+                          WebkitBoxOrient: 'vertical',
+                          WebkitLineClamp: 2,
+                        }}
+                      >
+                        {proposal.notes}
+                      </span>
+                    </div>
+                  ) : null}
 
-                {proposal.notes ? (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                    <span className="font-medium text-slate-900">
-                      Observações:
-                    </span>{' '}
-                    <span
-                      className="overflow-hidden align-top"
-                      title={proposal.notes}
-                      style={{
-                        display: '-webkit-inline-box',
-                        WebkitBoxOrient: 'vertical',
-                        WebkitLineClamp: 2,
-                      }}
+                  {hasClientResponse ? (
+                    <div
+                      className={`rounded-2xl border px-4 py-3 text-sm ${
+                        isAccepted
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                          : 'border-rose-200 bg-rose-50 text-rose-800'
+                      }`}
                     >
-                      {proposal.notes}
-                    </span>
-                  </div>
-                ) : null}
-
-                {hasClientResponse ? (
-                  <div
-                    className={`rounded-2xl border px-4 py-3 text-sm ${
-                      isAccepted
-                        ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                        : 'border-rose-200 bg-rose-50 text-rose-800'
-                    }`}
-                  >
-                    {isAccepted ? 'Cliente aceitou' : 'Cliente recusou'} essa
-                    proposta em {formatDateTime(proposal.clientRespondedAt)}.
-                  </div>
-                ) : null}
+                      {isAccepted ? 'Cliente aceitou' : 'Cliente recusou'} essa proposta em{' '}
+                      {formatDateTime(proposal.clientRespondedAt)}.
+                    </div>
+                  ) : null}
 
                 <div className="inline-flex max-w-full flex-nowrap items-center gap-2">
                   {canEditProposal(proposal) ? (

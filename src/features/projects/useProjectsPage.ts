@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useFeedback } from '../../components/FeedbackProvider'
-import { getToastToneForMessage } from '../../lib/feedback'
-import { getErrorMessage } from '../../lib/supabase'
+import { useFilterModal } from '../../lib/useFilterModal'
+import { useAlert } from '../../lib/useAlert'
+import { useRemovalHandler } from '../../lib/useRemovalHandler'
+import { useSubmitHandler } from '../../lib/useSubmitHandler'
 import { useClientStore } from '../../stores/useClientStore'
 import { useProjectStore } from '../../stores/useProjectStore'
 import { useProposalStore } from '../../stores/useProposalStore'
@@ -10,7 +11,6 @@ import {
   hasResourceLoadError,
   isResourcePending,
 } from '../../stores/resourceLoadState'
-import type { ProjectInput } from '../../types/inputs'
 import type { ProjectWithClient } from '../../types/viewModels'
 import type { ProjectStatusFilter } from '../../utils/projectStatus'
 import {
@@ -52,22 +52,28 @@ export function useProjectsPage() {
   const retryProposalsLoad = useProposalStore((state) => state.retryLoad)
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<ProjectStatusFilter>('all')
-  const [clientFilter, setClientFilter] = useState('all')
-  const [statusFilterDraft, setStatusFilterDraft] =
-    useState<ProjectStatusFilter>('all')
-  const [clientFilterDraft, setClientFilterDraft] = useState('all')
-  const { confirm, notify } = useFeedback()
-
-  function alert(message: string) {
-    notify({
-      tone: getToastToneForMessage(message),
-      title: message,
-    })
-  }
+  const filtersModal = useFilterModal<{ status: ProjectStatusFilter; clientId: string }>({
+    status: 'all',
+    clientId: 'all',
+  })
+  const { alert } = useAlert()
+  const handleProjectRemoval = useRemovalHandler<ProjectWithClient>({
+    confirmLabel: 'Excluir projeto',
+    description: (project) => `Deseja excluir o projeto "${project.name}"?`,
+    remove: removeProject,
+    successMessage: 'Projeto excluido com sucesso.',
+    errorMessage: 'Não foi possível excluir o projeto.',
+  })
+  const { isSubmitting, handleSubmit: handleProjectSubmit } = useSubmitHandler({
+    selected: selectedProject,
+    add: addProject,
+    edit: editProject,
+    onSuccess: closeModal,
+    createdMessage: 'Projeto criado com sucesso.',
+    updatedMessage: 'Projeto atualizado com sucesso.',
+    errorMessage: 'Não foi possível salvar o projeto.',
+  })
 
   useEffect(() => {
     void Promise.all([
@@ -96,8 +102,8 @@ export function useProjectsPage() {
   const commercialSummary = getProjectsCommercialSummary(proposals)
   const filteredProjects = getFilteredProjects(projectsWithClient, {
     search,
-    status: statusFilter,
-    clientId: clientFilter,
+    status: filtersModal.value.status,
+    clientId: filtersModal.value.clientId,
   })
 
   function openCreateModal() {
@@ -130,90 +136,39 @@ export function useProjectsPage() {
 
   function resetAllFilters() {
     setSearch('')
-    setStatusFilter('all')
-    setClientFilter('all')
-    setStatusFilterDraft('all')
-    setClientFilterDraft('all')
+    filtersModal.clear()
   }
 
-  function openFilterModal() {
-    setStatusFilterDraft(statusFilter)
-    setClientFilterDraft(clientFilter)
-    setIsFilterModalOpen(true)
+  function setStatusFilter(status: ProjectStatusFilter) {
+    filtersModal.setValue((prev) => ({ ...prev, status }))
   }
 
-  function applyFilterModal() {
-    setStatusFilter(statusFilterDraft)
-    setClientFilter(clientFilterDraft)
-    setIsFilterModalOpen(false)
+  function setClientFilter(clientId: string) {
+    filtersModal.setValue((prev) => ({ ...prev, clientId }))
   }
 
-  function clearFilterModal() {
-    setStatusFilterDraft('all')
-    setClientFilterDraft('all')
-    setStatusFilter('all')
-    setClientFilter('all')
+  function setStatusFilterDraft(status: ProjectStatusFilter) {
+    filtersModal.setDraft((prev) => ({ ...prev, status }))
   }
 
-  async function handleProjectSubmit(values: ProjectInput) {
-    const isEditing = Boolean(selectedProject)
-    setIsSubmitting(true)
-
-    try {
-      if (selectedProject) {
-        await editProject(selectedProject.id, values)
-      } else {
-        await addProject(values)
-      }
-
-      closeModal()
-      alert(
-        isEditing
-          ? 'Projeto atualizado com sucesso.'
-          : 'Projeto criado com sucesso.',
-      )
-    } catch (submitError) {
-      alert(getErrorMessage(submitError, 'Não foi possível salvar o projeto.'))
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  async function handleProjectRemoval(project: ProjectWithClient) {
-    const confirmed = await confirm({
-      title: 'Excluir projeto?',
-      description: `Deseja excluir o projeto "${project.name}"?`,
-      confirmLabel: 'Excluir projeto',
-      cancelLabel: 'Cancelar',
-      tone: 'danger',
-    })
-
-    if (!confirmed) {
-      return
-    }
-
-    try {
-      await removeProject(project.id)
-      alert('Projeto excluido com sucesso.')
-    } catch (removeError) {
-      alert(getErrorMessage(removeError, 'Não foi possível excluir o projeto.'))
-    }
+  function setClientFilterDraft(clientId: string) {
+    filtersModal.setDraft((prev) => ({ ...prev, clientId }))
   }
 
   return {
-    clientFilter,
-    clientFilterDraft,
+    clientFilter: filtersModal.value.clientId,
+    clientFilterDraft: filtersModal.draft.clientId,
     clients,
     combinedError: clientError ?? projectError,
     commercialSummary,
     filteredProjects,
     hasActiveSelectionFilters:
-      statusFilter !== 'all' || clientFilter !== 'all',
+      filtersModal.value.status !== 'all' || filtersModal.value.clientId !== 'all',
     hasCommercialSummaryLoadError: hasResourceLoadError(proposalsLoadStatus),
     hasLoadError:
       hasResourceLoadError(clientsLoadStatus) ||
       hasResourceLoadError(projectsLoadStatus),
-    isFilterModalOpen,
+    isFilterModalOpen: filtersModal.isOpen,
     isLoading:
       isResourcePending(clientsLoadStatus) ||
       isResourcePending(projectsLoadStatus),
@@ -224,10 +179,10 @@ export function useProjectsPage() {
     selectedProject,
     showCommercialSummary:
       proposalsLoadStatus === 'ready' && commercialSummary.openCount > 0,
-    statusFilter,
-    statusFilterDraft,
-    applyFilterModal,
-    clearFilterModal,
+    statusFilter: filtersModal.value.status,
+    statusFilterDraft: filtersModal.draft.status,
+    applyFilterModal: filtersModal.apply,
+    clearFilterModal: filtersModal.clear,
     closeModal,
     handleProjectRemoval,
     handleProjectSubmit,
@@ -235,11 +190,11 @@ export function useProjectsPage() {
     handleRetryLoad,
     openCreateModal,
     openEditModal,
-    openFilterModal,
+    openFilterModal: filtersModal.open,
     resetAllFilters,
     setClientFilter,
     setClientFilterDraft,
-    setIsFilterModalOpen,
+    setIsFilterModalOpen: filtersModal.setIsOpen,
     setSearch,
     setStatusFilter,
     setStatusFilterDraft,

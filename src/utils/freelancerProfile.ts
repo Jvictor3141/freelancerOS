@@ -9,6 +9,7 @@ export const emptyFreelancerProfile: FreelancerProfile = {
   city: '',
   website: '',
   whatsapp: '',
+  pixKey: '',
   bio: '',
   proposalSignature: '',
 };
@@ -40,6 +41,7 @@ export function getFreelancerProfileFromMetadata(
     city: getString(profileRecord?.city),
     website: getString(profileRecord?.website),
     whatsapp: getString(profileRecord?.whatsapp),
+    pixKey: getString(profileRecord?.pixKey),
     bio: getString(profileRecord?.bio),
     proposalSignature: getString(profileRecord?.proposalSignature),
   };
@@ -60,6 +62,7 @@ export function sanitizeFreelancerProfile(
     city: profile.city.trim(),
     website: profile.website.trim(),
     whatsapp: profile.whatsapp.trim(),
+    pixKey: profile.pixKey.trim(),
     bio: profile.bio.trim(),
     proposalSignature: profile.proposalSignature.trim(),
   };
@@ -116,6 +119,10 @@ export function buildFreelancerSignatureLines(profile: FreelancerProfile) {
 
   if (profile.whatsapp) {
     lines.push(`WhatsApp: ${profile.whatsapp}`);
+  }
+
+  if (profile.pixKey) {
+    lines.push(`PIX: ${profile.pixKey}`);
   }
 
   return lines;

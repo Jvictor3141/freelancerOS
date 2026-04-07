@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useFeedback } from '../../components/FeedbackProvider'
-import { getToastToneForMessage } from '../../lib/feedback'
+import { useFilterModal } from '../../lib/useFilterModal'
 import { getErrorMessage } from '../../lib/supabase'
+import { useAlert } from '../../lib/useAlert'
+import { useRemovalHandler } from '../../lib/useRemovalHandler'
+import { useSubmitHandler } from '../../lib/useSubmitHandler'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useClientStore } from '../../stores/useClientStore'
 import { useProposalStore } from '../../stores/useProposalStore'
@@ -9,7 +12,6 @@ import {
   hasResourceLoadError,
   isResourcePending,
 } from '../../stores/resourceLoadState'
-import type { ProposalInput } from '../../types/inputs'
 import type { ProposalSecureShareLink } from '../../types/sharedProposal'
 import type { ProposalWithClient } from '../../types/viewModels'
 import { getFreelancerProfileFromUser } from '../../utils/freelancerProfile'
@@ -66,8 +68,8 @@ export function useProposalsPage() {
   )
 
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [viewProposal, setViewProposal] = useState<ProposalWithClient | null>(null)
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isGeneratingShareLink, setIsGeneratingShareLink] = useState(false)
   const [shareTargetProposal, setShareTargetProposal] =
@@ -77,21 +79,36 @@ export function useProposalsPage() {
     useState<ProposalSecureShareLink | null>(null)
   const [shareFeedback, setShareFeedback] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<ProposalStatusFilter>('all')
-  const [statusFilterDraft, setStatusFilterDraft] =
-    useState<ProposalStatusFilter>('all')
+  const statusFilterModal = useFilterModal<ProposalStatusFilter>('all')
   const [
     dismissedClientResponseNotificationIds,
     setDismissedClientResponseNotificationIds,
   ] = useState<string[]>([])
-  const { confirm, notify } = useFeedback()
+  const { confirm } = useFeedback()
+  const { alert } = useAlert()
+  const handleProposalRemoval = useRemovalHandler<ProposalWithClient>({
+    confirmLabel: 'Excluir proposta',
+    description: (proposal) => `Deseja excluir a proposta "${proposal.title}"?`,
+    remove: removeProposal,
+    successMessage: 'Proposta excluida com sucesso.',
+    errorMessage: 'Não foi possível excluir a proposta.',
+  })
+  const { isSubmitting, handleSubmit: handleProposalSubmit } = useSubmitHandler({
+    selected: selectedProposal,
+    add: addProposal,
+    edit: editProposal,
+    onSuccess: closeModal,
+    createdMessage: 'Proposta criada com sucesso.',
+    updatedMessage: 'Proposta atualizada com sucesso.',
+    errorMessage: 'Não foi possível salvar a proposta.',
+  })
 
   const freelancerProfile = getFreelancerProfileFromUser(user)
   const proposalsWithClient = getProposalsWithClient(proposals, clients)
   const filteredProposals = getFilteredProposals(
     proposalsWithClient,
     search,
-    statusFilter,
+    statusFilterModal.value,
   )
   const clientResponseNotifications = getClientResponseNotifications(
     proposalsWithClient,
@@ -101,13 +118,6 @@ export function useProposalsPage() {
       clientResponseNotifications,
       dismissedClientResponseNotificationIds,
     )
-
-  function alert(message: string) {
-    notify({
-      tone: getToastToneForMessage(message),
-      title: message,
-    })
-  }
 
   useEffect(() => {
     void Promise.all([ensureClientsLoaded(), ensureProposalsLoaded()])
@@ -139,6 +149,16 @@ export function useProposalsPage() {
     setIsModalOpen(false)
   }
 
+  function openDetailModal(proposal: ProposalWithClient) {
+    setViewProposal(proposal)
+    setIsDetailModalOpen(true)
+  }
+
+  function closeDetailModal() {
+    setViewProposal(null)
+    setIsDetailModalOpen(false)
+  }
+
   function openShareModal(proposal: ProposalWithClient) {
     setShareTargetProposal(proposal)
     setShareExpiresInDays(7)
@@ -161,23 +181,7 @@ export function useProposalsPage() {
 
   function resetAllFilters() {
     setSearch('')
-    setStatusFilter('all')
-    setStatusFilterDraft('all')
-  }
-
-  function openFilterModal() {
-    setStatusFilterDraft(statusFilter)
-    setIsFilterModalOpen(true)
-  }
-
-  function applyFilterModal() {
-    setStatusFilter(statusFilterDraft)
-    setIsFilterModalOpen(false)
-  }
-
-  function clearFilterModal() {
-    setStatusFilterDraft('all')
-    setStatusFilter('all')
+    statusFilterModal.clear()
   }
 
   function resetGeneratedShareLink() {
@@ -197,51 +201,6 @@ export function useProposalsPage() {
       writeDismissedClientResponseNotificationIds(user?.id ?? null, nextNotificationIds)
       return nextNotificationIds
     })
-  }
-
-  async function handleProposalSubmit(values: ProposalInput) {
-    const isEditing = Boolean(selectedProposal)
-    setIsSubmitting(true)
-
-    try {
-      if (selectedProposal) {
-        await editProposal(selectedProposal.id, values)
-      } else {
-        await addProposal(values)
-      }
-
-      closeModal()
-      alert(
-        isEditing
-          ? 'Proposta atualizada com sucesso.'
-          : 'Proposta criada com sucesso.',
-      )
-    } catch (submitError) {
-      alert(getErrorMessage(submitError, 'Não foi possível salvar a proposta.'))
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  async function handleProposalRemoval(proposal: ProposalWithClient) {
-    const confirmed = await confirm({
-      title: 'Excluir proposta?',
-      description: `Deseja excluir a proposta "${proposal.title}"?`,
-      confirmLabel: 'Excluir proposta',
-      cancelLabel: 'Cancelar',
-      tone: 'danger',
-    })
-
-    if (!confirmed) {
-      return
-    }
-
-    try {
-      await removeProposal(proposal.id)
-      alert('Proposta excluida com sucesso.')
-    } catch (removeError) {
-      alert(getErrorMessage(removeError, 'Não foi possível excluir a proposta.'))
-    }
   }
 
   async function handleShareLinkGeneration() {
@@ -377,11 +336,12 @@ export function useProposalsPage() {
     combinedError: proposalError ?? clientError,
     filteredProposals,
     generatedShareLink,
-    hasActiveFilters: search.trim() !== '' || statusFilter !== 'all',
+    hasActiveFilters: search.trim() !== '' || statusFilterModal.value !== 'all',
     hasLoadError:
       hasResourceLoadError(clientsLoadStatus) ||
       hasResourceLoadError(proposalsLoadStatus),
-    isFilterModalOpen,
+    isDetailModalOpen,
+    isFilterModalOpen: statusFilterModal.isOpen,
     isGeneratingShareLink,
     isLoading:
       isResourcePending(clientsLoadStatus) ||
@@ -392,14 +352,16 @@ export function useProposalsPage() {
     metrics: getProposalMetrics(proposals),
     search,
     selectedProposal,
+    viewProposal,
     shareExpiresInDays,
     shareFeedback,
     shareTargetProposal,
-    statusFilter,
-    statusFilterDraft,
+    statusFilter: statusFilterModal.value,
+    statusFilterDraft: statusFilterModal.draft,
     visibleClientResponseNotifications,
-    applyFilterModal,
-    clearFilterModal,
+    applyFilterModal: statusFilterModal.apply,
+    clearFilterModal: statusFilterModal.clear,
+    closeDetailModal,
     closeModal,
     closeShareModal,
     handleAcceptProposal,
@@ -413,15 +375,16 @@ export function useProposalsPage() {
     handleSendProposal,
     handleShareLinkGeneration,
     openCreateModal,
+    openDetailModal,
     openEditModal,
-    openFilterModal,
+    openFilterModal: statusFilterModal.open,
     openShareModal,
     resetAllFilters,
     resetGeneratedShareLink,
-    setIsFilterModalOpen,
+    setIsFilterModalOpen: statusFilterModal.setIsOpen,
     setSearch,
     setShareExpiresInDays,
-    setStatusFilter,
-    setStatusFilterDraft,
+    setStatusFilter: statusFilterModal.setValue,
+    setStatusFilterDraft: statusFilterModal.setDraft,
   }
 }

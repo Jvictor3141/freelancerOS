@@ -63,7 +63,7 @@ export function ProposalsOverviewSection({
                   </div>
                   <p className="text-sm text-indigo-100">{card.label}:</p>
                 </div>
-                <p className="flex items-end justify-end mt-2 text-2xl font-semibold">{card.value}</p>
+                <p className="flex items-end justify-end mt-2 text-lg font-semibold">{card.value}</p>
               </div>
             )
           })}
@@ -79,7 +79,7 @@ export function ProposalsOverviewSection({
         <button
           type="button"
           onClick={onCreate}
-          className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
           Nova proposta
           <Plus size={16} />
@@ -87,7 +87,7 @@ export function ProposalsOverviewSection({
 
         <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
           <p className="text-sm font-semibold text-slate-900">Fluxo</p>
-          <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-600">
+          <ul className="mt-3 text-sm leading-6 text-slate-600">
             <li>1. Crie o rascunho com escopo, valor e prazo.</li>
             <li>2. Envie por email para o contato do cliente.</li>
             <li>3. Ao aceitar, gere o projeto automaticamente.</li>

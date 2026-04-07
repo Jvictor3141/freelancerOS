@@ -24,6 +24,18 @@ function formatCurrency(value: number) {
   })
 }
 
+const CLIENT_PROJECTS_VISIBLE_COUNT = 2
+const CLIENT_PAYMENTS_VISIBLE_COUNT = 3
+const CLIENT_DETAILS_LIST_GAP = 12
+const CLIENT_PROJECT_CARD_MIN_HEIGHT = 144
+const CLIENT_PAYMENT_CARD_MIN_HEIGHT = 92
+const CLIENT_DETAILS_LIST_MAX_HEIGHT = Math.max(
+  CLIENT_PROJECTS_VISIBLE_COUNT * CLIENT_PROJECT_CARD_MIN_HEIGHT +
+    (CLIENT_PROJECTS_VISIBLE_COUNT - 1) * CLIENT_DETAILS_LIST_GAP,
+  CLIENT_PAYMENTS_VISIBLE_COUNT * CLIENT_PAYMENT_CARD_MIN_HEIGHT +
+    (CLIENT_PAYMENTS_VISIBLE_COUNT - 1) * CLIENT_DETAILS_LIST_GAP,
+)
+
 export function ClientDetailsPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -201,7 +213,7 @@ export function ClientDetailsPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-2">
-        <div className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
+        <div className="flex h-full flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
           <div className="border-b border-slate-200 px-6 py-5">
             <p className="text-sm font-medium text-slate-500">Projetos</p>
             <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
@@ -209,44 +221,53 @@ export function ClientDetailsPage() {
             </h2>
           </div>
 
-          <div className="divide-y divide-slate-100">
-            {clientProjects.length > 0 ? (
-              clientProjects.map((project) => (
-                <div key={project.id} className="px-6 py-4">
-                  <div className="flex flex-col-2 justify-between gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="font-semibold text-slate-900">
-                        {project.name}
-                      </p>
-                      <p className="mt-1 text-sm text-slate-500">
-                        {project.description || 'Sem descricao'}
-                      </p>
+          <div className="p-4">
+            <div
+              className="space-y-3 overflow-y-auto pr-1"
+              style={{ maxHeight: `${CLIENT_DETAILS_LIST_MAX_HEIGHT}px` }}
+              aria-label="Lista de projetos do cliente"
+            >
+              {clientProjects.length > 0 ? (
+                clientProjects.map((project) => (
+                  <div
+                    key={project.id}
+                    className="min-h-[144px] rounded-2xl border border-slate-200 bg-slate-50/70 px-5 py-4"
+                  >
+                    <div className="flex justify-between gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-900">
+                          {project.name}
+                        </p>
+                        <p className="mt-1 line-clamp-2 text-sm text-slate-500">
+                          {project.description || 'Sem descricao'}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`inline-flex h-6.5 shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${projectStatusClassName[project.status]}`}
+                      >
+                        {projectStatusLabel[project.status]}
+                      </span>
                     </div>
 
-                    <span
-                      className={`inline-flex h-6.5 rounded-full px-3 py-1 text-xs font-semibold ${projectStatusClassName[project.status]}`}
-                    >
-                      {projectStatusLabel[project.status]}
-                    </span>
+                    <div className="mt-3 flex flex-col gap-2 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+                      <span>Prazo: {formatDate(project.deadline)}</span>
+                      <span className="font-semibold text-slate-900">
+                        {formatCurrency(project.value)}
+                      </span>
+                    </div>
                   </div>
-
-                  <div className="mt-3 flex flex-col gap-2 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-                    <span>Prazo: {formatDate(project.deadline)}</span>
-                    <span className="font-semibold text-slate-900">
-                      {formatCurrency(project.value)}
-                    </span>
-                  </div>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+                  Nenhum projeto encontrado para este cliente.
                 </div>
-              ))
-            ) : (
-              <div className="px-6 py-8 text-sm text-slate-500">
-                Nenhum projeto encontrado para este cliente.
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
+        <div className="flex h-full flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
           <div className="border-b border-slate-200 px-6 py-5">
             <p className="text-sm font-medium text-slate-500">Pagamentos</p>
             <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
@@ -254,33 +275,42 @@ export function ClientDetailsPage() {
             </h2>
           </div>
 
-          <div className="divide-y divide-slate-100">
-            {clientPayments.length > 0 ? (
-              clientPayments.map((payment) => (
-                <div key={payment.id} className="px-6 py-4">
-                  <div className="flex flex-col-2 justify-between gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="font-semibold text-slate-900">
-                        {formatCurrency(payment.amount)}
-                      </p>
-                      <p className="mt-1 text-sm text-slate-500">
-                        Vencimento: {formatDate(payment.dueDate)}
-                      </p>
-                    </div>
+          <div className="p-4">
+            <div
+              className="space-y-3 overflow-y-auto pr-1"
+              style={{ maxHeight: `${CLIENT_DETAILS_LIST_MAX_HEIGHT}px` }}
+              aria-label="Lista de pagamentos do cliente"
+            >
+              {clientPayments.length > 0 ? (
+                clientPayments.map((payment) => (
+                  <div
+                    key={payment.id}
+                    className="min-h-[92px] rounded-2xl border border-slate-200 bg-slate-50/70 px-5 py-4"
+                  >
+                    <div className="flex justify-between gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-slate-900">
+                          {formatCurrency(payment.amount)}
+                        </p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          Vencimento: {formatDate(payment.dueDate)}
+                        </p>
+                      </div>
 
-                    <span
-                      className={`inline-flex h-6.5 rounded-full px-3 py-1 text-xs font-semibold ${paymentStatusClassName[payment.status]}`}
-                    >
-                      {paymentStatusLabel[payment.status]}
-                    </span>
+                      <span
+                        className={`inline-flex h-6.5 shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${paymentStatusClassName[payment.status]}`}
+                      >
+                        {paymentStatusLabel[payment.status]}
+                      </span>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
+                  Nenhum pagamento encontrado para este cliente.
                 </div>
-              ))
-            ) : (
-              <div className="px-6 py-8 text-sm text-slate-500">
-                Nenhum pagamento encontrado para este cliente.
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </section>

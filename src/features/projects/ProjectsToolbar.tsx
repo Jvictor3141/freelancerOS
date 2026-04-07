@@ -1,4 +1,5 @@
 import { ListFilter } from 'lucide-react'
+import { SelectField } from '../../components/SelectField'
 import type { Client } from '../../types/client'
 import {
   type ProjectStatusFilter,
@@ -64,34 +65,33 @@ export function ProjectsToolbar({
         </div>
 
         <div className="hidden xl:grid xl:min-w-0 xl:flex-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_56px] xl:gap-4">
-          <select
+          <SelectField
             value={statusFilter}
-            onChange={(event) =>
-              onStatusFilterChange(parseProjectStatusFilter(event.target.value))
+            ariaLabel="Filtrar projetos por status"
+            onChange={(nextValue) =>
+              onStatusFilterChange(parseProjectStatusFilter(nextValue))
             }
-            className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
-          >
-            {projectStatusFilterOptions.map((status) => (
-              <option key={status} value={status}>
-                {status === 'all'
+            options={projectStatusFilterOptions.map((status) => ({
+              value: status,
+              label:
+                status === 'all'
                   ? 'Todos os status'
-                  : projectStatusLabel[status]}
-              </option>
-            ))}
-          </select>
+                  : projectStatusLabel[status],
+            }))}
+          />
 
-          <select
+          <SelectField
             value={clientFilter}
-            onChange={(event) => onClientFilterChange(event.target.value)}
-            className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
-          >
-            <option value="all">Todos os clientes</option>
-            {clients.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.name}
-              </option>
-            ))}
-          </select>
+            ariaLabel="Filtrar projetos por cliente"
+            onChange={onClientFilterChange}
+            options={[
+              { value: 'all', label: 'Todos os clientes' },
+              ...clients.map((client) => ({
+                value: client.id,
+                label: client.name,
+              })),
+            ]}
+          />
 
           <button
             type="button"
