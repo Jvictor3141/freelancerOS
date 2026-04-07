@@ -11,7 +11,6 @@ import {
   hasResourceLoadError,
   isResourcePending,
 } from '../../stores/resourceLoadState'
-import type { ProjectInput } from '../../types/inputs'
 import type { ProjectWithClient } from '../../types/viewModels'
 import type { ProjectStatusFilter } from '../../utils/projectStatus'
 import {
@@ -66,7 +65,7 @@ export function useProjectsPage() {
     successMessage: 'Projeto excluido com sucesso.',
     errorMessage: 'Não foi possível excluir o projeto.',
   })
-  const { isSubmitting, handleSubmit: handleProjectSubmit } = useSubmitHandler<ProjectInput, ProjectWithClient>({
+  const { isSubmitting, handleSubmit: handleProjectSubmit } = useSubmitHandler({
     selected: selectedProject,
     add: addProject,
     edit: editProject,

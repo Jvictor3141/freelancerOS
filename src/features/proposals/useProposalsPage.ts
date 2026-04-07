@@ -12,7 +12,6 @@ import {
   hasResourceLoadError,
   isResourcePending,
 } from '../../stores/resourceLoadState'
-import type { ProposalInput } from '../../types/inputs'
 import type { ProposalSecureShareLink } from '../../types/sharedProposal'
 import type { ProposalWithClient } from '../../types/viewModels'
 import { getFreelancerProfileFromUser } from '../../utils/freelancerProfile'
@@ -92,7 +91,7 @@ export function useProposalsPage() {
     successMessage: 'Proposta excluida com sucesso.',
     errorMessage: 'Não foi possível excluir a proposta.',
   })
-  const { isSubmitting, handleSubmit: handleProposalSubmit } = useSubmitHandler<ProposalInput, ProposalWithClient>({
+  const { isSubmitting, handleSubmit: handleProposalSubmit } = useSubmitHandler({
     selected: selectedProposal,
     add: addProposal,
     edit: editProposal,

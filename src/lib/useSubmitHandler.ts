@@ -4,8 +4,8 @@ import { useAlert } from './useAlert'
 
 type SubmitConfig<TInput, TSelected extends { id: string }> = {
   selected: TSelected | null
-  add: (values: TInput) => Promise<void>
-  edit: (id: string, values: TInput) => Promise<void>
+  add: (values: TInput) => Promise<unknown>
+  edit: (id: string, values: TInput) => Promise<unknown>
   onSuccess: () => void
   createdMessage: string
   updatedMessage: string

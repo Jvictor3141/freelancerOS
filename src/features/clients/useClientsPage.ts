@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useAlert } from '../../lib/useAlert'
 import { useRemovalHandler } from '../../lib/useRemovalHandler'
 import { useSubmitHandler } from '../../lib/useSubmitHandler'
 import { useClientStore } from '../../stores/useClientStore'
@@ -8,7 +7,6 @@ import {
   isResourcePending,
 } from '../../stores/resourceLoadState'
 import type { Client } from '../../types/client'
-import type { ClientInput } from '../../types/inputs'
 import { getFilteredClients } from '../../utils/clientsPage'
 
 export function useClientsPage() {
@@ -27,7 +25,6 @@ export function useClientsPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [search, setSearch] = useState('')
-  const { alert } = useAlert()
   const handleClientRemoval = useRemovalHandler<Client>({
     confirmLabel: 'Excluir cliente',
     description: (client) => `Deseja excluir o cliente "${client.name}"?`,
@@ -35,7 +32,7 @@ export function useClientsPage() {
     successMessage: 'Cliente excluido com sucesso.',
     errorMessage: 'Não foi possível excluir o cliente.',
   })
-  const { isSubmitting, handleSubmit: handleClientSubmit } = useSubmitHandler<ClientInput, Client>({
+  const { isSubmitting, handleSubmit: handleClientSubmit } = useSubmitHandler({
     selected: selectedClient,
     add: addClient,
     edit: editClient,

@@ -11,7 +11,6 @@ import {
   hasResourceLoadError,
   isResourcePending,
 } from '../../stores/resourceLoadState'
-import type { PaymentInput } from '../../types/inputs'
 import type { PaymentWithProjectAndClient } from '../../types/viewModels'
 import {
   getFilteredPayments,
@@ -60,7 +59,7 @@ export function usePaymentsPage() {
     successMessage: 'Pagamento excluido com sucesso.',
     errorMessage: 'Não foi possível excluir o pagamento.',
   })
-  const { isSubmitting, handleSubmit: handlePaymentSubmit } = useSubmitHandler<PaymentInput, PaymentWithProjectAndClient>({
+  const { isSubmitting, handleSubmit: handlePaymentSubmit } = useSubmitHandler({
     selected: selectedPayment,
     add: addPayment,
     edit: editPayment,
