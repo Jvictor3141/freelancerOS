@@ -1,3 +1,4 @@
+import { SelectField } from '../../components/SelectField'
 import {
   type ProposalStatusFilter,
   parseProposalStatusFilter,
@@ -24,21 +25,19 @@ export function ProposalFiltersModalContent({
         <span className="mb-2 block text-sm font-medium text-slate-700">
           Status
         </span>
-        <select
+        <SelectField
           value={statusFilterDraft}
-          onChange={(event) =>
-            onStatusChange(parseProposalStatusFilter(event.target.value))
+          onChange={(nextValue) =>
+            onStatusChange(parseProposalStatusFilter(nextValue))
           }
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
-        >
-          {proposalStatusOptions.map((status) => (
-            <option key={status} value={status}>
-              {status === 'all'
+          options={proposalStatusOptions.map((status) => ({
+            value: status,
+            label:
+              status === 'all'
                 ? 'Todos os status'
-                : proposalStatusLabel[status]}
-            </option>
-          ))}
-        </select>
+                : proposalStatusLabel[status],
+          }))}
+        />
       </label>
 
       <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">

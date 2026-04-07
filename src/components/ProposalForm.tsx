@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useFeedback } from './FeedbackProvider';
+import { SelectField } from './SelectField';
 import type { ProposalInput } from '../types/inputs';
 import type { Client } from '../types/client';
 import type { Proposal } from '../types/proposal';
@@ -73,23 +74,8 @@ export function ProposalForm({
     });
   }, [initialValues, clients]);
 
-  function handleChange(
-    event: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
-  ) {
+  function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = event.target;
-
-    if (name === 'clientId') {
-      const selectedClient = clients.find((client) => client.id === value);
-
-      setValues((previousValues) => ({
-        ...previousValues,
-        clientId: value,
-        recipientEmail: selectedClient?.email ?? previousValues.recipientEmail,
-      }));
-      return;
-    }
 
     if (name === 'title') {
       setField('title', value);
@@ -198,20 +184,25 @@ export function ProposalForm({
         <span className="mb-2 block text-sm font-medium text-slate-700">
           Cliente
         </span>
-        <select
+        <SelectField
           name="clientId"
           value={values.clientId}
-          onChange={handleChange}
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-        >
-          <option value="">Selecione um cliente</option>
-          {clients.map((client) => (
-            <option key={client.id} value={client.id}>
-              {client.name}
-              {client.company ? ` - ${client.company}` : ''}
-            </option>
-          ))}
-        </select>
+          onChange={(nextValue) => {
+            const selectedClient = clients.find((client) => client.id === nextValue)
+            setValues((prev) => ({
+              ...prev,
+              clientId: nextValue,
+              recipientEmail: selectedClient?.email ?? prev.recipientEmail,
+            }))
+          }}
+          options={[
+            { value: '', label: 'Selecione um cliente' },
+            ...clients.map((client) => ({
+              value: client.id,
+              label: `${client.name}${client.company ? ` - ${client.company}` : ''}`,
+            })),
+          ]}
+        />
       </label>
 
       <label>

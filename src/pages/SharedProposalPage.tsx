@@ -201,7 +201,7 @@ export function SharedProposalPage() {
         ) : proposal ? (
           <>
             <section className="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
-              <article className="overflow-hidden rounded-[34px] bg-[#635bff] p-6 text-white shadow-[0_28px_70px_rgba(99,91,255,0.28)] sm:p-8">
+              <article className="overflow-hidden rounded-[34px] bg-[#635bff] p-5 text-white shadow-[0_28px_70px_rgba(99,91,255,0.28)] sm:p-8">
                 <p className="text-sm font-medium text-indigo-100/90">
                   Proposta comercial
                 </p>
@@ -213,32 +213,32 @@ export function SharedProposalPage() {
                     'Você recebeu uma proposta comercial compartilhada com acesso protegido por link seguro.'}
                 </p>
 
-                <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                  <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
+                <div className="mt-5 grid gap-2 grid-cols-3">
+                  <div className="rounded-3xl bg-white/12 p-3 backdrop-blur-sm">
                     <div className='flex items-center'>
                       <div className="mr-0.5 md:mr-2 inline-flex rounded-2xl bg-white/12 p-2">
                         <FileText size={15} />
                       </div>
                       <p className="text-sm max-[374px]:hidden text-indigo-100">Valor</p>
                     </div>
-                    <p className="mt-2 text-2xl font-semibold">
+                    <p className="mt-2 text-1xl font-semibold">
                       {formatCurrency(proposal.amount)}
                     </p>
                   </div>
 
-                  <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
+                  <div className="rounded-3xl bg-white/12 p-3 backdrop-blur-sm">
                     <div className='flex items-center'>
                       <div className="mr-0.5 md:mr-2 inline-flex rounded-2xl bg-white/12 p-2">
                         <Clock3 size={15} />
                       </div>
                       <p className="text-sm max-[374px]:hidden text-indigo-100">Prazo</p>
                     </div>
-                    <p className="mt-2 text-2xl font-semibold">
+                    <p className="mt-2 text-1xl font-semibold">
                       {proposal.deliveryDays} dia(s)
                     </p>
                   </div>
 
-                  <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
+                  <div className="rounded-3xl bg-white/12 p-3 backdrop-blur-sm">
                     <div className='flex items-center'>
                       <div className="mr-0.5 md:mr-2 inline-flex rounded-2xl bg-white/12 p-2">
                         {isAccepted ? (
@@ -251,7 +251,7 @@ export function SharedProposalPage() {
                       </div>
                       <p className="text-sm max-[374px]:hidden text-indigo-100">Status</p>
                     </div>
-                    <p className="mt-2 text-lg font-semibold">
+                    <p className="mt-2 text-xs font-semibold">
                       {isAccepted
                         ? 'Aceita'
                         : isRejected

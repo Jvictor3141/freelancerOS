@@ -1,4 +1,5 @@
 import { Copy, ExternalLink } from 'lucide-react'
+import { SelectField } from '../../components/SelectField'
 import type { ProposalSecureShareLink } from '../../types/sharedProposal'
 import type { ProposalWithClient } from '../../types/viewModels'
 import { formatDateTime } from '../../utils/formatting'
@@ -47,18 +48,12 @@ export function ProposalShareModalContent({
         <span className="mb-2 block text-sm font-medium text-slate-700">
           Expiração do link
         </span>
-        <select
+        <SelectField
           value={shareExpiresInDays}
-          onChange={(event) => onShareExpiresInDaysChange(Number(event.target.value))}
+          onChange={onShareExpiresInDaysChange}
           disabled={isGeneratingShareLink}
-          className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
-        >
-          {shareExpirationOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          options={shareExpirationOptions}
+        />
       </label>
 
       {generatedShareLink ? (

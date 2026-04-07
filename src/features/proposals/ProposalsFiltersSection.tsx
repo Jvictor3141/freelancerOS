@@ -1,4 +1,5 @@
 import { ListFilter, RotateCcw } from 'lucide-react'
+import { SelectField } from '../../components/SelectField'
 import {
   type ProposalStatusFilter,
   parseProposalStatusFilter,
@@ -37,21 +38,20 @@ export function ProposalsFiltersSection({
           className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
         />
 
-        <select
+        <SelectField
           value={statusFilter}
-          onChange={(event) =>
-            onStatusFilterChange(parseProposalStatusFilter(event.target.value))
+          ariaLabel="Filtrar propostas por status"
+          onChange={(nextValue) =>
+            onStatusFilterChange(parseProposalStatusFilter(nextValue))
           }
-          className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
-        >
-          {proposalStatusOptions.map((status) => (
-            <option key={status} value={status}>
-              {status === 'all'
+          options={proposalStatusOptions.map((status) => ({
+            value: status,
+            label:
+              status === 'all'
                 ? 'Todos os status'
-                : proposalStatusLabel[status]}
-            </option>
-          ))}
-        </select>
+                : proposalStatusLabel[status],
+          }))}
+        />
 
         <button
           type="button"
