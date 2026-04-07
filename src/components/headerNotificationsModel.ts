@@ -126,12 +126,14 @@ export function writeDismissedHeaderNotificationIds(
 export function getVisibleHeaderNotifications(
   notifications: HeaderNotification[],
   dismissedNotificationIds: string[],
+  disabledTypes: HeaderNotificationType[] = [],
 ) {
-  return excludeItemsById(
-    notifications,
-    dismissedNotificationIds,
-    (notification) => notification.id,
-  )
+  const enabled =
+    disabledTypes.length === 0
+      ? notifications
+      : notifications.filter((n) => !disabledTypes.includes(n.type))
+
+  return excludeItemsById(enabled, dismissedNotificationIds, (n) => n.id)
 }
 
 function getProposalAcceptedNotifications(

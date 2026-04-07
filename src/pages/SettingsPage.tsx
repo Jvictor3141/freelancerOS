@@ -1,15 +1,18 @@
 import {
   ArrowUpRight,
+  Bell,
   BriefcaseBusiness,
   KeyRound,
   Mail,
   Palette,
+  QrCode,
   Save,
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import type { HeaderNotificationType } from '../components/headerNotificationsModel';
 import { Modal } from '../components/Modal';
 import { getErrorMessage } from '../lib/supabase';
 import {
@@ -30,6 +33,57 @@ import {
   getFreelancerProfileFromUser,
   sanitizeFreelancerProfile,
 } from '../utils/freelancerProfile';
+
+type NotificationTypeConfig = {
+  label: string;
+  description: string;
+  tone: 'success' | 'warning' | 'danger';
+};
+
+const notificationTypeConfig: Record<HeaderNotificationType, NotificationTypeConfig> = {
+  payment_overdue: {
+    label: 'Pagamento vencido',
+    description: 'Quando um pagamento pendente passa da data de vencimento.',
+    tone: 'danger',
+  },
+  payment_due_today: {
+    label: 'Pagamento vence hoje',
+    description: 'Quando há um pagamento com vencimento no dia atual.',
+    tone: 'warning',
+  },
+  project_due_today: {
+    label: 'Projeto vence hoje',
+    description: 'Quando um projeto ativo tem prazo no dia atual.',
+    tone: 'warning',
+  },
+  project_due_soon: {
+    label: 'Projeto vence em breve',
+    description: 'Quando um projeto ativo vence em até 3 dias.',
+    tone: 'warning',
+  },
+  proposal_accepted: {
+    label: 'Proposta aceita',
+    description: 'Quando um cliente aceita uma proposta enviada.',
+    tone: 'success',
+  },
+};
+
+const notificationTypeOrder: HeaderNotificationType[] = [
+  'payment_overdue',
+  'payment_due_today',
+  'project_due_today',
+  'project_due_soon',
+  'proposal_accepted',
+];
+
+const notificationToneClassName: Record<
+  NotificationTypeConfig['tone'],
+  string
+> = {
+  danger: 'bg-rose-100 text-rose-600',
+  warning: 'bg-amber-100 text-amber-600',
+  success: 'bg-emerald-100 text-emerald-600',
+};
 
 type ThemeOption = {
   value: WorkspaceTheme;
@@ -131,6 +185,12 @@ export function SettingsPage() {
   const { user } = useAuthStore();
   const theme = usePreferencesStore((state) => state.theme);
   const setTheme = usePreferencesStore((state) => state.setTheme);
+  const disabledNotificationTypes = usePreferencesStore(
+    (state) => state.disabledNotificationTypes,
+  );
+  const toggleNotificationType = usePreferencesStore(
+    (state) => state.toggleNotificationType,
+  );
   const [profileValues, setProfileValues] =
     useState<FreelancerProfile>(emptyFreelancerProfile);
   const [newPassword, setNewPassword] = useState('');
@@ -153,7 +213,7 @@ export function SettingsPage() {
     );
   }, [theme]);
 
-  const profileIntro = useMemo(() => {
+const profileIntro = useMemo(() => {
     return buildFreelancerIntro(profileValues);
   }, [profileValues]);
 
@@ -304,6 +364,7 @@ export function SettingsPage() {
     <>
       <div className="page-stack space-y-6">
         <section className="grid items-start gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="flex flex-col gap-6">
           <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
             <div className='flex items-center mb-5'>
               <div className="mr-2 inline-flex rounded-2xl bg-indigo-50 p-3 text-[#635bff]">
@@ -345,8 +406,54 @@ export function SettingsPage() {
                 hint="Abrir segurança"
                 onClick={() => setSecurityModalOpen(true)}
               />
+
             </div>
           </article>
+
+          <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
+            <div className="mb-5 flex items-center">
+              <div className="mr-2 inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-600">
+                <QrCode size={18} />
+              </div>
+              <p className="text-sm font-medium text-slate-500">
+                Recebimento
+              </p>
+            </div>
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
+              Chave PIX
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-slate-500">
+              A chave aparece na assinatura das propostas enviadas, junto com
+              WhatsApp e contato.
+            </p>
+
+            <form onSubmit={handleProfileSubmit} className="mt-6 space-y-4">
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-700">
+                  Chave PIX
+                </span>
+                <input
+                  name="pixKey"
+                  value={profileValues.pixKey}
+                  onChange={handleProfileFieldChange}
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+                  placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"
+                />
+              </label>
+
+              <FeedbackBanner feedback={profileFeedback} />
+
+              <button
+                type="submit"
+                disabled={profileSubmitting}
+                className="inline-flex items-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-70"
+              >
+                <Save size={16} />
+                {profileSubmitting ? 'Salvando...' : 'Salvar chave PIX'}
+              </button>
+            </form>
+          </article>
+          </div>
 
           <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
             <p className="text-sm font-medium text-slate-500">
@@ -394,6 +501,71 @@ export function SettingsPage() {
             </div>
           </article>
         </section>
+
+        <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
+          <div className="mb-5 flex items-center">
+            <div className="mr-2 inline-flex rounded-2xl bg-slate-100 p-3 text-slate-600">
+              <Bell size={18} />
+            </div>
+            <p className="text-sm font-medium text-slate-500">
+              Alertas do painel
+            </p>
+          </div>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
+            Preferências de notificação
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Notificações desativadas não são perdidas — apenas silenciadas no
+            sino até você reativar.
+          </p>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {notificationTypeOrder.map((type) => {
+              const config = notificationTypeConfig[type];
+              const isEnabled = !disabledNotificationTypes.includes(type);
+
+              return (
+                <div
+                  key={type}
+                  className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`inline-flex rounded-xl p-2 ${notificationToneClassName[config.tone]}`}
+                    >
+                      <Bell size={14} />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">
+                        {config.label}
+                      </p>
+                      <p className="mt-0.5 text-xs leading-5 text-slate-500">
+                        {config.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={isEnabled}
+                    aria-label={`${isEnabled ? 'Desativar' : 'Ativar'} notificação de ${config.label.toLowerCase()}`}
+                    onClick={() => toggleNotificationType(type)}
+                    className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+                      isEnabled ? 'bg-[#635bff]' : 'bg-slate-200'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
+                        isEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </article>
       </div>
 
       <Modal

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../stores/useAuthStore'
 import { useClientStore } from '../stores/useClientStore'
+import { usePreferencesStore } from '../stores/usePreferencesStore'
 import { usePaymentStore } from '../stores/usePaymentStore'
 import { useProjectStore } from '../stores/useProjectStore'
 import { useProposalStore } from '../stores/useProposalStore'
@@ -23,6 +24,9 @@ import {
 export function useHeaderNotifications() {
   const navigate = useNavigate()
   const user = useAuthStore((state) => state.user)
+  const disabledNotificationTypes = usePreferencesStore(
+    (state) => state.disabledNotificationTypes,
+  )
 
   const clients = useClientStore((state) => state.clients)
   const clientsLoadStatus = useClientStore((state) => state.loadStatus)
@@ -89,6 +93,7 @@ export function useHeaderNotifications() {
       payments: getPaymentsWithRelations(payments, projects, clients),
     }),
     dismissedNotificationIds,
+    disabledNotificationTypes,
   )
 
   const isLoading =
