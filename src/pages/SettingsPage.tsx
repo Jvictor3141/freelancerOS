@@ -411,7 +411,7 @@ const profileIntro = useMemo(() => {
           </article>
 
           <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-            <div className="mb-5 flex items-center">
+            <div className="mb-3 flex items-center">
               <div className="mr-2 inline-flex rounded-2xl bg-emerald-50 p-3 text-emerald-600">
                 <QrCode size={18} />
               </div>
@@ -428,29 +428,29 @@ const profileIntro = useMemo(() => {
             </p>
 
             <form onSubmit={handleProfileSubmit} className="mt-6 space-y-4">
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-slate-700">
-                  Chave PIX
-                </span>
-                <input
-                  name="pixKey"
-                  value={profileValues.pixKey}
-                  onChange={handleProfileFieldChange}
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                  placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"
-                />
-              </label>
-
-              <FeedbackBanner feedback={profileFeedback} />
-
-              <button
-                type="submit"
-                disabled={profileSubmitting}
-                className="inline-flex items-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-70"
-              >
-                <Save size={16} />
-                {profileSubmitting ? 'Salvando...' : 'Salvar chave PIX'}
-              </button>
+              <div className="grid gap-2 sm:grid-cols-2 items-end">
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">
+                    Chave PIX
+                  </span>
+                  <input
+                    name="pixKey"
+                    value={profileValues.pixKey}
+                    onChange={handleProfileFieldChange}
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
+                    placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"
+                  />
+                </label>
+                <FeedbackBanner feedback={profileFeedback} />
+                <button
+                  type="submit"
+                  disabled={profileSubmitting}
+                  className="inline-flex items-center h-fit w-fit gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-70"
+                >
+                  <Save size={16} />
+                  {profileSubmitting ? 'Salvando...' : 'Salvar chave PIX'}
+                </button>
+              </div>
             </form>
           </article>
           </div>
