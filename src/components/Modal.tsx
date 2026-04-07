@@ -49,30 +49,30 @@ export function Modal({
         <div
           role="dialog"
           aria-modal="true"
-          className={`motion-dialog w-full ${maxWidthClassName} overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_32px_80px_rgba(15,23,42,0.22)]`}
+          className={`motion-dialog flex w-full flex-col ${maxWidthClassName} max-h-[calc(100dvh-2rem)] overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_32px_80px_rgba(15,23,42,0.22)] sm:max-h-[calc(100dvh-4rem)]`}
         >
-          <div className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-5 sm:max-h-[calc(100dvh-4rem)] sm:p-6">
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <h3 className="text-xl font-semibold tracking-tight text-slate-950">
-                  {title}
-                </h3>
-                {description ? (
-                  <p className="mt-1 text-sm text-slate-500">{description}</p>
-                ) : null}
-              </div>
-
-              {showCloseButton ? (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-                >
-                  {closeLabel}
-                </button>
+          <div className="flex shrink-0 flex-col gap-4 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+            <div>
+              <h3 className="text-xl font-semibold tracking-tight text-slate-950">
+                {title}
+              </h3>
+              {description ? (
+                <p className="mt-1 text-sm text-slate-500">{description}</p>
               ) : null}
             </div>
 
+            {showCloseButton ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+              >
+                {closeLabel}
+              </button>
+            ) : null}
+          </div>
+
+          <div className="overflow-y-auto p-5 sm:p-6">
             {children}
           </div>
         </div>

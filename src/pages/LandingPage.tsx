@@ -1,22 +1,23 @@
 import { useRef, type CSSProperties } from 'react';
-import type { LucideIcon } from 'lucide-react';
 import {
   ArrowRight,
   CheckCircle2,
-  CreditCard,
-  FolderKanban,
-  ImageIcon,
   Smartphone,
-  Users,
+  // Users,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
 import { useScrollReveal } from '../lib/useScrollReveal';
 import { Seo } from '../seo/Seo';
+import mockdashboardImg from '../assets/imagens/mock-dashboard.webp';
+import clientsPageImg from '../assets/imagens/clients-page.webp';
+import clientsDetailsImg from '../assets/imagens/clients-details.webp';
+import projectsPageImg from '../assets/imagens/projects-page.webp';
+import paymentsPageImg from '../assets/imagens/payments-page.webp';
+import proposalsPageImg from '../assets/imagens/proposals-page.webp';
+import mobileViewImg from '../assets/imagens/mobile-viewl.webp';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-type StatusTone = 'success' | 'warning' | 'danger' | 'neutral';
 
 type FeatureSection = {
   number: string;
@@ -25,14 +26,7 @@ type FeatureSection = {
   description: string;
   benefit: string;
   imageLabel: string;
-  imageIcon: LucideIcon;
-};
-
-type PreviewPayment = {
-  client: string;
-  amount: string;
-  status: string;
-  tone: StatusTone;
+  image: string;
 };
 
 // ─── Static data ──────────────────────────────────────────────────────────────
@@ -58,7 +52,7 @@ const featureSections: FeatureSection[] = [
       'Nome, histórico, projetos e observações em um lugar. Você para de reabrir conversa para lembrar quem pediu o quê e em que prazo estava.',
     benefit: 'Menos retrabalho para retomar conversas e definir próximos passos.',
     imageLabel: 'Tela de clientes — lista com histórico e contexto completo',
-    imageIcon: Users,
+    image: clientsPageImg,
   },
   {
     number: '02',
@@ -68,7 +62,7 @@ const featureSections: FeatureSection[] = [
       'Cada entrega vinculada ao cliente certo. Andamento, valor e prazo ficam visíveis sem depender de memória ou anotação perdida em algum lugar aleatório.',
     benefit: 'Você sabe o que está em execução e o que precisa avançar hoje.',
     imageLabel: 'Tela de projetos — escopo, status e prazo por cliente',
-    imageIcon: FolderKanban,
+    image: projectsPageImg,
   },
   {
     number: '03',
@@ -78,7 +72,17 @@ const featureSections: FeatureSection[] = [
       'Pendente, atrasado e recebido ficam separados e claros. Você cobra no momento certo porque o sistema mostra — não porque você lembrou de conferir.',
     benefit: 'Mais clareza para cobrar no tempo certo e fechar o mês sem surpresa.',
     imageLabel: 'Tela de pagamentos — status por cliente com alertas de atraso',
-    imageIcon: CreditCard,
+    image: paymentsPageImg,
+  },
+  {
+    number: '04',
+    eyebrow: 'Detalhes do cliente',
+    title: 'Histórico completo de cada relação comercial',
+    description:
+      'Projetos, pagamentos e observações de cada cliente reunidos em um só lugar. Você abre e sabe tudo o que aconteceu antes de retomar qualquer conversa.',
+    benefit: 'Contexto completo sem precisar buscar informação em vários lugares.',
+    imageLabel: 'Tela de detalhes do cliente — projetos e pagamentos vinculados',
+    image: clientsDetailsImg,
   },
 ];
 
@@ -86,12 +90,6 @@ const stats = [
   { value: '1', label: 'Painel único', detail: 'clientes, projetos e pagamentos' },
   { value: '0', label: 'Planilhas paralelas', detail: 'a operação fica dentro do sistema' },
   { value: '100%', label: 'Grátis para começar', detail: 'sem cartão de crédito' },
-];
-
-const previewPayments: PreviewPayment[] = [
-  { client: 'Studio Norte', amount: 'R$ 2.400', status: 'Pendente', tone: 'warning' },
-  { client: 'Ateliê Aurora', amount: 'R$ 3.200', status: 'Pago', tone: 'success' },
-  { client: 'Clínica Prisma', amount: 'R$ 1.800', status: 'Atrasado', tone: 'danger' },
 ];
 
 const footerLinks = [
@@ -111,70 +109,6 @@ function getRevealStyle(delay: number, distance = 32): CSSProperties {
 }
 
 // ─── Internal components ──────────────────────────────────────────────────────
-
-type ImgPlaceholderProps = {
-  label: string;
-  icon?: LucideIcon;
-  className?: string;
-  variant?: 'light' | 'dark';
-};
-
-function ImgPlaceholder({
-  label,
-  icon: Icon = ImageIcon,
-  className = '',
-  variant = 'light',
-}: ImgPlaceholderProps) {
-  const bg =
-    variant === 'dark'
-      ? 'bg-white/4 border-white/10'
-      : 'bg-slate-100/80 border-slate-200';
-  const iconBg =
-    variant === 'dark' ? 'bg-white/8 border-white/10' : 'bg-white border-slate-200';
-  const textColor = variant === 'dark' ? 'text-white/35' : 'text-slate-400';
-  const subColor = variant === 'dark' ? 'text-white/20' : 'text-slate-300';
-
-  return (
-    <div
-      className={[
-        'relative flex flex-col items-center justify-center gap-4 overflow-hidden rounded-2xl border-2 border-dashed p-10 text-center',
-        bg,
-        className,
-      ].join(' ')}
-    >
-      <div
-        className={['flex h-12 w-12 items-center justify-center rounded-xl border', iconBg].join(
-          ' ',
-        )}
-      >
-        <Icon size={22} className={textColor} />
-      </div>
-      <div className="space-y-1">
-        <p className={['text-sm font-semibold', textColor].join(' ')}>{label}</p>
-        <p className={['text-xs', subColor].join(' ')}>Substitua com screenshot real</p>
-      </div>
-    </div>
-  );
-}
-
-function StatusPill({ label, tone }: { label: string; tone: StatusTone }) {
-  const toneClass: Record<StatusTone, string> = {
-    success: 'bg-emerald-100 text-emerald-700',
-    warning: 'bg-amber-100 text-amber-700',
-    danger: 'bg-rose-100 text-rose-700',
-    neutral: 'bg-slate-100 text-slate-600',
-  };
-  return (
-    <span
-      className={[
-        'inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap',
-        toneClass[tone],
-      ].join(' ')}
-    >
-      {label}
-    </span>
-  );
-}
 
 function MarqueeTicker() {
   const doubled = [...marqueeItems, ...marqueeItems];
@@ -199,70 +133,13 @@ function MarqueeTicker() {
 
 function DashboardMock() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 shadow-[0_32px_80px_rgba(0,0,0,0.5)]">
-      {/* Browser chrome */}
-      <div className="flex items-center gap-3 border-b border-white/6 bg-slate-800/80 px-4 py-3">
-        <div className="flex gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-rose-500/70" />
-          <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/70" />
-          <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/70" />
-        </div>
-        <div className="flex-1 rounded bg-white/6 px-3 py-1 text-[11px] text-white/25">
-          app.freelanceros.com/dashboard
-        </div>
-      </div>
-      {/* Dashboard content */}
-      <div className="space-y-3 bg-[#0f1117] p-4">
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: 'Recebido no mês', value: 'R$ 14.800' },
-            { label: 'A receber', value: 'R$ 4.200' },
-            { label: 'Projetos ativos', value: '5' },
-          ].map(({ label, value }) => (
-            <div key={label} className="rounded-xl border border-white/6 bg-white/5 p-3">
-              <p className="text-[10px] leading-4 text-white/40">{label}</p>
-              <p className="mt-1 text-lg font-semibold tracking-tight text-white">{value}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="overflow-hidden rounded-xl border border-white/6 bg-white/3">
-          <div className="border-b border-white/6 px-4 py-3">
-            <p className="text-xs font-semibold text-white/40">Cobranças que pedem ação</p>
-          </div>
-          <div className="divide-y divide-white/5">
-            {previewPayments.map(({ client, amount, status, tone }) => (
-              <div key={client} className="flex items-center justify-between px-4 py-2.5">
-                <div>
-                  <p className="text-sm font-medium text-white/85">{client}</p>
-                  <p className="text-xs text-white/40">{amount}</p>
-                </div>
-                <StatusPill label={status} tone={tone} />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="overflow-hidden rounded-xl border border-white/6 bg-white/3">
-          <div className="border-b border-white/6 px-4 py-3">
-            <p className="text-xs font-semibold text-white/40">Projetos em andamento</p>
-          </div>
-          <div className="divide-y divide-white/5">
-            {[
-              { title: 'Redesign do site', client: 'Clínica Prisma', status: 'Em revisão', tone: 'neutral' as StatusTone },
-              { title: 'Branding completo', client: 'Ateliê Aurora', status: 'Pronto p/ cobrar', tone: 'success' as StatusTone },
-            ].map(({ title, client, status, tone }) => (
-              <div key={title} className="flex items-center justify-between px-4 py-2.5">
-                <div>
-                  <p className="text-sm font-medium text-white/85">{title}</p>
-                  <p className="text-xs text-white/40">{client}</p>
-                </div>
-                <StatusPill label={status} tone={tone} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+    <div className="flex h-full items-center justify-center">
+      <img
+        src={mockdashboardImg}
+        alt="Dashboard do FreelancerOS"
+        className="w-full drop-shadow-[0_32px_48px_rgba(0,0,0,0.35)]"
+        loading="eager"
+      />
     </div>
   );
 }
@@ -341,7 +218,7 @@ export function LandingPage() {
         <section className="landing-hero-grid relative overflow-hidden bg-slate-950">
           {/* Ambient glows */}
           <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-            <div className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-[#635bff]/12 blur-[120px]" />
+            <div className="absolute -left-40 -top-40 h-125 w-125 rounded-full bg-[#635bff]/12 blur-[120px]" />
             <div className="absolute -right-40 top-1/3 h-80 w-80 rounded-full bg-sky-500/8 blur-[100px]" />
             <div className="absolute bottom-0 left-1/2 h-60 w-96 -translate-x-1/2 rounded-full bg-violet-800/10 blur-[80px]" />
           </div>
@@ -365,7 +242,7 @@ export function LandingPage() {
                     Pare de operar
                     <br />
                     no modo{' '}
-                    <em className="font-light italic text-white/30 not-italic">bagunça.</em>
+                    <em className="font-light italic text-white/30">bagunça.</em>
                   </h1>
                   <p className="max-w-lg text-base leading-7 text-white/50 sm:text-lg">
                     O FreelancerOS organiza clientes, projetos e pagamentos em um único painel
@@ -515,13 +392,15 @@ export function LandingPage() {
               </p>
             </div>
 
-            {/* Full-width dashboard screenshot placeholder */}
             <div data-scroll-reveal style={getRevealStyle(80, 40)}>
-              <ImgPlaceholder
-                label="Screenshot completo do Dashboard — visão geral com métricas, alertas e projetos ativos"
-                icon={ImageIcon}
-                className="aspect-[16/9] w-full"
-              />
+              <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-[0_24px_70px_rgba(15,23,42,0.1)]">
+                <img
+                  src={proposalsPageImg}
+                  alt="Tela de propostas do FreelancerOS"
+                  className="block w-full"
+                  loading="lazy"
+                />
+              </div>
             </div>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
@@ -559,7 +438,7 @@ export function LandingPage() {
 
             <div className="space-y-24 lg:space-y-32">
               {featureSections.map(
-                ({ number, eyebrow, title, description, benefit, imageLabel, imageIcon: Icon }, i) => (
+                ({ number, eyebrow, title, description, benefit, imageLabel, image }, i) => (
                   <div
                     key={number}
                     className={[
@@ -591,15 +470,16 @@ export function LandingPage() {
                       </div>
                     </div>
 
-                    {/* Image placeholder */}
                     <div
                       data-scroll-reveal
                       style={getRevealStyle(i % 2 === 0 ? 60 : 0, 40)}
+                      className="overflow-hidden rounded-2xl border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
                     >
-                      <ImgPlaceholder
-                        label={imageLabel}
-                        icon={Icon}
-                        className="aspect-[4/3] w-full"
+                      <img
+                        src={image}
+                        alt={imageLabel}
+                        className="block w-full"
+                        loading="lazy"
                       />
                     </div>
                   </div>
@@ -699,28 +579,20 @@ export function LandingPage() {
                 style={getRevealStyle(80, 40)}
                 className="flex justify-center"
               >
-                <div className="relative w-64 sm:w-72">
+                <div className="relative w-70 sm:w-75">
                   <div className="relative overflow-hidden rounded-[3.5rem] border-4 border-slate-200 bg-white shadow-[0_40px_80px_rgba(15,23,42,0.12)]">
                     {/* Status bar + dynamic island */}
-                    <div className="flex items-center justify-between bg-white px-6 pb-2 pt-4">
+                    <div className="flex items-center justify-between border-b border-slate-200 bg-white px-6 pb-2 pt-4">
                       <span className="text-[11px] font-semibold text-slate-900">9:41</span>
                       <div className="h-6 w-20 rounded-full bg-slate-900" />
                       <span className="text-[11px] font-semibold text-slate-900">100%</span>
                     </div>
-                    {/* Screen placeholder */}
-                    <div className="flex aspect-[9/18] flex-col items-center justify-center gap-4 bg-slate-100 p-8 text-center">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-200 bg-white">
-                        <Smartphone size={22} className="text-slate-400" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-semibold text-slate-400">
-                          Demonstração mobile
-                        </p>
-                        <p className="text-xs text-slate-300">
-                          Substitua com screenshot real
-                        </p>
-                      </div>
-                    </div>
+                    <img
+                      src={mobileViewImg}
+                      alt="FreelancerOS no celular"
+                      className="block w-full"
+                      loading="lazy"
+                    />
                     {/* Home indicator */}
                     <div className="flex h-8 items-center justify-center bg-white">
                       <div className="h-1 w-24 rounded-full bg-slate-200" />
@@ -737,7 +609,7 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* ── TESTIMONIAL ────────────────────────────────────────────────────── */}
+        {/* ── TESTIMONIAL ────────────────────────────────────────────────────── 
         <section className="bg-slate-50 py-20 lg:py-28">
           <div className="mx-auto max-w-4xl px-5 sm:px-8 lg:px-10">
             <blockquote
@@ -765,7 +637,7 @@ export function LandingPage() {
                 imediata.&rdquo;
               </p>
               <footer className="flex items-center justify-center gap-4">
-                {/* Avatar placeholder */}
+                {/* Avatar placeholder 
                 <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-dashed border-slate-300 bg-slate-200">
                   <div className="flex h-full w-full items-center justify-center">
                     <Users size={18} className="text-slate-400" />
@@ -778,7 +650,7 @@ export function LandingPage() {
               </footer>
             </blockquote>
           </div>
-        </section>
+        </section> */}
 
         {/* ── CTA ────────────────────────────────────────────────────────────── */}
         <section

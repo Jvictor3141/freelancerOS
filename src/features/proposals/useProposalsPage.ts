@@ -68,6 +68,8 @@ export function useProposalsPage() {
   )
 
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [viewProposal, setViewProposal] = useState<ProposalWithClient | null>(null)
   const [isShareModalOpen, setIsShareModalOpen] = useState(false)
   const [isGeneratingShareLink, setIsGeneratingShareLink] = useState(false)
   const [shareTargetProposal, setShareTargetProposal] =
@@ -145,6 +147,16 @@ export function useProposalsPage() {
   function closeModal() {
     selectProposal(null)
     setIsModalOpen(false)
+  }
+
+  function openDetailModal(proposal: ProposalWithClient) {
+    setViewProposal(proposal)
+    setIsDetailModalOpen(true)
+  }
+
+  function closeDetailModal() {
+    setViewProposal(null)
+    setIsDetailModalOpen(false)
   }
 
   function openShareModal(proposal: ProposalWithClient) {
@@ -328,6 +340,7 @@ export function useProposalsPage() {
     hasLoadError:
       hasResourceLoadError(clientsLoadStatus) ||
       hasResourceLoadError(proposalsLoadStatus),
+    isDetailModalOpen,
     isFilterModalOpen: statusFilterModal.isOpen,
     isGeneratingShareLink,
     isLoading:
@@ -339,6 +352,7 @@ export function useProposalsPage() {
     metrics: getProposalMetrics(proposals),
     search,
     selectedProposal,
+    viewProposal,
     shareExpiresInDays,
     shareFeedback,
     shareTargetProposal,
@@ -347,6 +361,7 @@ export function useProposalsPage() {
     visibleClientResponseNotifications,
     applyFilterModal: statusFilterModal.apply,
     clearFilterModal: statusFilterModal.clear,
+    closeDetailModal,
     closeModal,
     closeShareModal,
     handleAcceptProposal,
@@ -360,6 +375,7 @@ export function useProposalsPage() {
     handleSendProposal,
     handleShareLinkGeneration,
     openCreateModal,
+    openDetailModal,
     openEditModal,
     openFilterModal: statusFilterModal.open,
     openShareModal,
