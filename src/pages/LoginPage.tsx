@@ -107,8 +107,8 @@ export function LoginPage() {
     }
 
     if (mode === 'sign_up') {
-      if (password.length < 6) {
-        setLocalError('Use uma senha com pelo menos 6 caracteres.');
+      if (password.length < 8) {
+        setLocalError('Use uma senha com pelo menos 8 caracteres.');
         return;
       }
 
@@ -266,6 +266,11 @@ export function LoginPage() {
                   placeholder="Sua senha"
                   autoComplete={
                     mode === 'sign_in' ? 'current-password' : 'new-password'
+                  }
+                  hint={
+                    mode === 'sign_up'
+                      ? 'Mínimo 8 caracteres, com maiúscula, minúscula e símbolo (ex: @, !, #).'
+                      : undefined
                   }
                 />
 

@@ -54,6 +54,10 @@ export async function getSession() {
   return supabase.auth.getSession();
 }
 
+export async function getCurrentUser() {
+  return supabase.auth.getUser();
+}
+
 function getMetadataObject(metadata: unknown) {
   return getRecord(metadata) ?? {};
 }

@@ -45,8 +45,8 @@ export function RecoveryPasswordPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setLocalError('Use uma nova senha com pelo menos 6 caracteres.');
+    if (password.length < 8) {
+      setLocalError('Use uma nova senha com pelo menos 8 caracteres.');
       return;
     }
 
@@ -174,8 +174,9 @@ export function RecoveryPasswordPage() {
                         label="Nova senha"
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
-                        placeholder="Minimo de 6 caracteres"
+                        placeholder="Mínimo de 8 caracteres"
                         autoComplete="new-password"
+                        hint="Mínimo 8 caracteres, com maiúscula, minúscula e símbolo (ex: @, !, #)."
                       />
 
                       <PasswordField
