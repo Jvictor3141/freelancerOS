@@ -73,17 +73,11 @@ function isExistingAccountSignUpResult(
   )
 }
 
-function resolveInitialAuthFlow(session: Session | null): AuthFlow {
-  if (!session?.user || typeof window === 'undefined') {
-    return null
-  }
-
-  const currentUrl = new URL(window.location.href)
-
-  return currentUrl.pathname === '/redefinir-senha' &&
-    currentUrl.searchParams.get('flow') === 'recovery'
-    ? 'recovery'
-    : null
+function resolveInitialAuthFlow(_session: Session | null): AuthFlow {
+  // O fluxo de recuperação é definido exclusivamente pelo evento PASSWORD_RECOVERY
+  // emitido pelo onAuthStateChange — não por parâmetros da URL, que são controláveis
+  // por qualquer usuário autenticado.
+  return null
 }
 
 function resolveAuthFlow(

@@ -132,24 +132,19 @@ function getHttpUrl(value: string | null | undefined) {
   }
 }
 
-function resolvePublicAppUrl(request: Request) {
-  // Preferimos a origem configurada porque ela representa a URL publica canonica
-  // do app; o origin da requisicao fica como fallback seguro para browser/dev.
+function resolvePublicAppUrl(_request: Request) {
+  // PUBLIC_APP_URL e obrigatorio. Nao usamos o header Origin como fallback porque
+  // ele e controlavel pelo chamador em contextos nao-browser (ex: curl), o que
+  // permitiria gerar links apontando para um dominio arbitrario.
   const configuredPublicAppUrl = getHttpUrl(publicAppUrl);
 
-  if (configuredPublicAppUrl) {
-    return configuredPublicAppUrl.toString();
+  if (!configuredPublicAppUrl) {
+    throw new Error(
+      'PUBLIC_APP_URL nao esta configurado. Defina essa variavel nos secrets da Edge Function antes de gerar links.',
+    );
   }
 
-  const requestOrigin = getHttpUrl(request.headers.get('origin'));
-
-  if (requestOrigin) {
-    return requestOrigin.toString();
-  }
-
-  throw new Error(
-    'Configure PUBLIC_APP_URL para gerar links compartilhados com origem confiavel.',
-  );
+  return configuredPublicAppUrl.toString();
 }
 
 function getAuthClient(authorizationHeader: string) {
@@ -503,6 +498,10 @@ async function handleGetSharedProposal(payload: GetSharedProposalRequest) {
 async function handleSharedProposalResponse(
   payload: RespondToSharedProposalRequest,
 ) {
+  // Valida o token com comparacao constante em tempo antes de chamar a RPC,
+  // evitando que o banco seja o unico ponto de verificacao sem garantia de timing seguro.
+  await validateShareToken(payload.shareId, payload.token);
+
   const tokenHash = await hashToken(payload.token);
 
   // A RPC trava o link e a proposta na mesma transacao para evitar aceite/recusa

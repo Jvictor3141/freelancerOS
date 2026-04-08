@@ -3,7 +3,7 @@ import { LoaderCircle } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { BrandLogo } from '../components/BrandLogo';
 import { Seo } from '../seo/Seo';
-import { getSession } from '../services/authService';
+import { getCurrentUser } from '../services/authService';
 import { useAuthStore } from '../stores/useAuthStore';
 
 type AuthFeedback = {
@@ -83,7 +83,9 @@ export function AuthCallbackPage() {
         return;
       }
 
-      const { data, error } = await getSession();
+      // getUser() faz uma chamada de rede ao Supabase para validar o token —
+      // ao contrario de getSession() que apenas le o storage local sem verificacao.
+      const { data, error } = await getCurrentUser();
 
       if (!isActive) {
         return;
@@ -102,7 +104,7 @@ export function AuthCallbackPage() {
         return;
       }
 
-      const sessionUser = data.session?.user ?? user;
+      const sessionUser = data.user ?? user;
 
       if (isRecoveryFlow) {
         navigate('/redefinir-senha?flow=recovery', { replace: true });

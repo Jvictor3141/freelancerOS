@@ -83,7 +83,7 @@ export function getSupabaseErrorMessage(
     return 'O projeto precisa de uma sessao autenticada. Ative Anonymous Sign-Ins no Supabase Auth ou implemente login antes de usar o app.';
   }
 
-  return error.message;
+  return fallback;
 }
 
 // Esta funcao padroniza erros vindos de qualquer camada para simplificar o tratamento nas stores.
