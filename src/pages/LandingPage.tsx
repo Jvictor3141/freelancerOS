@@ -1,8 +1,9 @@
-import { useRef, type CSSProperties } from 'react';
+import { useRef, useState, useEffect, type CSSProperties } from 'react';
 import {
   ArrowRight,
   CheckCircle2,
   Smartphone,
+  X,
   // Users,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -144,14 +145,62 @@ function DashboardMock() {
   );
 }
 
+// ─── Lightbox ─────────────────────────────────────────────────────────────────
+
+type LightboxProps = {
+  src: string;
+  alt: string;
+  onClose: () => void;
+};
+
+function ImageLightbox({ src, alt, onClose }: LightboxProps) {
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+        aria-label="Fechar"
+      >
+        <X size={20} />
+      </button>
+      <img
+        src={src}
+        alt={alt}
+        className="max-h-[90vh] max-w-[90vw] rounded-2xl shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      />
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function LandingPage() {
   const pageRef = useRef<HTMLDivElement>(null);
   useScrollReveal(pageRef);
 
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
+
   return (
     <>
+      {lightbox && (
+        <ImageLightbox
+          src={lightbox.src}
+          alt={lightbox.alt}
+          onClose={() => setLightbox(null)}
+        />
+      )}
       <Seo
         title="FreelancerOS | Organize clientes, projetos e pagamentos"
         description="FreelancerOS e o painel para freelancers centralizarem clientes, projetos, propostas e pagamentos em um unico lugar."
@@ -473,12 +522,13 @@ export function LandingPage() {
                     <div
                       data-scroll-reveal
                       style={getRevealStyle(i % 2 === 0 ? 60 : 0, 40)}
-                      className="overflow-hidden rounded-2xl border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
+                      className="group cursor-zoom-in overflow-hidden rounded-2xl border border-slate-200 shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
+                      onClick={() => setLightbox({ src: image, alt: imageLabel })}
                     >
                       <img
                         src={image}
                         alt={imageLabel}
-                        className="block w-full"
+                        className="block w-full transition-transform duration-500 ease-in-out group-hover:scale-105"
                         loading="lazy"
                       />
                     </div>
