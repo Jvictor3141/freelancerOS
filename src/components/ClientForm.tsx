@@ -12,6 +12,13 @@ type ClientFormProps = {
   isSubmitting?: boolean;
 };
 
+function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 2) return digits.length ? `(${digits}` : '';
+  if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+}
+
 const emptyValues: ClientFormValues = {
   name: '',
   company: '',
@@ -35,7 +42,7 @@ export function ClientForm({
         name: initialValues.name,
         company: initialValues.company,
         email: initialValues.email,
-        phone: initialValues.phone,
+        phone: formatPhone(initialValues.phone),
         notes: initialValues.notes,
       });
       return;
@@ -52,6 +59,13 @@ export function ClientForm({
     setValues((previousValues) => ({
       ...previousValues,
       [name]: value,
+    }));
+  }
+
+  function handlePhoneChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setValues((previousValues) => ({
+      ...previousValues,
+      phone: formatPhone(event.target.value),
     }));
   }
 
@@ -132,7 +146,8 @@ export function ClientForm({
         <input
           name="phone"
           value={values.phone}
-          onChange={handleChange}
+          onChange={handlePhoneChange}
+          maxLength={15}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
           placeholder="Ex.: (83) 99999-9999"
         />
