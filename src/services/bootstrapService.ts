@@ -159,6 +159,7 @@ async function migrateLegacyData(userId: string) {
             name: project.name,
             description: project.description,
             value: project.value,
+            currency: project.currency ?? 'BRL',
             deadline: project.deadline,
             status: normalizeProjectStatus(project.status),
           },
@@ -189,6 +190,7 @@ async function migrateLegacyData(userId: string) {
           {
             projectId: payment.projectId,
             amount: payment.amount,
+            currency: payment.currency ?? 'BRL',
             dueDate: payment.dueDate,
             paidAt: payment.paidAt,
             status: toPersistedPaymentStatus(payment.status),

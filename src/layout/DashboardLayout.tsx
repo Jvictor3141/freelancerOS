@@ -1,15 +1,18 @@
 import type { PropsWithChildren } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BottomNavigationBar } from '../components/navigation';
 import { Header } from '../components/Header';
 import { Sidebar } from '../components/Sidebar';
 import { Seo } from '../seo/Seo';
 
 export function DashboardLayout({ children }: PropsWithChildren) {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-transparent text-slate-900">
       <Seo
-        title="FreelancerOS | Painel do Freelancer"
-        description="Painel autenticado do FreelancerOS para gerenciar clientes, projetos, propostas e pagamentos."
+        title={t('dashboard.layout_seo_title')}
+        description={t('dashboard.layout_seo_description')}
         robots="noindex, follow"
         canonical={null}
       />

@@ -1,4 +1,6 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { isSupportedLanguage, LANGUAGE_LOCALE_MAP } from '../i18n/config';
 
 type OpenGraphConfig = {
   title?: string;
@@ -29,32 +31,25 @@ function getSiteOrigin() {
   if (import.meta.env.VITE_SITE_URL) {
     return import.meta.env.VITE_SITE_URL;
   }
-
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
-
   return '';
 }
 
 function toAbsoluteUrl(value: string) {
-  if (/^https?:\/\//i.test(value)) {
-    return value;
-  }
-
+  if (/^https?:\/\//i.test(value)) return value;
   const siteOrigin = getSiteOrigin();
-
-  if (!siteOrigin) {
-    return value;
-  }
-
+  if (!siteOrigin) return value;
   return new URL(value, siteOrigin).toString();
 }
 
-function upsertMeta(attribute: 'name' | 'property', key: string, content?: string) {
-  if (typeof document === 'undefined' || !content) {
-    return;
-  }
+function upsertMeta(
+  attribute: 'name' | 'property',
+  key: string,
+  content?: string,
+) {
+  if (typeof document === 'undefined' || !content) return;
 
   let element = document.head.querySelector<HTMLMetaElement>(
     `meta[${attribute}="${key}"]`,
@@ -70,9 +65,7 @@ function upsertMeta(attribute: 'name' | 'property', key: string, content?: strin
 }
 
 function upsertCanonical(canonical: string | null | undefined) {
-  if (typeof document === 'undefined') {
-    return;
-  }
+  if (typeof document === 'undefined') return;
 
   const existing =
     document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
@@ -82,13 +75,10 @@ function upsertCanonical(canonical: string | null | undefined) {
     return;
   }
 
-  if (!canonical) {
-    return;
-  }
+  if (!canonical) return;
 
   const href = toAbsoluteUrl(canonical);
   const link = existing ?? document.createElement('link');
-
   link.setAttribute('rel', 'canonical');
   link.setAttribute('href', href);
 
@@ -97,6 +87,11 @@ function upsertCanonical(canonical: string | null | undefined) {
   }
 }
 
+/**
+ * SEO component.
+ * Sets <title>, meta tags, canonical link and <html lang=""> attribute.
+ * The html lang attribute is kept in sync with the active i18next language.
+ */
 export function Seo({
   title,
   description,
@@ -105,8 +100,18 @@ export function Seo({
   openGraph,
   twitter,
 }: SeoProps) {
+  const { i18n } = useTranslation();
+  const lang = i18n.resolvedLanguage ?? i18n.language;
+  const htmlLang = isSupportedLanguage(lang)
+    ? LANGUAGE_LOCALE_MAP[lang]
+    : 'pt-BR';
+
   useEffect(() => {
+    // Page title
     document.title = title;
+
+    // <html lang="">
+    document.documentElement.lang = htmlLang;
 
     if (description) {
       upsertMeta('name', 'description', description);
@@ -165,7 +170,7 @@ export function Seo({
         upsertMeta('name', 'twitter:image', toAbsoluteUrl(twitter.image));
       }
     }
-  }, [canonical, description, openGraph, robots, title, twitter]);
+  }, [canonical, description, htmlLang, openGraph, robots, title, twitter]);
 
   return null;
 }

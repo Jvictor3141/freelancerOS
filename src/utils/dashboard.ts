@@ -1,14 +1,19 @@
-import { formatDate } from './formatting'
+import { formatCurrency, formatDate } from './formatting';
 
-const CURRENCY_FORMATTER = new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'BRL',
-})
-
-export function formatDashboardCurrency(value: number) {
-  return CURRENCY_FORMATTER.format(value)
+/**
+ * Formats a currency value for dashboard display.
+ * Pass the active language from useTranslation() i18n.language.
+ */
+export function formatDashboardCurrency(value: number, lang = 'pt'): string {
+  return formatCurrency(value, lang);
 }
 
-export function formatDashboardDate(value: string) {
-  return formatDate(value)
+/**
+ * Formats a date for dashboard display.
+ */
+export function formatDashboardDate(
+  value: string,
+  lang = 'pt',
+): string {
+  return formatDate(value, lang);
 }

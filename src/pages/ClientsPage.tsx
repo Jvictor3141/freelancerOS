@@ -1,12 +1,17 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { ClientForm } from '../components/ClientForm'
 import { ClientsListSection } from '../features/clients/ClientsListSection'
 import { useClientsPage } from '../features/clients/useClientsPage'
 import { Modal } from '../components/Modal'
 import { PageBanner } from '../components/page/PageBanner'
 import { PageLoadingState } from '../components/page/PageLoadingState'
+import { isSupportedLanguage } from '../i18n/config'
 
 export function ClientsPage() {
+  const { t, i18n } = useTranslation()
+  const { lang } = useParams<{ lang?: string }>()
+  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
   const navigate = useNavigate()
   const {
     error,
@@ -30,7 +35,7 @@ export function ClientsPage() {
   if (isLoading) {
     return (
       <PageLoadingState
-        label="Clientes"
+        label={t('clients.loading_label')}
         description={loadingDescription}
       />
     )
@@ -40,7 +45,7 @@ export function ClientsPage() {
     <div className="page-stack space-y-6">
       {error ? (
         <PageBanner
-          actionLabel={hasLoadError ? 'Tentar novamente' : undefined}
+          actionLabel={hasLoadError ? t('common.retry') : undefined}
           onAction={
             hasLoadError
               ? () => {
@@ -59,18 +64,18 @@ export function ClientsPage() {
         onSearchChange={setSearch}
         onCreate={openCreateModal}
         onEdit={openEditModal}
-        onOpenDetails={(client) => navigate(`/clients/${client.id}`)}
+        onOpenDetails={(client) => navigate(`/${currentLang}/clients/${client.id}`)}
         onRemove={(client) => {
           void handleClientRemoval(client)
         }}
       />
 
       <Modal
-        title={selectedClient ? 'Editar cliente' : 'Novo cliente'}
+        title={selectedClient ? t('clients.modal_edit_title') : t('clients.modal_new_title')}
         description={
           selectedClient
-            ? 'Atualize as informações do cliente.'
-            : 'Preencha os dados para cadastrar um novo cliente.'
+            ? t('clients.modal_edit_description')
+            : t('clients.modal_new_description')
         }
         isOpen={isModalOpen}
         onClose={closeModal}

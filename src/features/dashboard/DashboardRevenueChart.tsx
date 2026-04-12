@@ -7,6 +7,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { useTranslation } from 'react-i18next'
 import type { DashboardRevenuePoint } from '../../types/dashboard'
 import { formatDashboardCurrency } from '../../utils/dashboard'
 
@@ -15,6 +16,8 @@ type DashboardRevenueChartProps = {
 }
 
 export function DashboardRevenueChart({ data }: DashboardRevenueChartProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="h-64 sm:h-80">
       <ResponsiveContainer
@@ -56,7 +59,7 @@ export function DashboardRevenueChart({ data }: DashboardRevenueChartProps) {
           <Tooltip
             formatter={(value) => [
               formatDashboardCurrency(Number(value)),
-              'Recebido',
+              t('dashboard.financial_received'),
             ]}
             contentStyle={{
               borderRadius: 16,

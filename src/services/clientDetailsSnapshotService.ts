@@ -1,4 +1,5 @@
 import { getSupabaseErrorMessage, supabase } from '../lib/supabase'
+import { isSupportedCurrency } from '../i18n/config'
 import type { ClientDetailsSnapshot } from '../types/clientDetails'
 import { isPaymentMethod, isPaymentStatus } from '../utils/paymentStatus'
 import { normalizeProjectStatus } from '../utils/projectStatus'
@@ -71,6 +72,7 @@ function parseSummary(record: UnknownRecord | null) {
 function parseProjects(snapshot: UnknownRecord) {
   return getArrayRecords(snapshot.projects).map((record) => {
     const status = getStringValue(record, 'status')
+    const currency = getStringValue(record, 'currency')
 
     return {
       id: getStringValue(record, 'id'),
@@ -78,6 +80,7 @@ function parseProjects(snapshot: UnknownRecord) {
       name: getStringValue(record, 'name'),
       description: getStringValue(record, 'description'),
       value: getNumberValue(record, 'value'),
+      currency: isSupportedCurrency(currency) ? currency : ('BRL' as const),
       deadline: getStringValue(record, 'deadline'),
       status: normalizeProjectStatus(status),
       createdAt: getStringValue(record, 'createdAt'),
@@ -89,11 +92,13 @@ function parsePayments(snapshot: UnknownRecord) {
   return getArrayRecords(snapshot.payments).map((record) => {
     const status = getStringValue(record, 'status')
     const method = getStringValue(record, 'method')
+    const currency = getStringValue(record, 'currency')
 
     return {
       id: getStringValue(record, 'id'),
       projectId: getStringValue(record, 'projectId'),
       amount: getNumberValue(record, 'amount'),
+      currency: isSupportedCurrency(currency) ? currency : ('BRL' as const),
       dueDate: getStringValue(record, 'dueDate'),
       paidAt: getNullableStringValue(record, 'paidAt'),
       status: isPaymentStatus(status) ? status : 'pending',

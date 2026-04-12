@@ -10,9 +10,11 @@ import {
   XCircle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { useParams } from 'react-router-dom'
 import { getActionButtonClassName } from '../../utils/actionButtonStyles'
 import {
-  formatCurrency,
+  formatCurrencyCode,
   formatDate,
   formatDateTime,
 } from '../../utils/formatting'
@@ -32,6 +34,7 @@ import {
   proposalStatusClassName,
   proposalStatusLabel,
 } from '../../utils/proposalStatus'
+import { isSupportedLanguage } from '../../i18n/config'
 
 type ProposalListSectionProps = {
   proposals: ProposalWithClient[]
@@ -88,14 +91,18 @@ export function ProposalListSection({
   onOpenProjects,
   onRemove,
 }: ProposalListSectionProps) {
+  const { t, i18n } = useTranslation()
+  const { lang } = useParams<{ lang?: string }>()
+  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
       <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
         <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-          Propostas da operação
+          {t('proposals.list_title')}
         </h3>
         <p className="text-sm font-medium text-slate-500">
-          {proposals.length} proposta(s) encontrada(s)
+          {t('proposals.count', { count: proposals.length })}
         </p>
       </div>
 
@@ -121,73 +128,73 @@ export function ProposalListSection({
                         <span
                           className={`inline-flex h-7 w-fit rounded-full px-3 py-1 text-xs font-semibold ${proposalStatusClassName[proposal.status]}`}
                         >
-                          {proposalStatusLabel[proposal.status]}
+                          {t(proposalStatusLabel[proposal.status])}
                         </span>
                       </div>
 
                       <p
                         className="mt-2 overflow-hidden text-sm text-slate-500"
-                        title={proposal.description || 'Sem escopo detalhado.'}
+                        title={proposal.description || t('proposals.no_scope')}
                         style={{
                           display: '-webkit-box',
                           WebkitBoxOrient: 'vertical',
                           WebkitLineClamp: 3,
                         }}
                       >
-                        {proposal.description || 'Sem escopo detalhado.'}
+                        {proposal.description || t('proposals.no_scope')}
                       </p>
                     </div>
 
                     <div className="shrink-0 rounded-2xl bg-slate-100 px-4 py-3 text-sm">
-                      <p className="text-slate-500">Valor da proposta</p>
+                      <p className="text-slate-500">{t('proposals.value_label')}</p>
                       <p className="mt-1 font-semibold text-slate-950">
-                        {formatCurrency(proposal.amount)}
+                        {formatCurrencyCode(proposal.amount, proposal.currency)}
                       </p>
                     </div>
                   </div>
 
                   <div className="grid gap-2 text-sm text-slate-600 md:grid-cols-2 xl:grid-cols-4">
                     <p>
-                      <span className="font-medium text-slate-900">Cliente:</span>{' '}
+                      <span className="font-medium text-slate-900">{t('proposals.field_client')}</span>{' '}
                       {proposal.clientName}
                     </p>
                     <p>
-                      <span className="font-medium text-slate-900">Empresa:</span>{' '}
-                      {proposal.clientCompany || '-'}
+                      <span className="font-medium text-slate-900">{t('proposals.field_company')}</span>{' '}
+                      {proposal.clientCompany || t('common.none')}
                     </p>
                     <p className="break-all">
-                      <span className="font-medium text-slate-900">E-mail:</span>{' '}
+                      <span className="font-medium text-slate-900">{t('proposals.field_email')}</span>{' '}
                       {proposal.recipientEmail}
                     </p>
                     <p>
-                      <span className="font-medium text-slate-900">Prazo:</span>{' '}
-                      {proposal.deliveryDays} dia(s)
+                      <span className="font-medium text-slate-900">{t('proposals.field_deadline')}</span>{' '}
+                      {t('proposals.delivery_days', { count: proposal.deliveryDays })}
                     </p>
                     <p>
-                      <span className="font-medium text-slate-900">Criada em:</span>{' '}
-                      {formatDate(proposal.createdAt)}
+                      <span className="font-medium text-slate-900">{t('proposals.field_created_at')}</span>{' '}
+                      {formatDate(proposal.createdAt, currentLang)}
                     </p>
                     <p>
-                      <span className="font-medium text-slate-900">Enviada em:</span>{' '}
-                      {formatDate(proposal.sentAt)}
+                      <span className="font-medium text-slate-900">{t('proposals.field_sent_at')}</span>{' '}
+                      {formatDate(proposal.sentAt, currentLang)}
                     </p>
                     {proposal.acceptedAt ? (
                       <p>
-                        <span className="font-medium text-slate-900">Aceita em:</span>{' '}
-                        {formatDate(proposal.acceptedAt)}
+                        <span className="font-medium text-slate-900">{t('proposals.field_accepted_at')}</span>{' '}
+                        {formatDate(proposal.acceptedAt, currentLang)}
                       </p>
                     ) : null}
                     {proposal.rejectedAt ? (
                       <p>
-                        <span className="font-medium text-slate-900">Recusada em:</span>{' '}
-                        {formatDate(proposal.rejectedAt)}
+                        <span className="font-medium text-slate-900">{t('proposals.field_rejected_at')}</span>{' '}
+                        {formatDate(proposal.rejectedAt, currentLang)}
                       </p>
                     ) : null}
                   </div>
 
                   {proposal.notes ? (
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                      <span className="font-medium text-slate-900">Observações:</span>{' '}
+                      <span className="font-medium text-slate-900">{t('proposals.field_notes')}</span>{' '}
                       <span
                         className="overflow-hidden align-top"
                         title={proposal.notes}
@@ -210,8 +217,10 @@ export function ProposalListSection({
                           : 'border-rose-200 bg-rose-50 text-rose-800'
                       }`}
                     >
-                      {isAccepted ? 'Cliente aceitou' : 'Cliente recusou'} essa proposta em{' '}
-                      {formatDateTime(proposal.clientRespondedAt)}.
+                      {t('proposals.client_responded_at', {
+                        response: isAccepted ? t('proposals.accepted_by_client') : t('proposals.rejected_by_client'),
+                        date: formatDateTime(proposal.clientRespondedAt, currentLang),
+                      })}
                     </div>
                   ) : null}
 
@@ -219,8 +228,8 @@ export function ProposalListSection({
                   {canEditProposal(proposal) ? (
                     <ProposalActionButton
                       tone="neutral"
-                      label={`Editar proposta ${proposal.title}`}
-                      title="Editar proposta"
+                      label={t('proposals.edit_aria', { title: proposal.title })}
+                      title={t('proposals.edit_title')}
                       icon={PencilLine}
                       onClick={() => onEdit(proposal)}
                     />
@@ -229,8 +238,8 @@ export function ProposalListSection({
                   {canGenerateProposalShareLink(proposal) ? (
                     <ProposalActionButton
                       tone="info"
-                      label={`Gerar link seguro da proposta ${proposal.title}`}
-                      title="Gerar link seguro"
+                      label={t('proposals.share_aria', { title: proposal.title })}
+                      title={t('proposals.share_title')}
                       icon={Link2}
                       onClick={() => onOpenShare(proposal)}
                     />
@@ -239,8 +248,8 @@ export function ProposalListSection({
                   {sendMode === 'send' ? (
                     <ProposalActionButton
                       tone="info"
-                      label={`Enviar proposta ${proposal.title} ao cliente`}
-                      title="Enviar ao cliente"
+                      label={t('proposals.send_aria', { title: proposal.title })}
+                      title={t('proposals.send_title')}
                       icon={Mail}
                       onClick={() => onSend(proposal)}
                     />
@@ -249,8 +258,8 @@ export function ProposalListSection({
                   {sendMode === 'resend' ? (
                     <ProposalActionButton
                       tone="info"
-                      label={`Reenviar proposta ${proposal.title}`}
-                      title="Reenviar proposta"
+                      label={t('proposals.resend_aria', { title: proposal.title })}
+                      title={t('proposals.resend_title')}
                       icon={Send}
                       onClick={() => onSend(proposal)}
                     />
@@ -259,8 +268,8 @@ export function ProposalListSection({
                   {canAcceptProposal(proposal) ? (
                     <ProposalActionButton
                       tone="success"
-                      label={`Aceitar proposta ${proposal.title} e gerar projeto`}
-                      title="Aceitar e gerar projeto"
+                      label={t('proposals.accept_aria', { title: proposal.title })}
+                      title={t('proposals.accept_title')}
                       icon={CheckCircle2}
                       onClick={() => onAccept(proposal)}
                     />
@@ -269,8 +278,8 @@ export function ProposalListSection({
                   {canRejectProposal(proposal) ? (
                     <ProposalActionButton
                       tone="danger"
-                      label={`Marcar proposta ${proposal.title} como recusada`}
-                      title="Marcar como recusada"
+                      label={t('proposals.reject_aria', { title: proposal.title })}
+                      title={t('proposals.reject_title')}
                       icon={XCircle}
                       onClick={() => onReject(proposal)}
                     />
@@ -279,8 +288,8 @@ export function ProposalListSection({
                   {canReopenProposal(proposal) ? (
                     <ProposalActionButton
                       tone="neutral"
-                      label={`Reabrir proposta ${proposal.title} como rascunho`}
-                      title="Reabrir rascunho"
+                      label={t('proposals.reopen_aria', { title: proposal.title })}
+                      title={t('proposals.reopen_title')}
                       icon={RotateCcw}
                       onClick={() => onReopen(proposal)}
                     />
@@ -289,8 +298,8 @@ export function ProposalListSection({
                   {canOpenProposalProject(proposal) ? (
                     <ProposalActionButton
                       tone="success"
-                      label="Abrir projetos"
-                      title="Abrir projetos"
+                      label={t('proposals.open_projects_aria')}
+                      title={t('proposals.open_projects_title')}
                       icon={ArrowRight}
                       onClick={onOpenProjects}
                     />
@@ -298,8 +307,8 @@ export function ProposalListSection({
 
                   <ProposalActionButton
                     tone="neutral"
-                    label={`Excluir proposta ${proposal.title}`}
-                    title="Excluir proposta"
+                    label={t('proposals.delete_aria', { title: proposal.title })}
+                    title={t('proposals.delete_title')}
                     icon={Trash2}
                     onClick={() => onRemove(proposal)}
                   />
@@ -309,8 +318,7 @@ export function ProposalListSection({
           })
         ) : (
           <div className="px-5 py-10 text-center text-sm text-slate-500 sm:px-6">
-            Nenhuma proposta encontrada. Crie a primeira para começar o fluxo
-            comercial.
+            {t('proposals.no_results')}
           </div>
         )}
       </div>

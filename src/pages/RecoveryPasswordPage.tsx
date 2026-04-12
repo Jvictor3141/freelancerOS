@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, KeyRound, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../components/BrandLogo';
 import { PasswordField } from '../components/PasswordField';
 import { getErrorMessage } from '../lib/supabase';
@@ -14,6 +15,7 @@ type AuthFeedback = {
 };
 
 export function RecoveryPasswordPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, authFlow, loading, error, clearFeedback, logout } =
     useAuthStore();
@@ -39,19 +41,17 @@ export function RecoveryPasswordPage() {
     setLocalError(null);
 
     if (!user) {
-      setLocalError(
-        'Esse link não está mais ativo. Solicite uma nova recuperação de senha.',
-      );
+      setLocalError(t('recovery.error_link_not_active'));
       return;
     }
 
     if (password.length < 8) {
-      setLocalError('Use uma nova senha com pelo menos 8 caracteres.');
+      setLocalError(t('recovery.error_password_min_length'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setLocalError('A confirmação da nova senha não confere.');
+      setLocalError(t('recovery.error_password_mismatch'));
       return;
     }
 
@@ -67,11 +67,11 @@ export function RecoveryPasswordPage() {
       await logout();
       await redirectToLogin({
         tone: 'success',
-        message: 'Senha redefinida com sucesso. Entre com a nova senha para continuar.',
+        message: t('recovery.success_password_updated'),
       });
     } catch (error) {
       setLocalError(
-        getErrorMessage(error, 'Não foi possível atualizar a senha da conta.'),
+        getErrorMessage(error, t('recovery.error_password_update_failed')),
       );
     }
   }
@@ -90,7 +90,7 @@ export function RecoveryPasswordPage() {
       setLocalError(
         getErrorMessage(
           error,
-          'Não foi possível encerrar a sessão temporária de recuperação.',
+          t('recovery.error_session_close_failed'),
         ),
       );
     }
@@ -98,13 +98,13 @@ export function RecoveryPasswordPage() {
 
   const hasActiveSession = Boolean(user);
   const isRecoverySession = authFlow === 'recovery';
-  const userEmail = user?.email ?? 'sua conta';
+  const userEmail = user?.email ?? t('common.no_company');
 
   return (
     <>
       <Seo
-        title="Redefinir Senha | FreelancerOS"
-        description="Redefina sua senha para recuperar o acesso ao painel do FreelancerOS."
+        title={t('recovery.seo_title')}
+        description={t('recovery.seo_description')}
         robots="noindex, follow"
         canonical="/redefinir-senha"
       />
@@ -126,14 +126,13 @@ export function RecoveryPasswordPage() {
 
                     <div className="space-y-3">
                       <p className="text-sm font-medium text-slate-500">
-                        Link indisponível
+                        {t('recovery.unavailable_link_label')}
                       </p>
                       <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-                        Esse link de redefinição não está ativo.
+                        {t('recovery.link_not_active_heading')}
                       </h1>
                       <p className="text-sm leading-6 text-slate-500">
-                        Solicite um novo email de recuperação para gerar outra
-                        sessao valida e concluir a troca da senha.
+                        {t('recovery.request_new_email')}
                       </p>
                     </div>
 
@@ -144,7 +143,7 @@ export function RecoveryPasswordPage() {
                       }}
                       className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
                     >
-                      Voltar para o login
+                      {t('recovery.back_to_login')}
                       <ArrowLeft size={16} />
                     </button>
                   </div>
@@ -153,45 +152,43 @@ export function RecoveryPasswordPage() {
                     <div className="space-y-3">
                       <p className="text-sm font-medium text-slate-500">
                         {isRecoverySession
-                          ? 'Fluxo protegido de recuperação'
-                          : 'Atualizacao de senha'}
+                          ? t('recovery.protected_flow_label')
+                          : t('recovery.password_update_label')}
                       </p>
                       <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-                        Defina sua nova senha
+                        {t('recovery.define_new_password')}
                       </h1>
                       <p className="text-sm leading-6 text-slate-500">
-                        Use esse formulario para salvar a nova senha da conta e
-                        encerrar a sessao atual com seguranca.
+                        {t('recovery.form_description')}
                       </p>
                     </div>
 
                     <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                      Sessao vinculada a {userEmail}.
+                      {t('recovery.session_linked_to', { email: userEmail })}
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                       <PasswordField
-                        label="Nova senha"
+                        label={t('recovery.new_password_label')}
                         value={password}
                         onChange={(event) => setPassword(event.target.value)}
-                        placeholder="Mínimo de 8 caracteres"
+                        placeholder={t('recovery.new_password_placeholder')}
                         autoComplete="new-password"
-                        hint="Mínimo 8 caracteres, com maiúscula, minúscula e símbolo (ex: @, !, #)."
+                        hint={t('recovery.password_hint')}
                       />
 
                       <PasswordField
-                        label="Confirmar nova senha"
+                        label={t('recovery.confirm_password_label')}
                         value={confirmPassword}
                         onChange={(event) =>
                           setConfirmPassword(event.target.value)
                         }
-                        placeholder="Repita a nova senha"
+                        placeholder={t('recovery.confirm_password_placeholder')}
                         autoComplete="new-password"
                       />
 
                       <div className="rounded-2xl border border-slate-200 bg-slate-50/90 px-4 py-3 text-sm leading-6 text-slate-500">
-                        Depois de atualizar a senha, a sessao atual sera
-                        encerrada automaticamente e um novo login sera exigido.
+                        {t('recovery.post_update_info')}
                       </div>
 
                       {localError ? (
@@ -211,7 +208,7 @@ export function RecoveryPasswordPage() {
                         disabled={loading}
                         className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
                       >
-                        {loading ? 'Processando...' : 'Atualizar senha'}
+                        {loading ? t('common.processing') : t('recovery.submit_button')}
                         <KeyRound size={16} />
                       </button>
 
@@ -224,8 +221,8 @@ export function RecoveryPasswordPage() {
                         className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
                       >
                         {isRecoverySession
-                          ? 'Cancelar recuperação'
-                          : 'Voltar ao login'}
+                          ? t('recovery.cancel_recovery')
+                          : t('recovery.back_to_login_action')}
                       </button>
                     </form>
                   </div>
@@ -243,20 +240,18 @@ export function RecoveryPasswordPage() {
                   <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-lg shadow-indigo-950/20">
                     <BrandLogo variant="mark" className="h-5 w-5" alt="" />
                   </span>
-                  Recuperacao segura
+                  {t('recovery.secure_recovery_badge')}
                 </div>
 
                 <div className="max-w-2xl space-y-4">
                   <p className="text-sm font-semibold uppercase tracking-[0.28em] text-indigo-100/90">
-                    Rota pública de redefinição
+                    {t('recovery.public_route_label')}
                   </p>
                   <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-                    O callback do Supabase termina sempre nesta tela
+                    {t('recovery.callback_heading')}
                   </h2>
                   <p className="max-w-xl text-base leading-7 text-indigo-100/90 sm:text-lg">
-                    O app não depende mais de parsing manual espalhado, hacks de
-                    sessionStorage nem renderizacao fora do router para concluir
-                    a troca de senha.
+                    {t('recovery.callback_description')}
                   </p>
                 </div>
               </div>
@@ -267,11 +262,10 @@ export function RecoveryPasswordPage() {
                     <ShieldAlert size={18} />
                   </div>
                   <h3 className="text-lg font-semibold tracking-tight">
-                    Callback centralizado
+                    {t('recovery.centralized_callback_title')}
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-indigo-100/90">
-                    O link do email chega em <code>/auth/callback</code> e a
-                    aplicação redireciona para a rota pública de recuperação.
+                    {t('recovery.centralized_callback_description')}
                   </p>
                 </article>
 
@@ -280,11 +274,10 @@ export function RecoveryPasswordPage() {
                     <KeyRound size={18} />
                   </div>
                   <h3 className="text-lg font-semibold tracking-tight">
-                    Encerramento apos salvar
+                    {t('recovery.closure_after_save_title')}
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-indigo-100/90">
-                    Assim que a nova senha e salva, a sessao atual e encerrada e
-                    o login normal volta a ser exigido.
+                    {t('recovery.closure_after_save_description')}
                   </p>
                 </article>
               </div>
@@ -296,4 +289,3 @@ export function RecoveryPasswordPage() {
     </>
   );
 }
-

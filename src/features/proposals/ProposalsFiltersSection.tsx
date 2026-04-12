@@ -1,4 +1,5 @@
 import { ListFilter, RotateCcw } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { SelectField } from '../../components/SelectField'
 import {
   type ProposalStatusFilter,
@@ -26,6 +27,7 @@ export function ProposalsFiltersSection({
   onResetAllFilters,
   onOpenFilterModal,
 }: ProposalsFiltersSectionProps) {
+  const { t } = useTranslation()
   const hasActiveStatusFilter = statusFilter !== 'all'
 
   return (
@@ -34,13 +36,13 @@ export function ProposalsFiltersSection({
         <input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Buscar por título, cliente ou e-mail"
+          placeholder={t('proposals.search_placeholder')}
           className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
         />
 
         <SelectField
           value={statusFilter}
-          ariaLabel="Filtrar propostas por status"
+          ariaLabel={t('proposals.filter_status_aria')}
           onChange={(nextValue) =>
             onStatusFilterChange(parseProposalStatusFilter(nextValue))
           }
@@ -48,8 +50,8 @@ export function ProposalsFiltersSection({
             value: status,
             label:
               status === 'all'
-                ? 'Todos os status'
-                : proposalStatusLabel[status],
+                ? t('proposals.filter_all_statuses')
+                : t(proposalStatusLabel[status]),
           }))}
         />
 
@@ -58,7 +60,7 @@ export function ProposalsFiltersSection({
           onClick={onResetAllFilters}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
-          Limpar filtros
+          {t('proposals.filter_clear')}
         </button>
       </div>
 
@@ -66,15 +68,15 @@ export function ProposalsFiltersSection({
         <input
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Buscar por título, cliente ou e-mail"
+          placeholder={t('proposals.search_placeholder')}
           className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-[#635bff]"
         />
 
         <button
           type="button"
           onClick={onOpenFilterModal}
-          aria-label="Abrir filtros"
-          title="Abrir filtros"
+          aria-label={t('proposals.filter_open_aria')}
+          title={t('proposals.filter_open_title')}
           className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border bg-white text-slate-700 transition hover:bg-slate-50 ${
             hasActiveStatusFilter
               ? 'border-[#635bff] text-[#635bff]'
@@ -90,8 +92,8 @@ export function ProposalsFiltersSection({
         <button
           type="button"
           onClick={onResetAllFilters}
-          aria-label="Limpar filtros"
-          title="Limpar filtros"
+          aria-label={t('proposals.filter_reset_aria')}
+          title={t('proposals.filter_reset_aria')}
           className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border transition ${
             hasActiveFilters
               ? 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'

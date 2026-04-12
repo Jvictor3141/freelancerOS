@@ -1,4 +1,5 @@
 import { X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { ProposalWithClient } from '../../types/viewModels'
 import { formatDateTime } from '../../utils/formatting'
 import { isAcceptedProposal } from './proposalRules'
@@ -12,19 +13,22 @@ export function ProposalResponseNotificationsSection({
   notifications,
   onDismiss,
 }: ProposalResponseNotificationsSectionProps) {
+  const { t, i18n } = useTranslation()
+  const currentLang = i18n.resolvedLanguage ?? 'pt'
+
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-medium text-slate-500">
-            Respostas do cliente
+            {t('proposals.notifications_label')}
           </p>
           <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-            Portal compartilhado com atividade recente
+            {t('proposals.notifications_heading')}
           </h3>
         </div>
         <p className="text-sm text-slate-500">
-          {notifications.length} aviso(s) ativo(s)
+          {t('proposals.notifications_count', { count: notifications.length })}
         </p>
       </div>
 
@@ -54,7 +58,9 @@ export function ProposalResponseNotificationsSection({
                           : 'bg-rose-100 text-rose-700'
                       }`}
                     >
-                      {isAccepted ? 'Aceita' : 'Recusada'}
+                      {isAccepted
+                        ? t('proposals.notification_accepted_badge')
+                        : t('proposals.notification_rejected_badge')}
                     </span>
                   </div>
                   <p className="mt-1 text-sm text-slate-500">
@@ -66,8 +72,8 @@ export function ProposalResponseNotificationsSection({
                 <button
                   type="button"
                   onClick={() => onDismiss(proposal)}
-                  aria-label={`Remover aviso da proposta ${proposal.title}`}
-                  title="Remover aviso"
+                  aria-label={t('proposals.notification_dismiss_aria', { title: proposal.title })}
+                  title={t('proposals.notification_dismiss_title')}
                   className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white/90 text-slate-500 transition hover:bg-white hover:text-slate-700"
                 >
                   <X size={15} />
@@ -75,11 +81,9 @@ export function ProposalResponseNotificationsSection({
               </div>
 
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                Resposta em{' '}
-                <span className="font-semibold text-slate-900">
-                  {formatDateTime(proposal.clientRespondedAt)}
-                </span>
-                .
+                {t('proposals.notification_responded_at', {
+                  date: formatDateTime(proposal.clientRespondedAt, currentLang),
+                })}
               </p>
             </article>
           )

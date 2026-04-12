@@ -1,3 +1,5 @@
+import type { CurrencyCode } from '../i18n/config';
+
 export const projectStatuses = [
   'in_progress',
   'review',
@@ -12,6 +14,7 @@ export type Project = {
   name: string;
   description: string;
   value: number;
+  currency: CurrencyCode;
   deadline: string;
   status: ProjectStatus;
   createdAt: string;

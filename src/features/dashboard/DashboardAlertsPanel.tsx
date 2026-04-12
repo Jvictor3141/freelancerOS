@@ -1,11 +1,15 @@
 import { ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useParams } from 'react-router-dom'
 import type { DashboardPaymentAlert } from '../../types/dashboard'
-import { formatDashboardCurrency, formatDashboardDate } from '../../utils/dashboard'
+import { formatCurrencyCode, formatDate } from '../../utils/formatting'
+import { usePreferencesStore } from '../../stores/usePreferencesStore'
 import {
   paymentStatusClassName,
   paymentStatusLabel,
 } from '../../utils/paymentStatus'
+import { isSupportedLanguage } from '../../i18n/config'
 
 const MAX_VISIBLE_ALERT_CARDS = 1
 const ALERT_CARD_MIN_HEIGHT = 102
@@ -19,6 +23,10 @@ type DashboardAlertsPanelProps = {
 }
 
 export function DashboardAlertsPanel({ alerts }: DashboardAlertsPanelProps) {
+  const { t, i18n } = useTranslation()
+  const { lang } = useParams<{ lang?: string }>()
+  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
   const alertsListRef = useRef<HTMLDivElement>(null)
   const [canScrollDown, setCanScrollDown] = useState(false)
 
@@ -65,9 +73,9 @@ export function DashboardAlertsPanel({ alerts }: DashboardAlertsPanelProps) {
   return (
     <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100 xl:col-span-4">
       <div className="mb-4">
-        <p className="text-sm font-medium text-slate-500">Alertas</p>
+        <p className="text-sm font-medium text-slate-500">{t('dashboard.alerts_label')}</p>
         <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-          Clientes que precisam de atenção
+          {t('dashboard.alerts_heading')}
         </h3>
       </div>
 
@@ -76,7 +84,7 @@ export function DashboardAlertsPanel({ alerts }: DashboardAlertsPanelProps) {
           ref={alertsListRef}
           className="space-y-3 overflow-y-auto pr-1"
           style={{ maxHeight: `${ALERTS_SCROLL_AREA_MAX_HEIGHT}px` }}
-          aria-label="Lista de alertas"
+          aria-label={t('dashboard.alerts_label')}
         >
           {alerts.length > 0 ? (
             alerts.map((alert) => (
@@ -97,21 +105,21 @@ export function DashboardAlertsPanel({ alerts }: DashboardAlertsPanelProps) {
                   <span
                     className={`inline-flex shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${paymentStatusClassName[alert.status]}`}
                   >
-                    {paymentStatusLabel[alert.status]}
+                    {t(paymentStatusLabel[alert.status])}
                   </span>
                 </div>
 
                 <div className="mt-2.5 flex flex-col gap-1.5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-                  <span>Vence em {formatDashboardDate(alert.dueDate)}</span>
+                  <span>{t('dashboard.alerts_due_on', { date: formatDate(alert.dueDate, currentLang) })}</span>
                   <span className="font-semibold text-slate-900">
-                    {formatDashboardCurrency(alert.amount)}
+                    {formatCurrencyCode(alert.amount, defaultCurrency)}
                   </span>
                 </div>
               </div>
             ))
           ) : (
             <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-sm text-slate-500">
-              Nenhum cliente com cobrança pendente ou atrasada.
+              {t('dashboard.alerts_empty')}
             </div>
           )}
         </div>
@@ -119,7 +127,7 @@ export function DashboardAlertsPanel({ alerts }: DashboardAlertsPanelProps) {
         {canScrollDown ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-center rounded-b-2xl bg-linear-to-t from-white via-white/94 to-transparent translate-y-10 px-4 pb-0 pt-1 text-center text-[8px] font-semibold uppercase tracking-[0.18em] text-slate-400">
             <span className="inline-flex items-center gap-1.5">
-              Role para ver mais
+              {t('dashboard.alerts_scroll_hint')}
               <ChevronDown size={14} />
             </span>
           </div>

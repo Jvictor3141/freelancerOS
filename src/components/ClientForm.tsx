@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFeedback } from './FeedbackProvider';
 import type { Client } from '../types/client';
 import { isValidEmailAddress } from '../utils/email';
@@ -33,6 +34,7 @@ export function ClientForm({
   onCancel,
   isSubmitting = false,
 }: ClientFormProps) {
+  const { t } = useTranslation();
   const [values, setValues] = useState<ClientFormValues>(emptyValues);
   const { notify } = useFeedback();
 
@@ -75,7 +77,7 @@ export function ClientForm({
     if (!values.name.trim() || !values.email.trim()) {
       notify({
         tone: 'warning',
-        title: 'Nome e e-mail são obrigatórios.',
+        title: t('forms.client_error_required'),
       });
       return;
     }
@@ -83,7 +85,7 @@ export function ClientForm({
     if (!isValidEmailAddress(values.email)) {
       notify({
         tone: 'warning',
-        title: 'Informe um e-mail válido para o cliente.',
+        title: t('forms.client_error_invalid_email'),
       });
       return;
     }
@@ -101,33 +103,33 @@ export function ClientForm({
     <form onSubmit={handleSubmit} className="grid gap-4">
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Nome
+          {t('forms.client_name_label')}
         </span>
         <input
           name="name"
           value={values.name}
           onChange={handleChange}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Ex.: Joao Silva"
+          placeholder={t('forms.client_name_placeholder')}
         />
       </label>
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Empresa
+          {t('forms.client_company_label')}
         </span>
         <input
           name="company"
           value={values.company}
           onChange={handleChange}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Ex.: Studio Bloom"
+          placeholder={t('forms.client_company_placeholder')}
         />
       </label>
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          E-mail
+          {t('forms.client_email_label')}
         </span>
         <input
           name="email"
@@ -135,13 +137,13 @@ export function ClientForm({
           value={values.email}
           onChange={handleChange}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Ex.: joao@email.com"
+          placeholder={t('forms.client_email_placeholder')}
         />
       </label>
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Telefone
+          {t('forms.client_phone_label')}
         </span>
         <input
           name="phone"
@@ -149,20 +151,20 @@ export function ClientForm({
           onChange={handlePhoneChange}
           maxLength={15}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Ex.: (83) 99999-9999"
+          placeholder={t('forms.client_phone_placeholder')}
         />
       </label>
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Notas
+          {t('forms.client_notes_label')}
         </span>
         <textarea
           name="notes"
           value={values.notes}
           onChange={handleChange}
           className="min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Observacoes sobre esse cliente..."
+          placeholder={t('forms.client_notes_placeholder')}
         />
       </label>
 
@@ -173,7 +175,7 @@ export function ClientForm({
           disabled={isSubmitting}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
-          Cancelar
+          {t('common.cancel')}
         </button>
 
         <button
@@ -181,7 +183,7 @@ export function ClientForm({
           disabled={isSubmitting}
           className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
-          {isSubmitting ? 'Salvando...' : 'Salvar cliente'}
+          {isSubmitting ? t('common.saving') : t('forms.client_submit')}
         </button>
       </div>
     </form>

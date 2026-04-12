@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useFeedback } from '../components/FeedbackProvider'
 import { getErrorMessage } from './supabase'
 import { useAlert } from './useAlert'
@@ -13,6 +14,7 @@ type RemovalConfig<T extends { id: string }> = {
 export function useRemovalHandler<T extends { id: string }>(
   config: RemovalConfig<T>,
 ) {
+  const { t } = useTranslation()
   const { confirm } = useFeedback()
   const { alert } = useAlert()
 
@@ -21,7 +23,7 @@ export function useRemovalHandler<T extends { id: string }>(
       title: `${config.confirmLabel}?`,
       description: config.description(item),
       confirmLabel: config.confirmLabel,
-      cancelLabel: 'Cancelar',
+      cancelLabel: t('common.cancel'),
       tone: 'danger',
     })
 

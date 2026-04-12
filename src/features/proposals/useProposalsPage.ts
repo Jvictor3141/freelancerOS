@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useFeedback } from '../../components/FeedbackProvider'
 import { useFilterModal } from '../../lib/useFilterModal'
 import { getErrorMessage } from '../../lib/supabase'
@@ -29,6 +30,7 @@ import {
 } from './proposalsView'
 
 export function useProposalsPage() {
+  const { t } = useTranslation()
   const user = useAuthStore((state) => state.user)
 
   const clients = useClientStore((state) => state.clients)
@@ -87,20 +89,20 @@ export function useProposalsPage() {
   const { confirm } = useFeedback()
   const { alert } = useAlert()
   const handleProposalRemoval = useRemovalHandler<ProposalWithClient>({
-    confirmLabel: 'Excluir proposta',
-    description: (proposal) => `Deseja excluir a proposta "${proposal.title}"?`,
+    confirmLabel: t('proposals.delete_confirm_label'),
+    description: (proposal) => t('proposals.delete_confirm_description', { title: proposal.title }),
     remove: removeProposal,
-    successMessage: 'Proposta excluida com sucesso.',
-    errorMessage: 'Não foi possível excluir a proposta.',
+    successMessage: t('proposals.delete_success'),
+    errorMessage: t('proposals.delete_error'),
   })
   const { isSubmitting, handleSubmit: handleProposalSubmit } = useSubmitHandler({
     selected: selectedProposal,
     add: addProposal,
     edit: editProposal,
     onSuccess: closeModal,
-    createdMessage: 'Proposta criada com sucesso.',
-    updatedMessage: 'Proposta atualizada com sucesso.',
-    errorMessage: 'Não foi possível salvar a proposta.',
+    createdMessage: t('proposals.save_created'),
+    updatedMessage: t('proposals.save_updated'),
+    errorMessage: t('proposals.save_error'),
   })
 
   const freelancerProfile = getFreelancerProfileFromUser(user)
@@ -131,7 +133,7 @@ export function useProposalsPage() {
 
   function openCreateModal() {
     if (clients.length === 0) {
-      alert('Cadastre pelo menos um cliente antes de criar uma proposta.')
+      alert(t('proposals.needs_client_first'))
       return
     }
 
@@ -222,7 +224,7 @@ export function useProposalsPage() {
       alert(
         getErrorMessage(
           shareError,
-          'Não foi possível gerar o link seguro da proposta.',
+          t('proposals.share_link_error'),
         ),
       )
     } finally {
@@ -237,17 +239,15 @@ export function useProposalsPage() {
 
     try {
       await navigator.clipboard.writeText(generatedShareLink.url)
-      setShareFeedback('Link copiado para a área de transferência.')
+      setShareFeedback(t('proposals.link_copied'))
     } catch {
-      setShareFeedback(
-        'Não foi possível copiar automaticamente. Copie o link manualmente.',
-      )
+      setShareFeedback(t('proposals.link_copy_error'))
     }
   }
 
   async function handleSendProposal(proposal: ProposalWithClient) {
     if (!proposal.recipientEmail.trim()) {
-      alert('Defina um e-mail válido antes de enviar a proposta.')
+      alert(t('proposals.email_no_recipient'))
       return
     }
 
@@ -264,18 +264,18 @@ export function useProposalsPage() {
         subject,
         body,
       )
-      alert('Abrindo seu app de e-mail com a proposta preenchida.')
+      alert(t('proposals.email_opening'))
     } catch (sendError) {
-      alert(getErrorMessage(sendError, 'Não foi possível enviar a proposta.'))
+      alert(getErrorMessage(sendError, t('proposals.send_error')))
     }
   }
 
   async function handleAcceptProposal(proposal: ProposalWithClient) {
     const confirmed = await confirm({
-      title: 'Aceitar proposta?',
-      description: `Aceitar a proposta "${proposal.title}" e gerar o projeto automaticamente?`,
-      confirmLabel: 'Aceitar proposta',
-      cancelLabel: 'Cancelar',
+      title: t('proposals.accept_confirm_title'),
+      description: t('proposals.accept_confirm_description', { title: proposal.title }),
+      confirmLabel: t('proposals.accept_confirm_label'),
+      cancelLabel: t('common.cancel'),
       tone: 'default',
     })
 
@@ -285,12 +285,12 @@ export function useProposalsPage() {
 
     try {
       await acceptProposalAndGenerateProject(proposal.id)
-      alert('Projeto gerado automaticamente na aba Projetos.')
+      alert(t('proposals.accept_success'))
     } catch (acceptError) {
       alert(
         getErrorMessage(
           acceptError,
-          'Não foi possível aceitar a proposta e gerar o projeto.',
+          t('proposals.accept_error'),
         ),
       )
     }
@@ -298,10 +298,10 @@ export function useProposalsPage() {
 
   async function handleRejectProposal(proposal: ProposalWithClient) {
     const confirmed = await confirm({
-      title: 'Recusar proposta?',
-      description: `Marcar a proposta "${proposal.title}" como recusada?`,
-      confirmLabel: 'Recusar proposta',
-      cancelLabel: 'Cancelar',
+      title: t('proposals.reject_confirm_title'),
+      description: t('proposals.reject_confirm_description', { title: proposal.title }),
+      confirmLabel: t('proposals.reject_confirm_label'),
+      cancelLabel: t('common.cancel'),
       tone: 'danger',
     })
 
@@ -311,12 +311,12 @@ export function useProposalsPage() {
 
     try {
       await rejectProposalById(proposal.id)
-      alert('Proposta marcada como recusada.')
+      alert(t('proposals.reject_success'))
     } catch (rejectError) {
       alert(
         getErrorMessage(
           rejectError,
-          'Não foi possível marcar a proposta como recusada.',
+          t('proposals.reject_error'),
         ),
       )
     }
@@ -325,9 +325,9 @@ export function useProposalsPage() {
   async function handleReopenProposal(proposal: ProposalWithClient) {
     try {
       await reopenProposalById(proposal.id)
-      alert(`Proposta "${proposal.title}" reaberta como rascunho.`)
+      alert(t('proposals.reopen_success', { title: proposal.title }))
     } catch (reopenError) {
-      alert(getErrorMessage(reopenError, 'Não foi possível reabrir a proposta.'))
+      alert(getErrorMessage(reopenError, t('proposals.reopen_error')))
     }
   }
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useRealtimeInvalidationStore } from '../../stores/useRealtimeInvalidationStore'
 import {
@@ -12,6 +13,7 @@ import {
 } from '../../services/dashboardSnapshotService'
 
 export function useDashboardData() {
+  const { t } = useTranslation()
   const user = useAuthStore((state) => state.user)
   const userId = user?.id ?? null
   const dashboardVersion = useRealtimeInvalidationStore(
@@ -54,7 +56,7 @@ export function useDashboardData() {
         setError(
           loadError instanceof Error
             ? loadError.message
-            : 'Não foi possível carregar o dashboard.',
+            : t('dashboard.load_error'),
         )
       }
     }
@@ -64,7 +66,7 @@ export function useDashboardData() {
     return () => {
       isDisposed = true
     }
-  }, [dashboardVersion, userId])
+  }, [dashboardVersion, userId, t])
 
   async function retryLoad() {
     if (!userId) {
@@ -83,7 +85,7 @@ export function useDashboardData() {
       setError(
         loadError instanceof Error
           ? loadError.message
-          : 'Não foi possível carregar o dashboard.',
+          : t('dashboard.load_error'),
       )
     }
   }

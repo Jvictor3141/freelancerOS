@@ -20,6 +20,7 @@ function createPayment(overrides: Partial<Payment> = {}): Payment {
     id: 'payment-1',
     projectId: 'project-1',
     amount: 1500,
+    currency: 'BRL' as const,
     dueDate: '2026-04-04',
     paidAt: null,
     status: 'pending',
@@ -49,6 +50,7 @@ describe('payment store', () => {
     await usePaymentStore.getState().addPayment({
       projectId: payment.projectId,
       amount: payment.amount,
+      currency: payment.currency,
       dueDate: payment.dueDate,
       paidAt: payment.paidAt,
       status: 'pending',

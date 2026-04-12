@@ -1,4 +1,5 @@
 import { CheckCheck, CircleAlert, Clock3, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { formatDate, formatDateTime } from '../utils/formatting'
 import type {
   HeaderNotification,
@@ -37,16 +38,6 @@ function getNotificationIcon(type: HeaderNotificationType) {
   return <Clock3 size={18} />
 }
 
-function getNotificationMeta(notification: HeaderNotification) {
-  if (notification.type === 'proposal_accepted') {
-    return `Aceite em ${formatDateTime(notification.occurredAt)}`
-  }
-  if (notification.type === 'payment_overdue') {
-    return `Expirou em ${formatDate(notification.occurredAt)}`
-  }
-  return `Prazo em ${formatDate(notification.occurredAt)}`
-}
-
 type NotificationCardProps = {
   notification: HeaderNotification
   onDismiss: (id: string) => void
@@ -58,7 +49,19 @@ export function NotificationCard({
   onDismiss,
   onClick,
 }: NotificationCardProps) {
+  const { t, i18n } = useTranslation()
+  const currentLang = i18n.resolvedLanguage ?? 'pt'
   const toneClassName = getNotificationToneClassName(notification.tone)
+
+  function getNotificationMeta() {
+    if (notification.type === 'proposal_accepted') {
+      return t('header.notifications_meta_accepted', { date: formatDateTime(notification.occurredAt, currentLang) })
+    }
+    if (notification.type === 'payment_overdue') {
+      return t('header.notifications_meta_expired', { date: formatDate(notification.occurredAt, currentLang) })
+    }
+    return t('header.notifications_meta_due', { date: formatDate(notification.occurredAt, currentLang) })
+  }
 
   return (
     <article
@@ -86,15 +89,15 @@ export function NotificationCard({
                 {notification.description}
               </p>
               <p className="mt-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                {getNotificationMeta(notification)}
+                {getNotificationMeta()}
               </p>
             </button>
 
             <button
               type="button"
               onClick={() => onDismiss(notification.id)}
-              aria-label={`Dispensar notificacao: ${notification.title}`}
-              title="Dispensar notificacao"
+              aria-label={t('common.dismiss_notification_aria', { title: notification.title })}
+              title={t('common.dismiss_notification')}
               className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/70 bg-white/85 text-slate-500 transition hover:bg-white hover:text-slate-700"
             >
               <X size={14} />

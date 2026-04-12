@@ -8,6 +8,11 @@ import type {
 import type { Payment } from '../types/payment';
 import type { Proposal } from '../types/proposal';
 import type { Project } from '../types/project';
+import { isSupportedCurrency } from '../i18n/config';
+
+function resolveCurrency(value: string | null | undefined): Project['currency'] {
+  return value && isSupportedCurrency(value) ? value : 'BRL';
+}
 
 type NumericValue = number | string;
 
@@ -29,6 +34,7 @@ export type ProjectRecord = {
   name: string;
   description: string | null;
   value: NumericValue;
+  currency: string;
   deadline: string | null;
   status: Project['status'];
   created_at: string;
@@ -39,6 +45,7 @@ export type PaymentRecord = {
   user_id: string;
   project_id: string;
   amount: NumericValue;
+  currency: string;
   due_date: string;
   paid_at: string | null;
   status: Payment['status'];
@@ -55,6 +62,7 @@ export type ProposalRecord = {
   title: string;
   description: string | null;
   amount: NumericValue;
+  currency: string;
   delivery_days: number;
   recipient_email: string;
   status: Proposal['status'];
@@ -100,6 +108,7 @@ export function mapProjectRecord(record: ProjectRecord): Project {
     name: record.name,
     description: record.description ?? '',
     value: Number(record.value),
+    currency: resolveCurrency(record.currency),
     deadline: record.deadline ?? '',
     status: record.status,
     createdAt: record.created_at,
@@ -111,6 +120,7 @@ export function mapPaymentRecord(record: PaymentRecord): Payment {
     id: record.id,
     projectId: record.project_id,
     amount: Number(record.amount),
+    currency: resolveCurrency(record.currency),
     dueDate: record.due_date,
     paidAt: record.paid_at,
     status: record.status,
@@ -128,6 +138,7 @@ export function mapProposalRecord(record: ProposalRecord): Proposal {
     title: record.title,
     description: record.description ?? '',
     amount: Number(record.amount),
+    currency: resolveCurrency(record.currency),
     deliveryDays: Number(record.delivery_days || 0),
     recipientEmail: record.recipient_email,
     status: record.status,
@@ -170,6 +181,7 @@ export function toProjectPayload(
     name: data.name,
     description: data.description,
     value: data.value,
+    currency: data.currency,
     deadline: data.deadline || null,
     status: data.status,
   };
@@ -185,6 +197,7 @@ export function toPaymentPayload(
     ...(options?.userId ? { user_id: options.userId } : {}),
     project_id: data.projectId,
     amount: data.amount,
+    currency: data.currency,
     due_date: data.dueDate,
     paid_at: data.paidAt,
     status: data.status,
@@ -213,6 +226,7 @@ export function toProposalPayload(
     title: data.title,
     description: data.description,
     amount: data.amount,
+    currency: data.currency,
     delivery_days: data.deliveryDays,
     recipient_email: data.recipientEmail,
     status: data.status,

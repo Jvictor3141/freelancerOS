@@ -30,6 +30,7 @@ function createProposal(overrides: Partial<Proposal> = {}): Proposal {
     title: 'Site institucional',
     description: 'Escopo comercial',
     amount: 2500,
+    currency: 'BRL' as const,
     deliveryDays: 10,
     recipientEmail: 'contato@acme.com',
     status: 'sent',

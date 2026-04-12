@@ -18,13 +18,7 @@ import {
   sortProposalsByClientResponseDesc,
 } from './proposalRules'
 
-export const shareExpirationOptions = [
-  { value: 1, label: '1 dia' },
-  { value: 3, label: '3 dias' },
-  { value: 7, label: '7 dias' },
-  { value: 14, label: '14 dias' },
-  { value: 30, label: '30 dias' },
-]
+export const shareExpirationValues = [1, 3, 7, 14, 30]
 
 const dismissedProposalResponseNotificationsStoragePrefix =
   'dismissed-proposal-response-notifications'

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFeedback } from './FeedbackProvider';
 import { SelectField } from './SelectField';
 import type { PaymentInput } from '../types/inputs';
@@ -29,6 +30,7 @@ type PaymentFormProps = {
 const emptyValues: PaymentFormState = {
   projectId: '',
   amount: '',
+  currency: 'BRL',
   dueDate: '',
   paidAt: null,
   status: 'pending',
@@ -43,6 +45,7 @@ export function PaymentForm({
   onCancel,
   isSubmitting = false,
 }: PaymentFormProps) {
+  const { t } = useTranslation();
   const [values, setValues] = useState<PaymentFormState>(emptyValues);
   const { notify } = useFeedback();
 
@@ -61,6 +64,7 @@ export function PaymentForm({
       setValues({
         projectId: initialValues.projectId,
         amount: String(initialValues.amount),
+        currency: initialValues.currency,
         dueDate: initialValues.dueDate,
         paidAt: initialValues.paidAt,
         status: toPersistedPaymentStatus(initialValues.status),
@@ -70,9 +74,11 @@ export function PaymentForm({
       return;
     }
 
+    const firstProject = projects[0];
     setValues({
       ...emptyValues,
-      projectId: projects[0]?.id ?? '',
+      projectId: firstProject?.id ?? '',
+      currency: firstProject?.currency ?? 'BRL',
     });
   }, [initialValues, projects]);
 
@@ -107,7 +113,7 @@ export function PaymentForm({
     if (!values.projectId) {
       notify({
         tone: 'warning',
-        title: 'Selecione um projeto.',
+        title: t('forms.payment_error_project_required'),
       });
       return;
     }
@@ -117,7 +123,7 @@ export function PaymentForm({
     if (!values.amount.trim() || Number.isNaN(amount) || amount <= 0) {
       notify({
         tone: 'warning',
-        title: 'Informe um valor maior que zero.',
+        title: t('forms.payment_error_amount_required'),
       });
       return;
     }
@@ -125,7 +131,7 @@ export function PaymentForm({
     if (!values.dueDate) {
       notify({
         tone: 'warning',
-        title: 'Informe a data de vencimento.',
+        title: t('forms.payment_error_due_date_required'),
       });
       return;
     }
@@ -133,7 +139,7 @@ export function PaymentForm({
     if (values.status === 'paid' && !values.paidAt) {
       notify({
         tone: 'warning',
-        title: 'Informe a data em que o pagamento foi recebido.',
+        title: t('forms.payment_error_paid_at_required'),
       });
       return;
     }
@@ -148,14 +154,21 @@ export function PaymentForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-        Projeto
+        {t('forms.payment_project_label')}
         <SelectField
           name="projectId"
           value={values.projectId}
-          onChange={(nextValue) => setField('projectId', nextValue)}
+          onChange={(nextValue) => {
+            const selectedProject = projects.find((p) => p.id === nextValue)
+            setValues((prev) => ({
+              ...prev,
+              projectId: nextValue,
+              currency: selectedProject?.currency ?? prev.currency,
+            }))
+          }}
           buttonClassName="bg-white text-slate-900"
           options={[
-            { value: '', label: 'Selecione um projeto' },
+            { value: '', label: t('forms.payment_project_placeholder') },
             ...projects.map((project) => ({
               value: project.id,
               label: project.name,
@@ -166,7 +179,7 @@ export function PaymentForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Valor
+          {t('forms.payment_amount_label')}
           <input
             type="number"
             name="amount"
@@ -175,12 +188,12 @@ export function PaymentForm({
             value={values.amount}
             onChange={handleChange}
             className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-            placeholder="0,00"
+            placeholder={t('forms.payment_amount_placeholder')}
           />
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Vencimento
+          {t('forms.payment_due_date_label')}
           <input
             type="date"
             name="dueDate"
@@ -193,7 +206,7 @@ export function PaymentForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Status
+          {t('forms.payment_status_label')}
           <SelectField
             name="status"
             value={values.status}
@@ -207,14 +220,14 @@ export function PaymentForm({
             }}
             buttonClassName="bg-white text-slate-900"
             options={[
-              { value: 'pending', label: paymentStatusLabel.pending },
-              { value: 'paid', label: paymentStatusLabel.paid },
+              { value: 'pending', label: t(paymentStatusLabel.pending) },
+              { value: 'paid', label: t(paymentStatusLabel.paid) },
             ]}
           />
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Metodo
+          {t('forms.payment_method_label')}
           <SelectField
             name="method"
             value={values.method}
@@ -226,12 +239,12 @@ export function PaymentForm({
               value: method,
               label:
                 method === 'pix'
-                  ? 'Pix'
+                  ? t('forms.payment_method_pix')
                   : method === 'card'
-                    ? 'Cartão'
+                    ? t('forms.payment_method_card')
                     : method === 'bank_transfer'
-                      ? 'Transferência'
-                      : 'Dinheiro',
+                      ? t('forms.payment_method_bank_transfer')
+                      : t('forms.payment_method_cash'),
             }))}
           />
         </label>
@@ -239,7 +252,7 @@ export function PaymentForm({
 
       {values.status === 'paid' ? (
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-          Pago em
+          {t('forms.payment_paid_at_label')}
           <input
             type="date"
             name="paidAt"
@@ -251,14 +264,14 @@ export function PaymentForm({
       ) : null}
 
       <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">
-        Observacoes
+        {t('forms.payment_notes_label')}
         <textarea
           name="notes"
           value={values.notes}
           onChange={handleChange}
           rows={4}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-          placeholder="Adicione observacoes sobre este pagamento"
+          placeholder={t('forms.payment_notes_placeholder')}
         />
       </label>
 
@@ -269,7 +282,7 @@ export function PaymentForm({
           disabled={isSubmitting}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
-          Cancelar
+          {t('common.cancel')}
         </button>
 
         <button
@@ -277,7 +290,7 @@ export function PaymentForm({
           disabled={isSubmitting}
           className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
-          {isSubmitting ? 'Salvando...' : 'Salvar pagamento'}
+          {isSubmitting ? t('common.saving') : t('forms.payment_submit')}
         </button>
       </div>
     </form>

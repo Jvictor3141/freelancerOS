@@ -1,4 +1,5 @@
 import type { Client } from './client'
+import type { CurrencyCode } from '../i18n/config'
 import type {
   PaymentMethod,
   PersistedPaymentStatus,
@@ -18,6 +19,7 @@ export type ProjectInput = EntityInput<Project>
 export type PaymentInput = {
   projectId: string
   amount: number
+  currency: CurrencyCode
   dueDate: string
   paidAt: string | null
   status: PersistedPaymentStatus

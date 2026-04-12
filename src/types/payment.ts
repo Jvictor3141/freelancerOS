@@ -1,3 +1,5 @@
+import type { CurrencyCode } from '../i18n/config';
+
 export const persistedPaymentStatuses = ['pending', 'paid'] as const;
 export type PersistedPaymentStatus = (typeof persistedPaymentStatuses)[number];
 
@@ -11,6 +13,7 @@ export type Payment = {
   id: string;
   projectId: string;
   amount: number;
+  currency: CurrencyCode;
   dueDate: string;
   paidAt: string | null;
   status: PaymentStatus;
