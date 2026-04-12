@@ -173,7 +173,7 @@ export function ProjectsListSection({
                       {project.name}
                     </p>
                     <p
-                      className="max-w-[22rem] truncate text-xs text-slate-500"
+                      className="max-w-88 truncate text-xs text-slate-500"
                       title={project.description || t('common.no_description')}
                     >
                       {project.description || t('common.no_description')}
