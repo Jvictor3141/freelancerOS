@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useFilterModal } from '../../lib/useFilterModal'
 import { useAlert } from '../../lib/useAlert'
 import { useRemovalHandler } from '../../lib/useRemovalHandler'
@@ -20,6 +21,7 @@ import {
 } from './projectsView'
 
 export function useProjectsPage() {
+  const { t } = useTranslation()
   const [searchParams, setSearchParams] = useSearchParams()
 
   const clients = useClientStore((state) => state.clients)
@@ -59,20 +61,20 @@ export function useProjectsPage() {
   })
   const { alert } = useAlert()
   const handleProjectRemoval = useRemovalHandler<ProjectWithClient>({
-    confirmLabel: 'Excluir projeto',
-    description: (project) => `Deseja excluir o projeto "${project.name}"?`,
+    confirmLabel: t('projects.delete_confirm_label'),
+    description: (project) => t('projects.delete_confirm_description', { name: project.name }),
     remove: removeProject,
-    successMessage: 'Projeto excluido com sucesso.',
-    errorMessage: 'Não foi possível excluir o projeto.',
+    successMessage: t('projects.delete_success'),
+    errorMessage: t('projects.delete_error'),
   })
   const { isSubmitting, handleSubmit: handleProjectSubmit } = useSubmitHandler({
     selected: selectedProject,
     add: addProject,
     edit: editProject,
     onSuccess: closeModal,
-    createdMessage: 'Projeto criado com sucesso.',
-    updatedMessage: 'Projeto atualizado com sucesso.',
-    errorMessage: 'Não foi possível salvar o projeto.',
+    createdMessage: t('projects.save_created'),
+    updatedMessage: t('projects.save_updated'),
+    errorMessage: t('projects.save_error'),
   })
 
   useEffect(() => {
@@ -108,7 +110,7 @@ export function useProjectsPage() {
 
   function openCreateModal() {
     if (clients.length === 0) {
-      alert('Cadastre pelo menos um cliente antes de criar um projeto.')
+      alert(t('projects.needs_client_first'))
       return
     }
 

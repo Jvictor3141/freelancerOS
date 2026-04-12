@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Modal } from '../components/Modal'
 import { ProjectForm } from '../components/ProjectForm'
 import { PageBanner } from '../components/page/PageBanner'
@@ -8,8 +9,12 @@ import { ProjectsCommercialBanner } from '../features/projects/ProjectsCommercia
 import { ProjectsListSection } from '../features/projects/ProjectsListSection'
 import { ProjectsToolbar } from '../features/projects/ProjectsToolbar'
 import { useProjectsPage } from '../features/projects/useProjectsPage'
+import { isSupportedLanguage } from '../i18n/config'
 
 export function ProjectsPage() {
+  const { t, i18n } = useTranslation()
+  const { lang } = useParams<{ lang?: string }>()
+  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
   const navigate = useNavigate()
   const {
     clients,
@@ -53,8 +58,8 @@ export function ProjectsPage() {
   if (isLoading) {
     return (
       <PageLoadingState
-        label="Projetos"
-        description="Sincronizando clientes e projetos no Supabase."
+        label={t('projects.loading_label')}
+        description={t('projects.loading_description')}
       />
     )
   }
@@ -63,7 +68,7 @@ export function ProjectsPage() {
     <div className="page-stack space-y-6">
       {combinedError ? (
         <PageBanner
-          actionLabel={hasLoadError ? 'Tentar novamente' : undefined}
+          actionLabel={hasLoadError ? t('common.retry') : undefined}
           onAction={
             hasLoadError
               ? () => {
@@ -80,7 +85,7 @@ export function ProjectsPage() {
         <PageBanner
           tone="warning"
           actionLabel={
-            hasCommercialSummaryLoadError ? 'Tentar novamente' : undefined
+            hasCommercialSummaryLoadError ? t('common.retry') : undefined
           }
           onAction={
             hasCommercialSummaryLoadError
@@ -90,15 +95,14 @@ export function ProjectsPage() {
               : undefined
           }
         >
-          Não foi possível carregar o resumo comercial das propostas nesta
-          página. A operação de projetos continua disponível normalmente.
+          {t('projects.error_proposal_summary')}
         </PageBanner>
       ) : null}
 
       {showCommercialSummary ? (
         <ProjectsCommercialBanner
           summary={commercialSummary}
-          onOpenProposals={() => navigate('/propostas')}
+          onOpenProposals={() => navigate(`/${currentLang}/propostas`)}
         />
       ) : null}
 
@@ -125,8 +129,8 @@ export function ProjectsPage() {
       />
 
       <Modal
-        title="Filtrar projetos"
-        description="Escolha os filtros do pipeline operacional e aplique quando terminar."
+        title={t('projects.modal_filter_title')}
+        description={t('projects.modal_filter_description')}
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
       >
@@ -142,11 +146,11 @@ export function ProjectsPage() {
       </Modal>
 
       <Modal
-        title={selectedProject ? 'Editar projeto' : 'Novo projeto'}
+        title={selectedProject ? t('projects.modal_edit_title') : t('projects.modal_new_title')}
         description={
           selectedProject
-            ? 'Atualize as informações do projeto.'
-            : 'Preencha os dados para cadastrar um novo projeto.'
+            ? t('projects.modal_edit_description')
+            : t('projects.modal_new_description')
         }
         isOpen={isModalOpen}
         onClose={closeModal}

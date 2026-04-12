@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useFilterModal } from '../../lib/useFilterModal'
 import { getErrorMessage } from '../../lib/supabase'
 import { useAlert } from '../../lib/useAlert'
@@ -19,6 +20,7 @@ import {
 import type { PaymentStatusFilter } from '../../utils/paymentStatus'
 
 export function usePaymentsPage() {
+  const { t } = useTranslation()
   const projects = useProjectStore((state) => state.projects)
   const projectError = useProjectStore((state) => state.error)
   const projectsLoadStatus = useProjectStore((state) => state.loadStatus)
@@ -53,20 +55,20 @@ export function usePaymentsPage() {
   const statusFilterModal = useFilterModal<PaymentStatusFilter>('all')
   const { alert } = useAlert()
   const handlePaymentRemoval = useRemovalHandler<PaymentWithProjectAndClient>({
-    confirmLabel: 'Excluir pagamento',
-    description: () => 'Deseja excluir este pagamento?',
+    confirmLabel: t('payments.delete_confirm_label'),
+    description: () => t('payments.delete_confirm_description'),
     remove: removePayment,
-    successMessage: 'Pagamento excluido com sucesso.',
-    errorMessage: 'Não foi possível excluir o pagamento.',
+    successMessage: t('payments.delete_success'),
+    errorMessage: t('payments.delete_error'),
   })
   const { isSubmitting, handleSubmit: handlePaymentSubmit } = useSubmitHandler({
     selected: selectedPayment,
     add: addPayment,
     edit: editPayment,
     onSuccess: closeModal,
-    createdMessage: 'Pagamento criado com sucesso.',
-    updatedMessage: 'Pagamento atualizado com sucesso.',
-    errorMessage: 'Não foi possível salvar o pagamento.',
+    createdMessage: t('payments.save_created'),
+    updatedMessage: t('payments.save_updated'),
+    errorMessage: t('payments.save_error'),
   })
 
   useEffect(() => {
@@ -86,7 +88,7 @@ export function usePaymentsPage() {
 
   function openCreateModal() {
     if (projects.length === 0) {
-      alert('Cadastre pelo menos um projeto antes de criar um pagamento.')
+      alert(t('payments.needs_project_first'))
       return
     }
 
@@ -115,10 +117,10 @@ export function usePaymentsPage() {
   async function handleMarkAsPaid(paymentId: string) {
     try {
       await markAsPaid(paymentId)
-      alert('Pagamento marcado como pago.')
+      alert(t('payments.mark_as_paid_success'))
     } catch (markError) {
       alert(
-        getErrorMessage(markError, 'Não foi possível marcar o pagamento como pago.'),
+        getErrorMessage(markError, t('payments.mark_as_paid_error')),
       )
     }
   }

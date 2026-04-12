@@ -1,4 +1,5 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Modal } from '../components/Modal'
 import { ProposalForm } from '../components/ProposalForm'
 import { PageBanner } from '../components/page/PageBanner'
@@ -12,8 +13,12 @@ import { canEditProposal } from '../features/proposals/proposalRules'
 import { ProposalsFiltersSection } from '../features/proposals/ProposalsFiltersSection'
 import { ProposalsOverviewSection } from '../features/proposals/ProposalsOverviewSection'
 import { useProposalsPage } from '../features/proposals/useProposalsPage'
+import { isSupportedLanguage } from '../i18n/config'
 
 export function ProposalsPage() {
+  const { t, i18n } = useTranslation()
+  const { lang } = useParams<{ lang?: string }>()
+  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
   const navigate = useNavigate()
   const {
     clients,
@@ -71,8 +76,8 @@ export function ProposalsPage() {
   if (isLoading) {
     return (
       <PageLoadingState
-        label="Propostas"
-        description="Preparando clientes e propostas para montar o funil comercial."
+        label={t('proposals.loading_label')}
+        description={t('proposals.loading_description')}
       />
     )
   }
@@ -81,7 +86,7 @@ export function ProposalsPage() {
     <div className="page-stack space-y-6">
       {combinedError ? (
         <PageBanner
-          actionLabel={hasLoadError ? 'Tentar novamente' : undefined}
+          actionLabel={hasLoadError ? t('common.retry') : undefined}
           onAction={
             hasLoadError
               ? () => {
@@ -130,7 +135,7 @@ export function ProposalsPage() {
         onReopen={(proposal) => {
           void handleReopenProposal(proposal)
         }}
-        onOpenProjects={() => navigate('/projetos')}
+        onOpenProjects={() => navigate(`/${currentLang}/projetos`)}
         onRemove={(proposal) => {
           void handleProposalRemoval(proposal)
         }}
@@ -154,8 +159,8 @@ export function ProposalsPage() {
       </Modal>
 
       <Modal
-        title="Filtrar propostas"
-        description="Escolha o status comercial para refinar a lista e aplique quando terminar."
+        title={t('proposals.modal_filter_title')}
+        description={t('proposals.modal_filter_description')}
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
       >
@@ -168,11 +173,11 @@ export function ProposalsPage() {
       </Modal>
 
       <Modal
-        title={selectedProposal ? 'Editar proposta' : 'Nova proposta'}
+        title={selectedProposal ? t('proposals.modal_edit_title') : t('proposals.modal_new_title')}
         description={
           selectedProposal
-            ? 'Ajuste a proposta antes de reenviar ao cliente.'
-            : 'Preencha os dados comerciais para criar uma nova proposta.'
+            ? t('proposals.modal_edit_description')
+            : t('proposals.modal_new_description')
         }
         isOpen={isModalOpen}
         onClose={closeModal}
@@ -187,8 +192,8 @@ export function ProposalsPage() {
       </Modal>
 
       <Modal
-        title="Link seguro da proposta"
-        description="Gere um link protegido por token e compartilhe apenas a visualização pública dessa proposta."
+        title={t('proposals.modal_share_title')}
+        description={t('proposals.modal_share_description')}
         isOpen={isShareModalOpen}
         onClose={closeShareModal}
       >

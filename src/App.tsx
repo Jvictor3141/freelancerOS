@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useRef } from 'react';
-import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Navigate, Outlet, Route, Routes, useParams } from 'react-router-dom';
 import { BrandLogo } from './components/BrandLogo';
 import { RouteTransition } from './components/RouteTransition';
 import { useSupabaseRealtimeSync } from './lib/useSupabaseRealtimeSync';
@@ -15,6 +16,7 @@ import { usePreferencesStore } from './stores/usePreferencesStore';
 import { useProjectStore } from './stores/useProjectStore';
 import { useProposalStore } from './stores/useProposalStore';
 import { useRealtimeInvalidationStore } from './stores/useRealtimeInvalidationStore';
+import { isSupportedLanguage, type SupportedLanguage } from './i18n/config';
 
 const DashboardPage = lazy(async () => ({
   default: (await import('./pages/DashboardPage')).DashboardPage,
@@ -58,15 +60,44 @@ function LoadingState({ title, description }: LoadingStateProps) {
   );
 }
 
+/**
+ * Validates the :lang URL param, syncs it to i18next, and sets <html lang="">.
+ * Redirects to the default language if the param is invalid.
+ */
+function LangRouteProvider() {
+  const { lang } = useParams<{ lang: string }>();
+  const { i18n } = useTranslation();
+
+  const validLang: SupportedLanguage =
+    lang && isSupportedLanguage(lang) ? lang : 'pt';
+
+  // Sync URL lang to i18next (runs synchronously before render via effect)
+  useEffect(() => {
+    if (i18n.language !== validLang) {
+      void i18n.changeLanguage(validLang);
+    }
+    document.documentElement.lang = validLang === 'pt' ? 'pt-BR' : 'en-US';
+  }, [validLang, i18n]);
+
+  // Redirect invalid lang segments to default
+  if (lang && !isSupportedLanguage(lang)) {
+    return <Navigate to={`/pt/${lang}`} replace />;
+  }
+
+  return <Outlet />;
+}
+
 function SharedProposalRoute() {
+  const { t } = useTranslation();
+
   return (
     <Suspense
       fallback={
         <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8">
           <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
             <LoadingState
-              title="Carregando proposta compartilhada"
-              description="Validando o link seguro e preparando a visualização."
+              title={t('app.loading_shared_proposal_title')}
+              description={t('app.loading_shared_proposal_description')}
             />
           </div>
         </div>
@@ -79,24 +110,26 @@ function SharedProposalRoute() {
 
 function ProtectedAppShell() {
   const { user, authFlow } = useAuthStore();
+  const { lang } = useParams<{ lang: string }>();
+  const currentLang = lang && isSupportedLanguage(lang) ? lang : 'pt';
+
   useSupabaseRealtimeSync(user?.id ?? null);
 
   if (!user) {
-    return <Navigate to="/login?mode=sign_in" replace />;
+    return <Navigate to={`/${currentLang}/login?mode=sign_in`} replace />;
   }
 
   if (authFlow === 'recovery') {
-    return <Navigate to="/redefinir-senha?flow=recovery" replace />;
+    return (
+      <Navigate to={`/${currentLang}/redefinir-senha?flow=recovery`} replace />
+    );
   }
 
   return (
     <DashboardLayout>
       <Suspense
         fallback={
-          <LoadingState
-            title="Carregando página"
-            description="Montando a interface e buscando os módulos necessários."
-          />
+          <AppPageLoadingFallback />
         }
       >
         <RouteTransition>
@@ -107,14 +140,44 @@ function ProtectedAppShell() {
   );
 }
 
+function AppPageLoadingFallback() {
+  const { t } = useTranslation();
+  return (
+    <LoadingState
+      title={t('app.loading_page_title')}
+      description={t('app.loading_page_description')}
+    />
+  );
+}
+
+function AppInitLoading() {
+  const { t } = useTranslation();
+  return (
+    <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
+        <LoadingState
+          title={t('app.loading_session_title')}
+          description={t('app.loading_session_description')}
+        />
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const { user, initialized, initialize, authFlow } = useAuthStore();
+  const { i18n } = useTranslation();
   const theme = usePreferencesStore((state) => state.theme);
   const previousUserIdRef = useRef<string | null>(null);
+
+  // Detect default lang for root redirects
+  const detectedLang: SupportedLanguage =
+    isSupportedLanguage(i18n.resolvedLanguage ?? '') ? (i18n.resolvedLanguage as SupportedLanguage) : 'pt';
+
   const authenticatedHome =
     authFlow === 'recovery'
-      ? '/redefinir-senha?flow=recovery'
-      : '/dashboard';
+      ? `/${detectedLang}/redefinir-senha?flow=recovery`
+      : `/${detectedLang}/dashboard`;
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -129,7 +192,6 @@ function App() {
         unsubscribe = cleanup;
         return;
       }
-
       cleanup();
     });
 
@@ -141,10 +203,7 @@ function App() {
 
   useEffect(() => {
     const currentUserId = user?.id ?? null;
-
-    if (previousUserIdRef.current === currentUserId) {
-      return;
-    }
+    if (previousUserIdRef.current === currentUserId) return;
 
     useClientStore.getState().resetStore();
     useProjectStore.getState().resetStore();
@@ -155,48 +214,79 @@ function App() {
   }, [user?.id]);
 
   if (!initialized) {
-    return (
-      <div className="min-h-screen bg-transparent px-5 py-6 text-slate-900 sm:px-8">
-        <div className="mx-auto flex min-h-[calc(100vh-3rem)] max-w-4xl items-center justify-center">
-          <LoadingState
-            title="Preparando sua sessão"
-            description="Verificando autenticação e conectando o painel ao Supabase."
-          />
-        </div>
-      </div>
-    );
+    return <AppInitLoading />;
   }
 
   return (
     <Routes>
+      {/* Root redirect → detected language */}
       <Route
         path="/"
-        element={user ? <Navigate to={authenticatedHome} replace /> : <LandingPage />}
-      />
-      <Route
-        path="/login"
-        element={user ? <Navigate to={authenticatedHome} replace /> : <LoginPage />}
-      />
-      <Route path="/auth/callback" element={<AuthCallbackPage />} />
-      <Route path="/redefinir-senha" element={<RecoveryPasswordPage />} />
-      <Route
-        path="/propostas/compartilhadas/:shareId"
-        element={<SharedProposalRoute />}
+        element={
+          <Navigate
+            to={user ? authenticatedHome : `/${detectedLang}/`}
+            replace
+          />
+        }
       />
 
-      <Route element={<ProtectedAppShell />}>
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/clientes" element={<ClientsPage />} />
-        <Route path="/clients/:id" element={<ClientDetailsPage />} />
-        <Route path="/projetos" element={<ProjectsPage />} />
-        <Route path="/pagamentos" element={<PaymentsPage />} />
-        <Route path="/propostas" element={<ProposalsPage />} />
-        <Route path="/configuracoes" element={<SettingsPage />} />
+      {/* Language-prefixed routes */}
+      <Route path="/:lang" element={<LangRouteProvider />}>
+        {/* Index: landing or redirect to dashboard */}
+        <Route
+          index
+          element={
+            user ? (
+              <Navigate to={authenticatedHome} replace />
+            ) : (
+              <LandingPage />
+            )
+          }
+        />
+
+        <Route
+          path="login"
+          element={
+            user ? <Navigate to={authenticatedHome} replace /> : <LoginPage />
+          }
+        />
+
+        <Route path="auth/callback" element={<AuthCallbackPage />} />
+        <Route path="redefinir-senha" element={<RecoveryPasswordPage />} />
+        <Route
+          path="propostas/compartilhadas/:shareId"
+          element={<SharedProposalRoute />}
+        />
+
+        {/* Protected shell */}
+        <Route element={<ProtectedAppShell />}>
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="clientes" element={<ClientsPage />} />
+          <Route path="clients/:id" element={<ClientDetailsPage />} />
+          <Route path="projetos" element={<ProjectsPage />} />
+          <Route path="pagamentos" element={<PaymentsPage />} />
+          <Route path="propostas" element={<ProposalsPage />} />
+          <Route path="configuracoes" element={<SettingsPage />} />
+        </Route>
+
+        {/* Unknown sub-paths → home */}
+        <Route
+          path="*"
+          element={
+            <Navigate to={user ? authenticatedHome : `/${detectedLang}/`} replace />
+          }
+        />
       </Route>
 
+      {/* Unknown root paths → detected lang home */}
       <Route
         path="*"
-        element={<Navigate to={user ? authenticatedHome : '/'} replace />}
+        element={
+          <Navigate
+            to={user ? authenticatedHome : `/${detectedLang}/`}
+            replace
+          />
+        }
       />
     </Routes>
   );

@@ -1,7 +1,10 @@
 import { AlertTriangle, ArrowUpRight, Clock3 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { useParams } from 'react-router-dom'
 import type { DashboardPaymentMetrics } from '../../types/dashboard'
 import { formatDashboardCurrency } from '../../utils/dashboard'
 import { DashboardFinancialStatCard } from './DashboardFinancialStatCard'
+import { isSupportedLanguage } from '../../i18n/config'
 
 type DashboardFinancialOverviewProps = {
   paymentMetrics: DashboardPaymentMetrics
@@ -10,20 +13,24 @@ type DashboardFinancialOverviewProps = {
 export function DashboardFinancialOverview({
   paymentMetrics,
 }: DashboardFinancialOverviewProps) {
+  const { t, i18n } = useTranslation()
+  const { lang } = useParams<{ lang?: string }>()
+  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+
   const cards = [
     {
-      label: 'Recebido',
-      value: formatDashboardCurrency(paymentMetrics.receivedAmount),
+      label: t('dashboard.financial_received'),
+      value: formatDashboardCurrency(paymentMetrics.receivedAmount, currentLang),
       icon: ArrowUpRight,
     },
     {
-      label: 'Pendente',
-      value: formatDashboardCurrency(paymentMetrics.pendingAmount),
+      label: t('dashboard.financial_pending'),
+      value: formatDashboardCurrency(paymentMetrics.pendingAmount, currentLang),
       icon: Clock3,
     },
     {
-      label: 'Atrasado',
-      value: formatDashboardCurrency(paymentMetrics.overdueAmount),
+      label: t('dashboard.financial_overdue'),
+      value: formatDashboardCurrency(paymentMetrics.overdueAmount, currentLang),
       icon: AlertTriangle,
     },
   ]
@@ -33,10 +40,10 @@ export function DashboardFinancialOverview({
       <div className="flex h-full flex-col justify-between gap-6">
         <div className="space-y-2">
           <p className="text-sm font-medium text-indigo-100">
-            Visão financeira
+            {t('dashboard.financial_label')}
           </p>
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Entradas de dinheiro e saúde do negócio
+            {t('dashboard.financial_heading')}
           </h2>
         </div>
 

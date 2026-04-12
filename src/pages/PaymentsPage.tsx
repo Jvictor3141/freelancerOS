@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Modal } from '../components/Modal'
 import { PaymentForm } from '../components/PaymentForm'
 import { PageBanner } from '../components/page/PageBanner'
@@ -7,6 +8,8 @@ import { PaymentsListSection } from '../features/payments/PaymentsListSection'
 import { usePaymentsPage } from '../features/payments/usePaymentsPage'
 
 export function PaymentsPage() {
+  const { t } = useTranslation()
+
   const {
     combinedError,
     filteredPayments,
@@ -38,8 +41,8 @@ export function PaymentsPage() {
   if (isLoading) {
     return (
       <PageLoadingState
-        label="Pagamentos"
-        description="Sincronizando clientes, projetos e pagamentos no Supabase."
+        label={t('payments.loading_label')}
+        description={t('payments.loading_description')}
       />
     )
   }
@@ -48,7 +51,7 @@ export function PaymentsPage() {
     <div className="page-stack space-y-6">
       {combinedError ? (
         <PageBanner
-          actionLabel={hasLoadError ? 'Tentar novamente' : undefined}
+          actionLabel={hasLoadError ? t('common.retry') : undefined}
           onAction={
             hasLoadError
               ? () => {
@@ -78,8 +81,8 @@ export function PaymentsPage() {
       />
 
       <Modal
-        title="Filtrar pagamentos"
-        description="Escolha o status para refinar a lista e aplique quando terminar."
+        title={t('payments.modal_filter_title')}
+        description={t('payments.modal_filter_description')}
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
       >
@@ -92,8 +95,8 @@ export function PaymentsPage() {
       </Modal>
 
       <Modal
-        title={selectedPayment ? 'Editar pagamento' : 'Novo pagamento'}
-        description="Preencha os dados para registrar o pagamento."
+        title={selectedPayment ? t('payments.modal_edit_title') : t('payments.modal_new_title')}
+        description={t('payments.modal_new_description')}
         isOpen={isModalOpen}
         onClose={closeModal}
       >

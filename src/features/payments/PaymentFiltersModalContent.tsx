@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { SelectField } from '../../components/SelectField'
 import {
   type PaymentStatusFilter,
@@ -19,11 +20,13 @@ export function PaymentFiltersModalContent({
   onClear,
   onApply,
 }: PaymentFiltersModalContentProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="space-y-4">
       <label className="block">
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Status
+          {t('payments.filter_status_label')}
         </span>
         <SelectField
           value={statusFilterDraft}
@@ -33,7 +36,7 @@ export function PaymentFiltersModalContent({
           options={paymentStatusFilterOptions.map((status) => ({
             value: status,
             label:
-              status === 'all' ? 'Todos os status' : paymentStatusLabel[status],
+              status === 'all' ? t('payments.filter_all_statuses') : t(paymentStatusLabel[status]),
           }))}
         />
       </label>
@@ -44,7 +47,7 @@ export function PaymentFiltersModalContent({
           onClick={onClear}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
-          Limpar filtros
+          {t('payments.filter_clear')}
         </button>
 
         <button
@@ -52,7 +55,7 @@ export function PaymentFiltersModalContent({
           onClick={onApply}
           className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
-          Aplicar filtros
+          {t('payments.filter_apply')}
         </button>
       </div>
     </div>

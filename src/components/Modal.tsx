@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 type ModalProps = {
   title: string;
@@ -20,8 +21,11 @@ export function Modal({
   children,
   maxWidthClassName = 'max-w-2xl',
   showCloseButton = true,
-  closeLabel = 'Fechar',
+  closeLabel,
 }: ModalProps) {
+  const { t } = useTranslation();
+  const effectiveCloseLabel = closeLabel ?? t('common.close');
+
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -67,7 +71,7 @@ export function Modal({
                 onClick={onClose}
                 className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
               >
-                {closeLabel}
+                {effectiveCloseLabel}
               </button>
             ) : null}
           </div>

@@ -1,9 +1,10 @@
 import { Copy, ExternalLink } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { SelectField } from '../../components/SelectField'
 import type { ProposalSecureShareLink } from '../../types/sharedProposal'
 import type { ProposalWithClient } from '../../types/viewModels'
 import { formatDateTime } from '../../utils/formatting'
-import { shareExpirationOptions } from './proposalsView'
+import { shareExpirationValues } from './proposalsView'
 
 type ProposalShareModalContentProps = {
   shareTargetProposal: ProposalWithClient | null
@@ -30,6 +31,14 @@ export function ProposalShareModalContent({
   onClose,
   onGenerateShareLink,
 }: ProposalShareModalContentProps) {
+  const { t, i18n } = useTranslation()
+  const currentLang = i18n.resolvedLanguage ?? 'pt'
+
+  const expirationOptions = shareExpirationValues.map((days) => ({
+    value: days,
+    label: t('proposals.share_expiration_days', { count: days }),
+  }))
+
   return (
     <div className="space-y-5">
       {shareTargetProposal ? (
@@ -38,21 +47,20 @@ export function ProposalShareModalContent({
             {shareTargetProposal.title}
           </p>
           <p className="mt-2 leading-6">
-            O token aparece somente após a geração. Se você perder esse link,
-            será preciso gerar um novo.
+            {t('proposals.share_link_info')}
           </p>
         </div>
       ) : null}
 
       <label className="block">
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Expiração do link
+          {t('proposals.share_expiration_label')}
         </span>
         <SelectField
           value={shareExpiresInDays}
           onChange={onShareExpiresInDaysChange}
           disabled={isGeneratingShareLink}
-          options={shareExpirationOptions}
+          options={expirationOptions}
         />
       </label>
 
@@ -61,10 +69,12 @@ export function ProposalShareModalContent({
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-sm font-semibold text-slate-900">
-                Link gerado com sucesso
+                {t('proposals.share_link_generated_title')}
               </p>
               <p className="mt-1 text-sm leading-6 text-slate-600">
-                Expira em {formatDateTime(generatedShareLink.expiresAt)}.
+                {t('proposals.share_link_expires_at', {
+                  date: formatDateTime(generatedShareLink.expiresAt, currentLang),
+                })}
               </p>
             </div>
 
@@ -73,8 +83,8 @@ export function ProposalShareModalContent({
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm shadow-slate-100 transition hover:bg-slate-50"
-              aria-label="Abrir visualização compartilhada"
-              title="Abrir visualização compartilhada"
+              aria-label={t('proposals.share_open_view_aria')}
+              title={t('proposals.share_open_view_aria')}
             >
               <ExternalLink size={16} />
             </a>
@@ -93,14 +103,14 @@ export function ProposalShareModalContent({
               className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
             >
               <Copy size={16} />
-              Copiar link
+              {t('proposals.share_copy_link')}
             </button>
             <button
               type="button"
               onClick={onResetGeneratedLink}
               className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
             >
-              Gerar novo link
+              {t('proposals.share_generate_new_link')}
             </button>
           </div>
 
@@ -119,7 +129,7 @@ export function ProposalShareModalContent({
           disabled={isGeneratingShareLink}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
-          Fechar
+          {t('proposals.share_close')}
         </button>
 
         <button
@@ -128,7 +138,7 @@ export function ProposalShareModalContent({
           disabled={isGeneratingShareLink}
           className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {isGeneratingShareLink ? 'Gerando...' : 'Gerar link seguro'}
+          {isGeneratingShareLink ? t('proposals.share_generating') : t('proposals.share_generate_link')}
         </button>
       </div>
     </div>

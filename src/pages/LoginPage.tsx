@@ -8,6 +8,7 @@ import {
   Wallet,
 } from 'lucide-react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../components/BrandLogo';
 import { PasswordField } from '../components/PasswordField';
 import { getErrorMessage } from '../lib/supabase';
@@ -45,28 +46,8 @@ function getAuthModeFromSearchParams(searchParams: URLSearchParams): AuthMode {
   return searchParams.get('mode') === 'sign_up' ? 'sign_up' : 'sign_in';
 }
 
-const highlights = [
-  {
-    title: 'Clientes, projetos e pagamentos no mesmo fluxo',
-    description:
-      'Pare de espalhar a operação em planilhas soltas e centralize tudo no mesmo painel.',
-    icon: BriefcaseBusiness,
-  },
-  {
-    title: 'Acesso protegido por dono dos dados',
-    description:
-      'Cada registro fica vinculado ao seu usuário no Supabase com RLS ativa.',
-    icon: ShieldCheck,
-  },
-  {
-    title: 'Financeiro visível sem improviso',
-    description:
-      'Recebimentos, pendências e atrasos aparecem em um dashboard pronto para decisão.',
-    icon: Wallet,
-  },
-];
-
 export function LoginPage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const { loading, error, notice, signIn, signUp, clearFeedback } =
     useAuthStore();
@@ -83,6 +64,24 @@ export function LoginPage() {
   } | null>(null);
   const [isPasswordResetSubmitting, setPasswordResetSubmitting] =
     useState(false);
+
+  const highlights = [
+    {
+      title: t('auth.highlight_flow_title'),
+      description: t('auth.highlight_flow_description'),
+      icon: BriefcaseBusiness,
+    },
+    {
+      title: t('auth.highlight_access_title'),
+      description: t('auth.highlight_access_description'),
+      icon: ShieldCheck,
+    },
+    {
+      title: t('auth.highlight_financial_title'),
+      description: t('auth.highlight_financial_description'),
+      icon: Wallet,
+    },
+  ];
 
   useEffect(() => {
     clearFeedback();
@@ -102,18 +101,18 @@ export function LoginPage() {
     setLocalError(null);
 
     if (!email.trim() || !password.trim()) {
-      setLocalError('Informe e-mail e senha para continuar.');
+      setLocalError(t('auth.error_email_password_required'));
       return;
     }
 
     if (mode === 'sign_up') {
       if (password.length < 8) {
-        setLocalError('Use uma senha com pelo menos 8 caracteres.');
+        setLocalError(t('auth.error_password_min_length'));
         return;
       }
 
       if (password !== confirmPassword) {
-        setLocalError('A confirmação de senha não confere.');
+        setLocalError(t('auth.error_password_mismatch'));
         return;
       }
     }
@@ -137,7 +136,7 @@ export function LoginPage() {
     if (!email.trim()) {
       setPasswordResetFeedback({
         tone: 'error',
-        message: 'Informe o e-mail da conta para receber o link de recuperação.',
+        message: t('auth.error_email_required_for_recovery'),
       });
       return;
     }
@@ -153,14 +152,14 @@ export function LoginPage() {
 
       setPasswordResetFeedback({
         tone: 'success',
-        message: `Link de recuperação enviado para ${email.trim()}.`,
+        message: t('auth.recovery_link_sent', { email: email.trim() }),
       });
     } catch (error) {
       setPasswordResetFeedback({
         tone: 'error',
         message: getErrorMessage(
           error,
-          'Não foi possível enviar o link de recuperação.',
+          t('auth.error_recovery_link_failed'),
         ),
       });
     } finally {
@@ -173,13 +172,13 @@ export function LoginPage() {
       <Seo
         title={
           mode === 'sign_in'
-            ? 'Entrar | FreelancerOS'
-            : 'Criar Conta | FreelancerOS'
+            ? t('auth.seo_sign_in_title')
+            : t('auth.seo_sign_up_title')
         }
         description={
           mode === 'sign_in'
-            ? 'Acesse sua conta do FreelancerOS para gerenciar sua operação como freelancer.'
-            : 'Crie sua conta no FreelancerOS para centralizar clientes, projetos, propostas e pagamentos.'
+            ? t('auth.seo_sign_in_description')
+            : t('auth.seo_sign_up_description')
         }
         robots="noindex, follow"
         canonical="/login"
@@ -194,7 +193,7 @@ export function LoginPage() {
                   to="/"
                   className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                 >
-                  Ver apresentação
+                  {t('auth.see_presentation')}
                 </Link>
               </div>
 
@@ -205,17 +204,17 @@ export function LoginPage() {
               <div className="min-h-35">
                 <div key={`auth-copy-${mode}`} className="motion-swap space-y-3">
                   <p className="text-sm font-medium text-slate-500">
-                    {mode === 'sign_in' ? 'Acesse sua conta' : 'Crie sua conta'}
+                    {mode === 'sign_in' ? t('auth.access_label') : t('auth.register_label')}
                   </p>
                   <h2 className="text-3xl font-semibold tracking-tight text-slate-950">
                     {mode === 'sign_in'
-                      ? 'Entrar no painel'
-                      : 'Cadastrar conta'}
+                      ? t('auth.sign_in_heading')
+                      : t('auth.sign_up_heading')}
                   </h2>
                   <p className="text-sm leading-6 text-slate-500">
                     {mode === 'sign_in'
-                      ? 'Use seu email e senha para acessar seus dados protegidos.'
-                      : 'Crie seu acesso para gravar clientes, projetos e pagamentos no banco.'}
+                      ? t('auth.sign_in_copy')
+                      : t('auth.sign_up_copy')}
                   </p>
                 </div>
               </div>
@@ -230,7 +229,7 @@ export function LoginPage() {
                       : 'text-slate-500'
                   }`}
                 >
-                  Entrar
+                  {t('auth.sign_in_tab')}
                 </button>
                 <button
                   type="button"
@@ -241,35 +240,35 @@ export function LoginPage() {
                       : 'text-slate-500'
                   }`}
                 >
-                  Criar conta
+                  {t('auth.sign_up_tab')}
                 </button>
               </div>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-slate-700">
-                    E-mail
+                    {t('auth.email_label')}
                   </span>
                   <input
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="voce@email.com"
+                    placeholder={t('auth.email_placeholder')}
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-[#635bff] focus:bg-white"
                   />
                 </label>
 
                 <PasswordField
-                  label="Senha"
+                  label={t('auth.password_label')}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  placeholder="Sua senha"
+                  placeholder={t('auth.password_placeholder')}
                   autoComplete={
                     mode === 'sign_in' ? 'current-password' : 'new-password'
                   }
                   hint={
                     mode === 'sign_up'
-                      ? 'Mínimo 8 caracteres, com maiúscula, minúscula e símbolo (ex: @, !, #).'
+                      ? t('auth.password_hint')
                       : undefined
                   }
                 />
@@ -278,12 +277,12 @@ export function LoginPage() {
                   <div key={`auth-slot-${mode}`} className="motion-swap">
                     {mode === 'sign_up' ? (
                       <PasswordField
-                        label="Confirmar senha"
+                        label={t('auth.confirm_password_label')}
                         value={confirmPassword}
                         onChange={(event) =>
                           setConfirmPassword(event.target.value)
                         }
-                        placeholder="Repita sua senha"
+                        placeholder={t('auth.confirm_password_placeholder')}
                         autoComplete="new-password"
                       />
                     ) : (
@@ -291,11 +290,10 @@ export function LoginPage() {
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-sm font-semibold text-slate-900">
-                              Esqueceu sua senha?
+                              {t('auth.forgot_password_title')}
                             </p>
                             <p className="mt-1 text-sm leading-6 text-slate-500">
-                              Digite seu email acima e receba um link de
-                              recuperação.
+                              {t('auth.forgot_password_description')}
                             </p>
                           </div>
 
@@ -306,8 +304,8 @@ export function LoginPage() {
                             }}
                             disabled={isPasswordResetSubmitting}
                             className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm shadow-slate-100 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-70"
-                            aria-label="Enviar link de recuperação"
-                            title="Enviar link de recuperação"
+                            aria-label={t('auth.send_recovery_link')}
+                            title={t('auth.send_recovery_link')}
                           >
                             <Mail size={16} />
                           </button>
@@ -369,10 +367,10 @@ export function LoginPage() {
                     className="motion-swap inline-flex items-center gap-2"
                   >
                     {loading
-                      ? 'Processando...'
+                      ? t('common.processing')
                       : mode === 'sign_in'
-                        ? 'Entrar no painel'
-                        : 'Criar conta'}
+                        ? t('auth.submit_sign_in')
+                        : t('auth.submit_sign_up')}
                     <ArrowRight size={16} />
                   </span>
                 </button>
@@ -383,11 +381,10 @@ export function LoginPage() {
                   <FolderKanban size={18} />
                 </div>
                 <p className="text-sm font-semibold text-slate-900">
-                  Seu painel fica vinculado ao seu usuário
+                  {t('auth.panel_binding_title')}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Depois do login, os dados carregados e gravados no Supabase
-                  ficam alinhados com as políticas do banco por usuário.
+                  {t('auth.panel_binding_description')}
                 </p>
               </div>
             </div>
@@ -408,15 +405,13 @@ export function LoginPage() {
 
               <div className="max-w-2xl space-y-4">
                 <p className="text-sm font-semibold uppercase tracking-[0.28em] text-indigo-100/90">
-                  Painel operacional
+                  {t('auth.hero_badge')}
                 </p>
                 <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-                  Entre para gerenciar sua operação sem virar refém de planilha
+                  {t('auth.hero_heading')}
                 </h1>
                 <p className="max-w-xl text-base leading-7 text-indigo-100/90 sm:text-lg">
-                  Login e cadastro no mesmo fluxo, no mesmo tema do produto e
-                  conectados direto ao Supabase com acesso protegido por
-                  usuário.
+                  {t('auth.hero_description')}
                 </p>
               </div>
             </div>
@@ -446,4 +441,3 @@ export function LoginPage() {
     </>
   );
 }
-

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { SelectField } from '../../components/SelectField'
 import {
   type ProposalStatusFilter,
@@ -19,6 +20,8 @@ export function ProposalFiltersModalContent({
   onClear,
   onApply,
 }: ProposalFiltersModalContentProps) {
+  const { t } = useTranslation()
+
   return (
     <div className="space-y-4">
       <label className="block">
@@ -34,8 +37,8 @@ export function ProposalFiltersModalContent({
             value: status,
             label:
               status === 'all'
-                ? 'Todos os status'
-                : proposalStatusLabel[status],
+                ? t('proposals.filter_all_statuses')
+                : t(proposalStatusLabel[status]),
           }))}
         />
       </label>
@@ -46,7 +49,7 @@ export function ProposalFiltersModalContent({
           onClick={onClear}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
-          Limpar filtros
+          {t('proposals.filter_clear')}
         </button>
 
         <button
@@ -54,7 +57,7 @@ export function ProposalFiltersModalContent({
           onClick={onApply}
           className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
-          Aplicar filtros
+          {t('proposals.filter_apply')}
         </button>
       </div>
     </div>

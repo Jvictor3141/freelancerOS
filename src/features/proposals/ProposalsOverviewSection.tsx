@@ -5,6 +5,7 @@ import {
   Plus,
   Send,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { formatCurrency } from '../../utils/formatting'
 import type { ProposalMetrics } from '../../types/viewModels'
 
@@ -17,25 +18,28 @@ export function ProposalsOverviewSection({
   metrics,
   onCreate,
 }: ProposalsOverviewSectionProps) {
+  const { t, i18n } = useTranslation()
+  const currentLang = i18n.resolvedLanguage ?? 'pt'
+
   const summaryCards = [
     {
-      label: 'Rascunhos',
+      label: t('proposals.overview_metric_drafts'),
       value: metrics.draftCount,
       icon: PencilLine,
     },
     {
-      label: 'Enviadas',
+      label: t('proposals.overview_metric_sent'),
       value: metrics.sentCount,
       icon: Send,
     },
     {
-      label: 'Aceitas',
+      label: t('proposals.overview_metric_accepted'),
       value: metrics.acceptedCount,
       icon: CheckCircle2,
     },
     {
-      label: 'Em aberto',
-      value: formatCurrency(metrics.openPipelineValue),
+      label: t('proposals.overview_metric_open'),
+      value: formatCurrency(metrics.openPipelineValue, currentLang),
       icon: Clock3,
     },
   ]
@@ -43,9 +47,9 @@ export function ProposalsOverviewSection({
   return (
     <section className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
       <article className="rounded-[28px] bg-[#635bff] p-6 text-white shadow-[0_24px_60px_rgba(99,91,255,0.28)]">
-        <p className="text-sm font-medium text-indigo-100">Fluxo comercial</p>
+        <p className="text-sm font-medium text-indigo-100">{t('proposals.overview_label')}</p>
         <h2 className="mt-2 text-3xl font-semibold tracking-tight">
-          Proposta, envio, aceite e projeto no mesmo fluxo
+          {t('proposals.overview_heading')}
         </h2>
 
         <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-4">
@@ -71,9 +75,9 @@ export function ProposalsOverviewSection({
       </article>
 
       <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
-        <p className="text-sm font-medium text-slate-500">Ação rápida</p>
+        <p className="text-sm font-medium text-slate-500">{t('proposals.quick_action_label')}</p>
         <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-          Nova proposta operacional
+          {t('proposals.quick_action_heading')}
         </h3>
 
         <button
@@ -81,16 +85,16 @@ export function ProposalsOverviewSection({
           onClick={onCreate}
           className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
-          Nova proposta
+          {t('proposals.new_button')}
           <Plus size={16} />
         </button>
 
         <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-          <p className="text-sm font-semibold text-slate-900">Fluxo</p>
+          <p className="text-sm font-semibold text-slate-900">{t('proposals.flow_label')}</p>
           <ul className="mt-3 text-sm leading-6 text-slate-600">
-            <li>1. Crie o rascunho com escopo, valor e prazo.</li>
-            <li>2. Envie por email para o contato do cliente.</li>
-            <li>3. Ao aceitar, gere o projeto automaticamente.</li>
+            <li>{t('proposals.flow_step_1')}</li>
+            <li>{t('proposals.flow_step_2')}</li>
+            <li>{t('proposals.flow_step_3')}</li>
           </ul>
         </div>
       </article>

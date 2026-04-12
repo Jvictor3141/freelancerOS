@@ -1,5 +1,7 @@
 import { PencilLine, Trash2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { useParams } from 'react-router-dom'
 import type { ProjectWithClient } from '../../types/viewModels'
 import { getActionButtonClassName } from '../../utils/actionButtonStyles'
 import { formatCurrency, formatDate } from '../../utils/formatting'
@@ -7,6 +9,7 @@ import {
   projectStatusClassName,
   projectStatusLabel,
 } from '../../utils/projectStatus'
+import { isSupportedLanguage } from '../../i18n/config'
 
 type ProjectsListSectionProps = {
   projects: ProjectWithClient[]
@@ -49,14 +52,18 @@ export function ProjectsListSection({
   onEdit,
   onRemove,
 }: ProjectsListSectionProps) {
+  const { t, i18n } = useTranslation()
+  const { lang } = useParams<{ lang?: string }>()
+  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">
       <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
         <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-          Lista de projetos
+          {t('projects.list_title')}
         </h3>
         <p className="text-sm font-medium text-slate-500">
-          {projects.length} projeto(s) encontrado(s)
+          {t('projects.count', { count: projects.length })}
         </p>
       </div>
 
@@ -71,51 +78,51 @@ export function ProjectsListSection({
                   </p>
                   <p
                     className="mt-1 truncate text-sm text-slate-500"
-                    title={project.description || 'Sem descrição'}
+                    title={project.description || t('common.no_description')}
                   >
-                    {project.description || 'Sem descrição'}
+                    {project.description || t('common.no_description')}
                   </p>
                 </div>
 
                 <span
                   className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${projectStatusClassName[project.status]}`}
                 >
-                  {projectStatusLabel[project.status]}
+                  {t(projectStatusLabel[project.status])}
                 </span>
               </div>
 
               <div className="grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
                 <p>
-                  <span className="font-medium text-slate-900">Cliente:</span>{' '}
+                  <span className="font-medium text-slate-900">{t('projects.card_client')}</span>{' '}
                   {project.clientName}
                 </p>
                 <p>
-                  <span className="font-medium text-slate-900">Empresa:</span>{' '}
-                  {project.clientCompany || '-'}
+                  <span className="font-medium text-slate-900">{t('projects.card_company')}</span>{' '}
+                  {project.clientCompany || t('common.none')}
                 </p>
                 <p>
-                  <span className="font-medium text-slate-900">Valor:</span>{' '}
-                  {formatCurrency(project.value)}
+                  <span className="font-medium text-slate-900">{t('projects.card_value')}</span>{' '}
+                  {formatCurrency(project.value, currentLang)}
                 </p>
                 <p>
-                  <span className="font-medium text-slate-900">Prazo:</span>{' '}
-                  {formatDate(project.deadline)}
+                  <span className="font-medium text-slate-900">{t('projects.card_deadline')}</span>{' '}
+                  {formatDate(project.deadline, currentLang)}
                 </p>
               </div>
 
               <div className="inline-flex max-w-full flex-nowrap items-center gap-2">
                 <ProjectActionButton
                   tone="neutral"
-                  label={`Editar projeto ${project.name}`}
-                  title="Editar projeto"
+                  label={t('projects.edit_aria', { name: project.name })}
+                  title={t('projects.edit_title')}
                   icon={PencilLine}
                   onClick={() => onEdit(project)}
                 />
 
                 <ProjectActionButton
                   tone="danger"
-                  label={`Excluir projeto ${project.name}`}
-                  title="Excluir projeto"
+                  label={t('projects.delete_aria', { name: project.name })}
+                  title={t('projects.delete_title')}
                   icon={Trash2}
                   onClick={() => onRemove(project)}
                 />
@@ -124,7 +131,7 @@ export function ProjectsListSection({
           ))
         ) : (
           <div className="px-5 py-10 text-center text-sm text-slate-500">
-            Nenhum projeto encontrado.
+            {t('projects.no_results')}
           </div>
         )}
       </div>
@@ -134,22 +141,22 @@ export function ProjectsListSection({
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50/80">
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Projeto
+                {t('projects.table_project')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Cliente
+                {t('projects.table_client')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Valor
+                {t('projects.table_value')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Prazo
+                {t('projects.table_deadline')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Status
+                {t('projects.table_status')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                Ações
+                {t('projects.table_actions')}
               </th>
             </tr>
           </thead>
@@ -167,9 +174,9 @@ export function ProjectsListSection({
                     </p>
                     <p
                       className="max-w-[22rem] truncate text-xs text-slate-500"
-                      title={project.description || 'Sem descrição'}
+                      title={project.description || t('common.no_description')}
                     >
-                      {project.description || 'Sem descrição'}
+                      {project.description || t('common.no_description')}
                     </p>
                   </div>
                 </td>
@@ -178,24 +185,24 @@ export function ProjectsListSection({
                   <div>
                     <p>{project.clientName}</p>
                     <p className="text-xs text-slate-500">
-                      {project.clientCompany || '-'}
+                      {project.clientCompany || t('common.none')}
                     </p>
                   </div>
                 </td>
 
                 <td className="px-6 py-4 text-sm text-slate-700">
-                  {formatCurrency(project.value)}
+                  {formatCurrency(project.value, currentLang)}
                 </td>
 
                 <td className="px-6 py-4 text-sm text-slate-700">
-                  {formatDate(project.deadline)}
+                  {formatDate(project.deadline, currentLang)}
                 </td>
 
                 <td className="px-6 py-4">
                   <span
                     className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold ${projectStatusClassName[project.status]}`}
                   >
-                    {projectStatusLabel[project.status]}
+                    {t(projectStatusLabel[project.status])}
                   </span>
                 </td>
 
@@ -203,16 +210,16 @@ export function ProjectsListSection({
                   <div className="flex flex-wrap items-center gap-2">
                     <ProjectActionButton
                       tone="neutral"
-                      label={`Editar projeto ${project.name}`}
-                      title="Editar projeto"
+                      label={t('projects.edit_aria', { name: project.name })}
+                      title={t('projects.edit_title')}
                       icon={PencilLine}
                       onClick={() => onEdit(project)}
                     />
 
                     <ProjectActionButton
                       tone="danger"
-                      label={`Excluir projeto ${project.name}`}
-                      title="Excluir projeto"
+                      label={t('projects.delete_aria', { name: project.name })}
+                      title={t('projects.delete_title')}
                       icon={Trash2}
                       onClick={() => onRemove(project)}
                     />
@@ -227,7 +234,7 @@ export function ProjectsListSection({
                   colSpan={6}
                   className="px-6 py-10 text-center text-sm text-slate-500"
                 >
-                  Nenhum projeto encontrado.
+                  {t('projects.no_results')}
                 </td>
               </tr>
             ) : null}

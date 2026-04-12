@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { HeaderNotificationType } from '../components/headerNotificationsModel';
 import { Modal } from '../components/Modal';
 import { getErrorMessage } from '../lib/supabase';
@@ -35,35 +36,35 @@ import {
 } from '../utils/freelancerProfile';
 
 type NotificationTypeConfig = {
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
   tone: 'success' | 'warning' | 'danger';
 };
 
 const notificationTypeConfig: Record<HeaderNotificationType, NotificationTypeConfig> = {
   payment_overdue: {
-    label: 'Pagamento vencido',
-    description: 'Quando um pagamento pendente passa da data de vencimento.',
+    labelKey: 'settings.notif_payment_overdue_label',
+    descriptionKey: 'settings.notif_payment_overdue_description',
     tone: 'danger',
   },
   payment_due_today: {
-    label: 'Pagamento vence hoje',
-    description: 'Quando há um pagamento com vencimento no dia atual.',
+    labelKey: 'settings.notif_payment_due_today_label',
+    descriptionKey: 'settings.notif_payment_due_today_description',
     tone: 'warning',
   },
   project_due_today: {
-    label: 'Projeto vence hoje',
-    description: 'Quando um projeto ativo tem prazo no dia atual.',
+    labelKey: 'settings.notif_project_due_today_label',
+    descriptionKey: 'settings.notif_project_due_today_description',
     tone: 'warning',
   },
   project_due_soon: {
-    label: 'Projeto vence em breve',
-    description: 'Quando um projeto ativo vence em até 3 dias.',
+    labelKey: 'settings.notif_project_due_soon_label',
+    descriptionKey: 'settings.notif_project_due_soon_description',
     tone: 'warning',
   },
   proposal_accepted: {
-    label: 'Proposta aceita',
-    description: 'Quando um cliente aceita uma proposta enviada.',
+    labelKey: 'settings.notif_proposal_accepted_label',
+    descriptionKey: 'settings.notif_proposal_accepted_description',
     tone: 'success',
   },
 };
@@ -87,8 +88,8 @@ const notificationToneClassName: Record<
 
 type ThemeOption = {
   value: WorkspaceTheme;
-  label: string;
-  description: string;
+  labelKey: string;
+  descriptionKey: string;
   previewClassName: string;
 };
 
@@ -108,22 +109,22 @@ type SummaryActionCardProps = {
 const themeOptions: ThemeOption[] = [
   {
     value: 'indigo',
-    label: 'Studio',
-    description: 'Visual frio, nítido e com cara de produto premium.',
+    labelKey: 'settings.theme_studio_label',
+    descriptionKey: 'settings.theme_studio_description',
     previewClassName:
       'bg-[linear-gradient(135deg,#635bff_0%,#7c73ff_52%,#dbeafe_100%)]',
   },
   {
     value: 'sunset',
-    label: 'Editorial',
-    description: 'Paleta quente para um painel mais humano e autoral.',
+    labelKey: 'settings.theme_editorial_label',
+    descriptionKey: 'settings.theme_editorial_description',
     previewClassName:
       'bg-[linear-gradient(135deg,#ea580c_0%,#fb923c_52%,#ffedd5_100%)]',
   },
   {
     value: 'forest',
-    label: 'Atelier',
-    description: 'Clima mais calmo para freelancers de branding e design.',
+    labelKey: 'settings.theme_atelier_label',
+    descriptionKey: 'settings.theme_atelier_description',
     previewClassName:
       'bg-[linear-gradient(135deg,#15803d_0%,#22c55e_52%,#dcfce7_100%)]',
   },
@@ -182,6 +183,7 @@ function SummaryActionCard({
 }
 
 export function SettingsPage() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const theme = usePreferencesStore((state) => state.theme);
   const setTheme = usePreferencesStore((state) => state.setTheme);
@@ -259,15 +261,14 @@ const profileIntro = useMemo(() => {
       setProfileValues(sanitizedProfile);
       setProfileFeedback({
         tone: 'success',
-        message:
-          'Perfil comercial salvo. As próximas propostas já podem sair com sua assinatura e posicionamento.',
+        message: t('settings.error_profile_save_success'),
       });
     } catch (error) {
       setProfileFeedback({
         tone: 'error',
         message: getErrorMessage(
           error,
-          'Não foi possível salvar o perfil profissional.',
+          t('settings.error_profile_save_failed'),
         ),
       });
     } finally {
@@ -279,7 +280,7 @@ const profileIntro = useMemo(() => {
     if (!user?.email) {
       setSecurityFeedback({
         tone: 'error',
-        message: 'A conta atual não possui um e-mail válido para recuperação.',
+        message: t('settings.error_no_email_for_recovery'),
       });
       return;
     }
@@ -296,14 +297,14 @@ const profileIntro = useMemo(() => {
 
       setSecurityFeedback({
         tone: 'success',
-        message: `Link de recuperação enviado para ${user.email}.`,
+        message: t('settings.recovery_link_sent', { email: user.email }),
       });
     } catch (error) {
       setSecurityFeedback({
         tone: 'error',
         message: getErrorMessage(
           error,
-          'Não foi possível enviar o link de recuperação.',
+          t('settings.error_recovery_link_failed'),
         ),
       });
     } finally {
@@ -317,7 +318,7 @@ const profileIntro = useMemo(() => {
     if (newPassword.length < 6) {
       setSecurityFeedback({
         tone: 'error',
-        message: 'Use uma senha com pelo menos 6 caracteres.',
+        message: t('settings.error_password_min_length'),
       });
       return;
     }
@@ -325,7 +326,7 @@ const profileIntro = useMemo(() => {
     if (newPassword !== confirmPassword) {
       setSecurityFeedback({
         tone: 'error',
-        message: 'A confirmação da nova senha não confere.',
+        message: t('settings.error_password_mismatch'),
       });
       return;
     }
@@ -344,15 +345,14 @@ const profileIntro = useMemo(() => {
       setConfirmPassword('');
       setSecurityFeedback({
         tone: 'success',
-        message:
-          'Senha atualizada com sucesso. Se você abriu o app por um link de recuperação, ele já pode ser descartado.',
+        message: t('settings.success_password_updated'),
       });
     } catch (error) {
       setSecurityFeedback({
         tone: 'error',
         message: getErrorMessage(
           error,
-          'Não foi possível atualizar a senha da conta.',
+          t('settings.error_password_update_failed'),
         ),
       });
     } finally {
@@ -371,39 +371,39 @@ const profileIntro = useMemo(() => {
                 <Sparkles size={18} />
               </div>
               <p className="text-sm font-medium text-slate-500">
-                Aparência, conta e posicionamento
+                {t('settings.appearance_label')}
               </p>
             </div>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-              Configure o painel para parecer seu
+              {t('settings.appearance_heading')}
             </h2>
 
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               <SummaryActionCard
                 icon={<Palette size={16} />}
-                label="Tema atual"
-                value={currentTheme.label}
-                hint="Abrir tema"
+                label={t('settings.current_theme_label')}
+                value={t(currentTheme.labelKey)}
+                hint={t('settings.open_theme_hint')}
                 onClick={() => setThemeModalOpen(true)}
               />
 
               <SummaryActionCard
                 icon={<BriefcaseBusiness size={16} />}
-                label="Assinatura usada"
+                label={t('settings.used_signature_label')}
                 value={
                   profileValues.businessName ||
                   profileValues.displayName ||
-                  'Não configurada'
+                  t('settings.not_configured')
                 }
-                hint="Abrir perfil"
+                hint={t('settings.open_profile_hint')}
                 onClick={() => setProfileModalOpen(true)}
               />
 
               <SummaryActionCard
                 icon={<ShieldCheck size={16} />}
-                label="Conta"
-                value={user?.email ?? 'Conta autenticada'}
-                hint="Abrir segurança"
+                label={t('settings.account_label')}
+                value={user?.email ?? t('header.authenticated_account')}
+                hint={t('settings.open_security_hint')}
                 onClick={() => setSecurityModalOpen(true)}
               />
 
@@ -416,29 +416,28 @@ const profileIntro = useMemo(() => {
                 <QrCode size={18} />
               </div>
               <p className="text-sm font-medium text-slate-500">
-                Recebimento
+                {t('settings.payment_label')}
               </p>
             </div>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-              Chave PIX
+              {t('settings.pix_key_heading')}
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              A chave aparece na assinatura das propostas enviadas, junto com
-              WhatsApp e contato.
+              {t('settings.pix_key_description')}
             </p>
 
             <form onSubmit={handleProfileSubmit} className="mt-6 space-y-4">
               <div className="grid gap-2 sm:grid-cols-2 items-end">
                 <label className="block">
                   <span className="mb-2 block text-sm font-medium text-slate-700">
-                    Chave PIX
+                    {t('settings.pix_key_label')}
                   </span>
                   <input
                     name="pixKey"
                     value={profileValues.pixKey}
                     onChange={handleProfileFieldChange}
                     className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                    placeholder="CPF, CNPJ, e-mail, telefone ou chave aleatória"
+                    placeholder={t('settings.pix_key_placeholder')}
                   />
                 </label>
                 <FeedbackBanner feedback={profileFeedback} />
@@ -448,7 +447,7 @@ const profileIntro = useMemo(() => {
                   className="inline-flex items-center h-fit w-fit gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-70"
                 >
                   <Save size={16} />
-                  {profileSubmitting ? 'Salvando...' : 'Salvar chave PIX'}
+                  {profileSubmitting ? t('common.saving') : t('settings.save_pix_key')}
                 </button>
               </div>
             </form>
@@ -457,10 +456,10 @@ const profileIntro = useMemo(() => {
 
           <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
             <p className="text-sm font-medium text-slate-500">
-              Preview nas propostas
+              {t('settings.preview_label')}
             </p>
             <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
-              Como sua identidade aparece para o cliente
+              {t('settings.preview_heading')}
             </h3>
 
             <div className="mt-6 rounded-[28px] border border-slate-200 bg-slate-50 p-5">
@@ -470,19 +469,19 @@ const profileIntro = useMemo(() => {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-slate-900">
-                    Proposta comercial
+                    {t('settings.proposal_preview_title')}
                   </p>
                   <p className="mt-1 text-sm text-slate-500">
-                    Assunto de e-mail + assinatura comercial
+                    {t('settings.proposal_preview_subtitle')}
                   </p>
                 </div>
               </div>
 
               <div className="mt-5 rounded-3xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">
-                <p>Olá, cliente.</p>
+                <p>{t('settings.email_greeting')}</p>
                 {profileIntro ? <p className="mt-3">{profileIntro}</p> : null}
                 <p className="mt-3">
-                  Segue a proposta do projeto "Nome do projeto".
+                  {t('settings.email_project_line')}
                 </p>
 
                 {profilePreviewLines.length > 0 ? (
@@ -493,8 +492,7 @@ const profileIntro = useMemo(() => {
                   </div>
                 ) : (
                   <div className="mt-4 rounded-2xl border border-dashed border-slate-300 px-4 py-3 text-slate-500">
-                    Preencha seu perfil para personalizar as propostas
-                    enviadas.
+                    {t('settings.fill_profile_hint')}
                   </div>
                 )}
               </div>
@@ -508,21 +506,21 @@ const profileIntro = useMemo(() => {
               <Bell size={18} />
             </div>
             <p className="text-sm font-medium text-slate-500">
-              Alertas do painel
+              {t('settings.notifications_label')}
             </p>
           </div>
           <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-            Preferências de notificação
+            {t('settings.notifications_heading')}
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Notificações desativadas não são perdidas — apenas silenciadas no
-            sino até você reativar.
+            {t('settings.notifications_description')}
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {notificationTypeOrder.map((type) => {
               const config = notificationTypeConfig[type];
               const isEnabled = !disabledNotificationTypes.includes(type);
+              const label = t(config.labelKey);
 
               return (
                 <div
@@ -537,10 +535,10 @@ const profileIntro = useMemo(() => {
                     </span>
                     <div>
                       <p className="text-sm font-semibold text-slate-900">
-                        {config.label}
+                        {label}
                       </p>
                       <p className="mt-0.5 text-xs leading-5 text-slate-500">
-                        {config.description}
+                        {t(config.descriptionKey)}
                       </p>
                     </div>
                   </div>
@@ -549,7 +547,10 @@ const profileIntro = useMemo(() => {
                     type="button"
                     role="switch"
                     aria-checked={isEnabled}
-                    aria-label={`${isEnabled ? 'Desativar' : 'Ativar'} notificação de ${config.label.toLowerCase()}`}
+                    aria-label={t('settings.notification_aria', {
+                      action: isEnabled ? t('settings.notification_disable') : t('settings.notification_enable'),
+                      label: label.toLowerCase(),
+                    })}
                     onClick={() => toggleNotificationType(type)}
                     className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
                       isEnabled ? 'bg-[#635bff]' : 'bg-slate-200'
@@ -569,8 +570,8 @@ const profileIntro = useMemo(() => {
       </div>
 
       <Modal
-        title="Identidade profissional"
-        description="Edite sua apresentação comercial sem deixar a tela principal carregada."
+        title={t('settings.profile_modal_title')}
+        description={t('settings.profile_modal_description')}
         isOpen={isProfileModalOpen}
         onClose={() => setProfileModalOpen(false)}
       >
@@ -579,107 +580,107 @@ const profileIntro = useMemo(() => {
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                Nome de exibição
+                {t('settings.profile_display_name_label')}
               </span>
               <input
                 name="displayName"
                 value={profileValues.displayName}
                 onChange={handleProfileFieldChange}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="Seu nome ou nome artístico"
+                placeholder={t('settings.profile_display_name_placeholder')}
               />
             </label>
 
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                Nome do estúdio ou empresa
+                {t('settings.profile_business_name_label')}
               </span>
               <input
                 name="businessName"
                 value={profileValues.businessName}
                 onChange={handleProfileFieldChange}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="Ex.: Atelier Norte"
+                placeholder={t('settings.profile_business_name_placeholder')}
               />
             </label>
 
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                Cargo ou especialidade
+                {t('settings.profile_headline_label')}
               </span>
               <input
                 name="headline"
                 value={profileValues.headline}
                 onChange={handleProfileFieldChange}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="Ex.: Designer de produto"
+                placeholder={t('settings.profile_headline_placeholder')}
               />
             </label>
 
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                Cidade ou base de operação
+                {t('settings.profile_city_label')}
               </span>
               <input
                 name="city"
                 value={profileValues.city}
                 onChange={handleProfileFieldChange}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="Ex.: São Paulo, SP"
+                placeholder={t('settings.profile_city_placeholder')}
               />
             </label>
 
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                Site ou portfolio
+                {t('settings.profile_website_label')}
               </span>
               <input
                 name="website"
                 value={profileValues.website}
                 onChange={handleProfileFieldChange}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="https://seuportfolio.com"
+                placeholder={t('settings.profile_website_placeholder')}
               />
             </label>
 
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                WhatsApp comercial
+                {t('settings.profile_whatsapp_label')}
               </span>
               <input
                 name="whatsapp"
                 value={profileValues.whatsapp}
                 onChange={handleProfileFieldChange}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="(11) 99999-9999"
+                placeholder={t('settings.profile_whatsapp_placeholder')}
               />
             </label>
           </div>
 
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-slate-700">
-              Como você se apresenta ao cliente
+              {t('settings.profile_bio_label')}
             </span>
             <textarea
               name="bio"
               value={profileValues.bio}
               onChange={handleProfileFieldChange}
               className="min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-              placeholder="Ex.: Ajudo negócios a transformar operação, branding e conversão em interfaces mais claras."
+              placeholder={t('settings.profile_bio_placeholder')}
             />
           </label>
 
           <label className="block">
             <span className="mb-2 block text-sm font-medium text-slate-700">
-              Fechamento usado nas propostas
+              {t('settings.profile_signature_label')}
             </span>
             <textarea
               name="proposalSignature"
               value={profileValues.proposalSignature}
               onChange={handleProfileFieldChange}
               className="min-h-24 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="Ex.: Fico à disposição para alinhar ajustes e iniciar assim que houver sinal verde."
-              />
+              placeholder={t('settings.profile_signature_placeholder')}
+            />
           </label>
 
           <FeedbackBanner feedback={profileFeedback} />
@@ -690,21 +691,20 @@ const profileIntro = useMemo(() => {
             className="inline-flex items-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-70"
           >
             <Save size={16} />
-            {profileSubmitting ? 'Salvando...' : 'Salvar perfil profissional'}
+            {profileSubmitting ? t('common.saving') : t('settings.profile_submit')}
           </button>
         </form>
       </Modal>
 
       <Modal
-        title="Tema do painel"
-        description="Troque o clima visual do workspace sem ocupar espaço fixo na página."
+        title={t('settings.theme_modal_title')}
+        description={t('settings.theme_modal_description')}
         isOpen={isThemeModalOpen}
         onClose={() => setThemeModalOpen(false)}
       >
         <div className="space-y-5">
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-            O tema altera fundo, destaques e botões principais. A troca é
-            instantânea e fica salva neste navegador.
+            {t('settings.theme_modal_info')}
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
@@ -724,10 +724,10 @@ const profileIntro = useMemo(() => {
                 >
                   <div className={`h-24 rounded-[20px] ${option.previewClassName}`} />
                   <p className="mt-4 text-sm font-semibold text-slate-950">
-                    {option.label}
+                    {t(option.labelKey)}
                   </p>
                   <p className="mt-1 text-sm leading-6 text-slate-500">
-                    {option.description}
+                    {t(option.descriptionKey)}
                   </p>
                 </button>
               );
@@ -737,18 +737,18 @@ const profileIntro = useMemo(() => {
       </Modal>
 
       <Modal
-        title="Segurança da conta"
-        description="Recuperação e troca de senha concentradas em um único fluxo."
+        title={t('settings.security_modal_title')}
+        description={t('settings.security_modal_description')}
         isOpen={isSecurityModalOpen}
         onClose={() => setSecurityModalOpen(false)}
       >
         <div className="space-y-5">
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-sm font-semibold text-slate-900">
-              E-mail da conta
+              {t('settings.security_account_email_label')}
             </p>
             <p className="mt-1 break-all text-sm text-slate-600">
-              {user?.email ?? 'E-mail indisponível'}
+              {user?.email ?? t('settings.security_email_unavailable')}
             </p>
             <button
               type="button"
@@ -759,34 +759,34 @@ const profileIntro = useMemo(() => {
               className="mt-4 inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-70"
             >
               <Mail size={16} />
-              Enviar link de recuperação
+              {t('settings.security_send_recovery_link')}
             </button>
           </div>
 
           <form onSubmit={handlePasswordUpdate} className="space-y-4">
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                Nova senha
+                {t('settings.security_new_password_label')}
               </span>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="Mínimo de 6 caracteres"
+                placeholder={t('settings.security_new_password_placeholder')}
               />
             </label>
 
             <label className="block">
               <span className="mb-2 block text-sm font-medium text-slate-700">
-                Confirmar nova senha
+                {t('settings.security_confirm_password_label')}
               </span>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-                placeholder="Repita a nova senha"
+                placeholder={t('settings.security_confirm_password_placeholder')}
               />
             </label>
 
@@ -798,7 +798,7 @@ const profileIntro = useMemo(() => {
               className="inline-flex items-center gap-2 rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105 disabled:opacity-70"
             >
               <KeyRound size={16} />
-              {securitySubmitting ? 'Atualizando...' : 'Atualizar senha'}
+              {securitySubmitting ? t('common.updating') : t('settings.security_submit')}
             </button>
           </form>
         </div>
@@ -806,5 +806,3 @@ const profileIntro = useMemo(() => {
     </>
   );
 }
-
-

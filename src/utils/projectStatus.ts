@@ -1,48 +1,54 @@
-import { projectStatuses, type ProjectStatus } from '../types/project'
-import { isOneOf } from './typeGuards'
+import { projectStatuses, type ProjectStatus } from '../types/project';
+import { isOneOf } from './typeGuards';
 
 export const projectStatusFilterOptions = [
   'all',
   'in_progress',
   'review',
   'completed',
-] as const
+] as const;
 
-export type ProjectStatusFilter = (typeof projectStatusFilterOptions)[number]
+export type ProjectStatusFilter = (typeof projectStatusFilterOptions)[number];
 
 export const projectEditableStatusOptions = [
   'in_progress',
   'review',
   'completed',
-] as const satisfies readonly ProjectStatus[]
+] as const satisfies readonly ProjectStatus[];
 
 export function isProjectStatus(value: string): value is ProjectStatus {
-  return isOneOf(projectStatuses, value)
+  return isOneOf(projectStatuses, value);
 }
 
 export function normalizeProjectStatus(
   value: string | null | undefined,
   fallback: ProjectStatus = 'in_progress',
 ): ProjectStatus {
-  return value && isProjectStatus(value) ? value : fallback
+  return value && isProjectStatus(value) ? value : fallback;
 }
 
-export function isProjectStatusFilter(value: string): value is ProjectStatusFilter {
-  return isOneOf(projectStatusFilterOptions, value)
+export function isProjectStatusFilter(
+  value: string,
+): value is ProjectStatusFilter {
+  return isOneOf(projectStatusFilterOptions, value);
 }
 
 export function parseProjectStatusFilter(value: string): ProjectStatusFilter {
-  return isProjectStatusFilter(value) ? value : 'all'
+  return isProjectStatusFilter(value) ? value : 'all';
 }
 
+/**
+ * Maps each project status to its i18n translation key.
+ * Usage: t(projectStatusLabel[status])
+ */
 export const projectStatusLabel: Record<ProjectStatus, string> = {
-  in_progress: 'Em andamento',
-  review: 'Em revisao',
-  completed: 'Concluido',
-}
+  in_progress: 'status.project.in_progress',
+  review: 'status.project.review',
+  completed: 'status.project.completed',
+};
 
 export const projectStatusClassName: Record<ProjectStatus, string> = {
   in_progress: 'bg-blue-100 text-blue-700',
   review: 'bg-amber-100 text-amber-700',
   completed: 'bg-emerald-100 text-emerald-700',
-}
+};

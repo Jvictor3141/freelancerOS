@@ -16,6 +16,7 @@ import {
   type ComponentType,
   type ReactNode,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from './Modal';
 
 type ToastTone = 'success' | 'error' | 'info' | 'warning';
@@ -114,6 +115,7 @@ const toneConfig: Record<ToastTone, ToneConfig> = {
 const FeedbackContext = createContext<FeedbackContextValue | null>(null);
 
 function ToastCard({ toast, onDismiss }: ToastCardProps) {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const { icon: Icon, iconBg, iconColor, progressColor } = toneConfig[toast.tone];
@@ -170,7 +172,7 @@ function ToastCard({ toast, onDismiss }: ToastCardProps) {
           type="button"
           onClick={() => onDismiss(toast.id)}
           className="mt-0.5 inline-flex shrink-0 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-          aria-label="Dispensar notificação"
+          aria-label={t('common.dismiss_notification')}
         >
           <X size={14} />
         </button>
@@ -209,6 +211,8 @@ function ConfirmationDialog({
   onConfirm,
   onCancel,
 }: ConfirmationDialogProps) {
+  const { t } = useTranslation();
+
   if (!dialog) {
     return null;
   }
@@ -228,8 +232,7 @@ function ConfirmationDialog({
     >
       <div className="space-y-5">
         <div className="rounded-3xl border border-slate-200 bg-slate-50/80 px-4 py-4 text-sm leading-6 text-slate-600">
-          {dialog.description ??
-            'Revise a acao antes de continuar. Voce pode cancelar sem alterar nada.'}
+          {dialog.description ?? t('common.confirm_default_description')}
         </div>
 
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -255,6 +258,7 @@ function ConfirmationDialog({
 }
 
 export function FeedbackProvider({ children }: FeedbackProviderProps) {
+  const { t } = useTranslation();
   const [toasts, setToasts] = useState<ToastRecord[]>([]);
   const [dialog, setDialog] = useState<ConfirmState | null>(null);
   const nextToastIdRef = useRef(0);
@@ -298,15 +302,15 @@ export function FeedbackProvider({ children }: FeedbackProviderProps) {
       id: nextDialogIdRef.current++,
       title: options.title,
       description: options.description,
-      confirmLabel: options.confirmLabel ?? 'Confirmar',
-      cancelLabel: options.cancelLabel ?? 'Cancelar',
+      confirmLabel: options.confirmLabel ?? t('common.confirm'),
+      cancelLabel: options.cancelLabel ?? t('common.cancel'),
       tone: options.tone ?? 'default',
     });
 
     return new Promise<boolean>((resolve) => {
       confirmResolverRef.current = resolve;
     });
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     return () => {

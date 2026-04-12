@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '../../stores/useAuthStore'
 import { useRealtimeInvalidationStore } from '../../stores/useRealtimeInvalidationStore'
 import type { ClientDetailsSnapshot } from '../../types/clientDetails'
@@ -20,6 +21,7 @@ type UseClientDetailsDataResult = {
 export function useClientDetailsData(
   clientId: string | undefined,
 ): UseClientDetailsDataResult {
+  const { t } = useTranslation()
   const user = useAuthStore((state) => state.user)
   const userId = user?.id ?? null
   const clientDetailsVersion = useRealtimeInvalidationStore(
@@ -64,7 +66,7 @@ export function useClientDetailsData(
         setError(
           loadError instanceof Error
             ? loadError.message
-            : 'Não foi possível carregar os dados do cliente.',
+            : t('clients.load_error'),
         )
       }
     }
@@ -74,7 +76,7 @@ export function useClientDetailsData(
     return () => {
       isDisposed = true
     }
-  }, [clientDetailsVersion, clientId, userId])
+  }, [clientDetailsVersion, clientId, userId, t])
 
   async function retryLoad() {
     if (!userId || !clientId) {
@@ -93,7 +95,7 @@ export function useClientDetailsData(
       setError(
         loadError instanceof Error
           ? loadError.message
-          : 'Não foi possível carregar os dados do cliente.',
+          : t('clients.load_error'),
       )
     }
   }

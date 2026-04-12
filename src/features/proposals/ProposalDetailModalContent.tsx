@@ -1,4 +1,5 @@
 import { PencilLine } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import {
   formatCurrency,
   formatDate,
@@ -23,24 +24,26 @@ type MetaField = {
 }
 
 export function ProposalDetailModalContent({ proposal, canEdit, onEdit }: Props) {
+  const { t, i18n } = useTranslation()
+  const currentLang = i18n.resolvedLanguage ?? 'pt'
   const hasClientResponse = hasSharedLinkClientResponse(proposal)
   const isAccepted = isAcceptedProposal(proposal)
 
   const metaFields: MetaField[] = [
-    { label: 'Cliente', value: proposal.clientName },
-    { label: 'Empresa', value: proposal.clientCompany || '—' },
-    { label: 'E-mail do destinatário', value: proposal.recipientEmail },
-    { label: 'Prazo de entrega', value: `${proposal.deliveryDays} dia(s)` },
-    { label: 'Criada em', value: formatDate(proposal.createdAt) },
-    { label: 'Enviada em', value: formatDate(proposal.sentAt) },
+    { label: t('proposals.detail_field_client'), value: proposal.clientName },
+    { label: t('proposals.detail_field_company'), value: proposal.clientCompany || '—' },
+    { label: t('proposals.detail_field_email'), value: proposal.recipientEmail },
+    { label: t('proposals.detail_field_deadline'), value: `${proposal.deliveryDays} ${t('proposals.share_expiration_days', { count: proposal.deliveryDays })}` },
+    { label: t('proposals.detail_field_created_at'), value: formatDate(proposal.createdAt, currentLang) },
+    { label: t('proposals.detail_field_sent_at'), value: formatDate(proposal.sentAt, currentLang) },
   ]
 
   if (proposal.acceptedAt) {
-    metaFields.push({ label: 'Aceita em', value: formatDate(proposal.acceptedAt) })
+    metaFields.push({ label: t('proposals.detail_field_accepted_at'), value: formatDate(proposal.acceptedAt, currentLang) })
   }
 
   if (proposal.rejectedAt) {
-    metaFields.push({ label: 'Recusada em', value: formatDate(proposal.rejectedAt) })
+    metaFields.push({ label: t('proposals.detail_field_rejected_at'), value: formatDate(proposal.rejectedAt, currentLang) })
   }
 
   return (
@@ -48,15 +51,15 @@ export function ProposalDetailModalContent({ proposal, canEdit, onEdit }: Props)
       {/* Status + valor */}
       <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-medium text-slate-400">Valor da proposta</p>
+          <p className="text-xs font-medium text-slate-400">{t('proposals.value_label')}</p>
           <p className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-            {formatCurrency(proposal.amount)}
+            {formatCurrency(proposal.amount, currentLang)}
           </p>
         </div>
         <span
           className={`inline-flex h-7 w-fit rounded-full px-3 py-1 text-xs font-semibold ${proposalStatusClassName[proposal.status]}`}
         >
-          {proposalStatusLabel[proposal.status]}
+          {t(proposalStatusLabel[proposal.status])}
         </span>
       </div>
 
@@ -64,14 +67,14 @@ export function ProposalDetailModalContent({ proposal, canEdit, onEdit }: Props)
       {proposal.description ? (
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-            Escopo
+            {t('proposals.scope_label')}
           </p>
           <p className="whitespace-pre-wrap text-sm leading-7 text-slate-700">
             {proposal.description}
           </p>
         </div>
       ) : (
-        <p className="text-sm italic text-slate-400">Sem escopo detalhado.</p>
+        <p className="text-sm italic text-slate-400">{t('proposals.no_scope')}</p>
       )}
 
       {/* Meta */}
@@ -88,7 +91,7 @@ export function ProposalDetailModalContent({ proposal, canEdit, onEdit }: Props)
       {proposal.notes ? (
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-            Observações
+            {t('proposals.notes_section_label')}
           </p>
           <p className="whitespace-pre-wrap text-sm leading-7 text-slate-600">
             {proposal.notes}
@@ -105,8 +108,10 @@ export function ProposalDetailModalContent({ proposal, canEdit, onEdit }: Props)
               : 'border-rose-200 bg-rose-50 text-rose-800'
           }`}
         >
-          {isAccepted ? 'Cliente aceitou' : 'Cliente recusou'} essa proposta em{' '}
-          {formatDateTime(proposal.clientRespondedAt)}.
+          {t('proposals.client_responded_at', {
+            response: isAccepted ? t('proposals.accepted_by_client') : t('proposals.rejected_by_client'),
+            date: formatDateTime(proposal.clientRespondedAt, currentLang),
+          })}
         </div>
       ) : null}
 
@@ -119,7 +124,7 @@ export function ProposalDetailModalContent({ proposal, canEdit, onEdit }: Props)
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
             <PencilLine size={15} />
-            Editar proposta
+            {t('proposals.edit_button')}
           </button>
         </div>
       ) : null}

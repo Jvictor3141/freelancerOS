@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useRemovalHandler } from '../../lib/useRemovalHandler'
 import { useSubmitHandler } from '../../lib/useSubmitHandler'
 import { useClientStore } from '../../stores/useClientStore'
@@ -10,6 +11,7 @@ import type { Client } from '../../types/client'
 import { getFilteredClients } from '../../utils/clientsPage'
 
 export function useClientsPage() {
+  const { t } = useTranslation()
   const clients = useClientStore((state) => state.clients)
   const selectedClient = useClientStore((state) => state.selectedClient)
   const loadStatus = useClientStore((state) => state.loadStatus)
@@ -26,20 +28,20 @@ export function useClientsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [search, setSearch] = useState('')
   const handleClientRemoval = useRemovalHandler<Client>({
-    confirmLabel: 'Excluir cliente',
-    description: (client) => `Deseja excluir o cliente "${client.name}"?`,
+    confirmLabel: t('clients.delete_confirm_label'),
+    description: (client) => t('clients.delete_confirm_description', { name: client.name }),
     remove: removeClient,
-    successMessage: 'Cliente excluido com sucesso.',
-    errorMessage: 'Não foi possível excluir o cliente.',
+    successMessage: t('clients.delete_success'),
+    errorMessage: t('clients.delete_error'),
   })
   const { isSubmitting, handleSubmit: handleClientSubmit } = useSubmitHandler({
     selected: selectedClient,
     add: addClient,
     edit: editClient,
     onSuccess: closeModal,
-    createdMessage: 'Cliente criado com sucesso.',
-    updatedMessage: 'Cliente atualizado com sucesso.',
-    errorMessage: 'Não foi possível salvar o cliente.',
+    createdMessage: t('clients.save_created'),
+    updatedMessage: t('clients.save_updated'),
+    errorMessage: t('clients.save_error'),
   })
 
   useEffect(() => {
@@ -74,8 +76,8 @@ export function useClientsPage() {
     isSubmitting,
     loadingDescription:
       loadStatus === 'loading'
-        ? 'Buscando a base de clientes no Supabase.'
-        : 'Preparando a sincronização inicial.',
+        ? t('clients.loading_sync')
+        : t('clients.loading_init'),
     search,
     selectedClient,
     setSearch,

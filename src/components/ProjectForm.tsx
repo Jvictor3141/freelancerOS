@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFeedback } from './FeedbackProvider';
 import { SelectField } from './SelectField';
 import type { Client } from '../types/client';
@@ -39,6 +40,7 @@ export function ProjectForm({
   onCancel,
   isSubmitting = false,
 }: ProjectFormProps) {
+  const { t } = useTranslation();
   const [values, setValues] = useState<ProjectFormState>(emptyValues);
   const { notify } = useFeedback();
   const statusOptions = projectEditableStatusOptions;
@@ -103,7 +105,7 @@ export function ProjectForm({
     if (!values.clientId) {
       notify({
         tone: 'warning',
-        title: 'Selecione um cliente.',
+        title: t('forms.project_error_client_required'),
       });
       return;
     }
@@ -111,7 +113,7 @@ export function ProjectForm({
     if (!values.name.trim()) {
       notify({
         tone: 'warning',
-        title: 'O nome do projeto e obrigatorio.',
+        title: t('forms.project_error_name_required'),
       });
       return;
     }
@@ -122,7 +124,7 @@ export function ProjectForm({
     if (Number.isNaN(numericValue) || numericValue < 0) {
       notify({
         tone: 'warning',
-        title: 'O valor do projeto não pode ser negativo.',
+        title: t('forms.project_error_value_negative'),
       });
       return;
     }
@@ -141,14 +143,14 @@ export function ProjectForm({
     <form onSubmit={handleSubmit} className="grid gap-4">
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Cliente
+          {t('forms.project_client_label')}
         </span>
         <SelectField
           name="clientId"
           value={values.clientId}
           onChange={(nextValue) => setField('clientId', nextValue)}
           options={[
-            { value: '', label: 'Selecione um cliente' },
+            { value: '', label: t('forms.project_client_placeholder') },
             ...clients.map((client) => ({
               value: client.id,
               label: `${client.name}${client.company ? ` - ${client.company}` : ''}`,
@@ -159,34 +161,34 @@ export function ProjectForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Nome do projeto
+          {t('forms.project_name_label')}
         </span>
         <input
           name="name"
           value={values.name}
           onChange={handleChange}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Ex.: Landing page institucional"
+          placeholder={t('forms.project_name_placeholder')}
         />
       </label>
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Descricao
+          {t('forms.project_description_label')}
         </span>
         <textarea
           name="description"
           value={values.description}
           onChange={handleChange}
           className="min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Descreva o escopo do projeto..."
+          placeholder={t('forms.project_description_placeholder')}
         />
       </label>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label>
           <span className="mb-2 block text-sm font-medium text-slate-700">
-            Valor
+            {t('forms.project_value_label')}
           </span>
           <input
             name="value"
@@ -196,13 +198,13 @@ export function ProjectForm({
             value={values.value}
             onChange={handleChange}
             className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-            placeholder="0,00"
+            placeholder={t('forms.project_value_placeholder')}
           />
         </label>
 
         <label>
           <span className="mb-2 block text-sm font-medium text-slate-700">
-            Prazo
+            {t('forms.project_deadline_label')}
           </span>
           <input
             name="deadline"
@@ -216,7 +218,7 @@ export function ProjectForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Status
+          {t('forms.project_status_label')}
         </span>
         <SelectField
           name="status"
@@ -226,7 +228,7 @@ export function ProjectForm({
           }}
           options={statusOptions.map((status) => ({
             value: status,
-            label: projectStatusLabel[status],
+            label: t(projectStatusLabel[status]),
           }))}
         />
       </label>
@@ -238,7 +240,7 @@ export function ProjectForm({
           disabled={isSubmitting}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
-          Cancelar
+          {t('common.cancel')}
         </button>
 
         <button
@@ -246,7 +248,7 @@ export function ProjectForm({
           disabled={isSubmitting}
           className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
-          {isSubmitting ? 'Salvando...' : 'Salvar projeto'}
+          {isSubmitting ? t('common.saving') : t('forms.project_submit')}
         </button>
       </div>
     </form>

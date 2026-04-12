@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useFeedback } from './FeedbackProvider';
 import { SelectField } from './SelectField';
 import type { ProposalInput } from '../types/inputs';
@@ -38,6 +39,7 @@ export function ProposalForm({
   onCancel,
   isSubmitting = false,
 }: ProposalFormProps) {
+  const { t } = useTranslation();
   const [values, setValues] = useState<ProposalFormValues>(emptyValues);
   const { notify } = useFeedback();
 
@@ -113,7 +115,7 @@ export function ProposalForm({
     if (!values.clientId) {
       notify({
         tone: 'warning',
-        title: 'Selecione um cliente.',
+        title: t('forms.proposal_error_client_required'),
       });
       return;
     }
@@ -121,7 +123,7 @@ export function ProposalForm({
     if (!values.title.trim()) {
       notify({
         tone: 'warning',
-        title: 'Informe o titulo da proposta.',
+        title: t('forms.proposal_error_title_required'),
       });
       return;
     }
@@ -131,7 +133,7 @@ export function ProposalForm({
     if (!values.amount.trim() || Number.isNaN(amount) || amount <= 0) {
       notify({
         tone: 'warning',
-        title: 'Informe um valor maior que zero.',
+        title: t('forms.proposal_error_amount_required'),
       });
       return;
     }
@@ -145,7 +147,7 @@ export function ProposalForm({
     ) {
       notify({
         tone: 'warning',
-        title: 'Informe um prazo válido em dias.',
+        title: t('forms.proposal_error_delivery_days_required'),
       });
       return;
     }
@@ -153,7 +155,7 @@ export function ProposalForm({
     if (!values.recipientEmail.trim()) {
       notify({
         tone: 'warning',
-        title: 'Informe o email de envio.',
+        title: t('forms.proposal_error_email_required'),
       });
       return;
     }
@@ -161,7 +163,7 @@ export function ProposalForm({
     if (!isValidEmailAddress(values.recipientEmail)) {
       notify({
         tone: 'warning',
-        title: 'Informe um email de destinatário válido.',
+        title: t('forms.proposal_error_invalid_email'),
       });
       return;
     }
@@ -182,7 +184,7 @@ export function ProposalForm({
     <form onSubmit={handleSubmit} className="grid gap-4">
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Cliente
+          {t('forms.proposal_client_label')}
         </span>
         <SelectField
           name="clientId"
@@ -196,7 +198,7 @@ export function ProposalForm({
             }))
           }}
           options={[
-            { value: '', label: 'Selecione um cliente' },
+            { value: '', label: t('forms.proposal_client_placeholder') },
             ...clients.map((client) => ({
               value: client.id,
               label: `${client.name}${client.company ? ` - ${client.company}` : ''}`,
@@ -207,21 +209,21 @@ export function ProposalForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Título da proposta
+          {t('forms.proposal_title_label')}
         </span>
         <input
           name="title"
           value={values.title}
           onChange={handleChange}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Ex.: Redesign do site institucional"
+          placeholder={t('forms.proposal_title_placeholder')}
         />
       </label>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <label>
           <span className="mb-2 block text-sm font-medium text-slate-700">
-            Valor
+            {t('forms.proposal_amount_label')}
           </span>
           <input
             name="amount"
@@ -231,13 +233,13 @@ export function ProposalForm({
             value={values.amount}
             onChange={handleChange}
             className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-            placeholder="0,00"
+            placeholder={t('forms.proposal_amount_placeholder')}
           />
         </label>
 
         <label>
           <span className="mb-2 block text-sm font-medium text-slate-700">
-            Prazo estimado em dias
+            {t('forms.proposal_delivery_days_label')}
           </span>
           <input
             name="deliveryDays"
@@ -253,7 +255,7 @@ export function ProposalForm({
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          E-mail do destinatário
+          {t('forms.proposal_recipient_email_label')}
         </span>
         <input
           name="recipientEmail"
@@ -261,33 +263,33 @@ export function ProposalForm({
           value={values.recipientEmail}
           onChange={handleChange}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="contato@cliente.com"
+          placeholder={t('forms.proposal_recipient_email_placeholder')}
         />
       </label>
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Escopo
+          {t('forms.proposal_description_label')}
         </span>
         <textarea
           name="description"
           value={values.description}
           onChange={handleChange}
           className="min-h-32 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Descreva entregaveis, revisoes, etapas e limites da proposta..."
+          placeholder={t('forms.proposal_description_placeholder')}
         />
       </label>
 
       <label>
         <span className="mb-2 block text-sm font-medium text-slate-700">
-          Observações internas
+          {t('forms.proposal_notes_label')}
         </span>
         <textarea
           name="notes"
           value={values.notes}
           onChange={handleChange}
           className="min-h-24 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
-          placeholder="Contexto comercial, margem, pontos para negociar..."
+          placeholder={t('forms.proposal_notes_placeholder')}
         />
       </label>
 
@@ -298,7 +300,7 @@ export function ProposalForm({
           disabled={isSubmitting}
           className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
-          Cancelar
+          {t('common.cancel')}
         </button>
 
         <button
@@ -306,7 +308,7 @@ export function ProposalForm({
           disabled={isSubmitting}
           className="rounded-2xl bg-[#635bff] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:brightness-105"
         >
-          {isSubmitting ? 'Salvando...' : 'Salvar proposta'}
+          {isSubmitting ? t('common.saving') : t('forms.proposal_submit')}
         </button>
       </div>
     </form>

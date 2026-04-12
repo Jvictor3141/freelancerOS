@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { LoaderCircle } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../components/BrandLogo';
 import { Seo } from '../seo/Seo';
 import { getCurrentUser } from '../services/authService';
@@ -40,6 +41,7 @@ function getSafeNextPath(rawNext: string | null) {
 }
 
 export function AuthCallbackPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { initialized, user, authFlow } = useAuthStore();
@@ -72,7 +74,7 @@ export function AuthCallbackPage() {
           }
         : {
             tone: 'success',
-            message: 'Link processado com sucesso. Faca login para continuar.',
+            message: t('auth.callback_success'),
           };
 
       if (errorDescription) {
@@ -97,7 +99,7 @@ export function AuthCallbackPage() {
           state: {
             authFeedback: {
               tone: 'error',
-              message: 'Não foi possível validar a sessão retornada pelo Supabase.',
+              message: t('auth.callback_session_error'),
             },
           },
         });
@@ -127,13 +129,13 @@ export function AuthCallbackPage() {
     return () => {
       isActive = false;
     };
-  }, [authFlow, initialized, navigate, searchParams, user]);
+  }, [authFlow, initialized, navigate, searchParams, user, t]);
 
   return (
     <>
       <Seo
-        title="Autenticando | FreelancerOS"
-        description="Processando o retorno de autenticacao e encaminhando voce para a rota correta."
+        title={t('auth.callback_seo_title')}
+        description={t('auth.callback_seo_description')}
         robots="noindex, follow"
         canonical="/auth/callback"
       />
@@ -145,11 +147,10 @@ export function AuthCallbackPage() {
               <LoaderCircle className="h-5 w-5 animate-spin text-[#635bff]" />
             </div>
             <h1 className="mt-4 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
-              Validando autenticacao
+              {t('auth.callback_heading')}
             </h1>
             <p className="mt-2 text-sm text-slate-500">
-              Processando o retorno do Supabase e encaminhando voce para a rota
-              correta.
+              {t('auth.callback_description')}
             </p>
           </div>
         </div>
