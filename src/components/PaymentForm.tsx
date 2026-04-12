@@ -30,6 +30,7 @@ type PaymentFormProps = {
 const emptyValues: PaymentFormState = {
   projectId: '',
   amount: '',
+  currency: 'BRL',
   dueDate: '',
   paidAt: null,
   status: 'pending',
@@ -63,6 +64,7 @@ export function PaymentForm({
       setValues({
         projectId: initialValues.projectId,
         amount: String(initialValues.amount),
+        currency: initialValues.currency,
         dueDate: initialValues.dueDate,
         paidAt: initialValues.paidAt,
         status: toPersistedPaymentStatus(initialValues.status),
@@ -72,9 +74,11 @@ export function PaymentForm({
       return;
     }
 
+    const firstProject = projects[0];
     setValues({
       ...emptyValues,
-      projectId: projects[0]?.id ?? '',
+      projectId: firstProject?.id ?? '',
+      currency: firstProject?.currency ?? 'BRL',
     });
   }, [initialValues, projects]);
 
@@ -154,7 +158,14 @@ export function PaymentForm({
         <SelectField
           name="projectId"
           value={values.projectId}
-          onChange={(nextValue) => setField('projectId', nextValue)}
+          onChange={(nextValue) => {
+            const selectedProject = projects.find((p) => p.id === nextValue)
+            setValues((prev) => ({
+              ...prev,
+              projectId: nextValue,
+              currency: selectedProject?.currency ?? prev.currency,
+            }))
+          }}
           buttonClassName="bg-white text-slate-900"
           options={[
             { value: '', label: t('forms.payment_project_placeholder') },

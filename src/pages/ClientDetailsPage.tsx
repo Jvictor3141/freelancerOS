@@ -8,7 +8,8 @@ import {
   Wallet,
 } from 'lucide-react'
 import { useClientDetailsData } from '../features/clients/useClientDetailsData'
-import { formatCurrency, formatDate } from '../utils/formatting'
+import { formatCurrencyCode, formatDate } from '../utils/formatting'
+import { usePreferencesStore } from '../stores/usePreferencesStore'
 import {
   paymentStatusClassName,
   paymentStatusLabel,
@@ -35,6 +36,7 @@ export function ClientDetailsPage() {
   const { t, i18n } = useTranslation()
   const { id, lang } = useParams<{ id?: string; lang?: string }>()
   const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
   const navigate = useNavigate()
   const { snapshot, combinedError, hasLoadError, isLoading, retryLoad } =
     useClientDetailsData(id)
@@ -180,7 +182,7 @@ export function ClientDetailsPage() {
             <p className="text-sm font-medium text-slate-500">{t('clients.details_metric_received')}</p>
           </div>
           <p className="mt-2 flex items-end justify-end text-lg font-semibold tracking-tight text-slate-950 sm:text-xl md:text-2xl lg:text-3xl">
-            {formatCurrency(summary.totalReceived, currentLang)}
+            {formatCurrencyCode(summary.totalReceived, defaultCurrency)}
           </p>
         </div>
 
@@ -192,7 +194,7 @@ export function ClientDetailsPage() {
             <p className="text-sm font-medium text-slate-500">{t('clients.details_metric_pending')}</p>
           </div>
           <p className="mt-2 flex items-end justify-end text-lg font-semibold tracking-tight text-slate-950 sm:text-xl md:text-2xl lg:text-3xl">
-            {formatCurrency(summary.totalOutstanding, currentLang)}
+            {formatCurrencyCode(summary.totalOutstanding, defaultCurrency)}
           </p>
         </div>
 
@@ -250,7 +252,7 @@ export function ClientDetailsPage() {
                     <div className="mt-3 flex flex-col gap-2 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
                       <span>{t('clients.details_project_deadline', { date: formatDate(project.deadline, currentLang) })}</span>
                       <span className="font-semibold text-slate-900">
-                        {formatCurrency(project.value, currentLang)}
+                        {formatCurrencyCode(project.value, project.currency)}
                       </span>
                     </div>
                   </div>
@@ -287,7 +289,7 @@ export function ClientDetailsPage() {
                     <div className="flex justify-between gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0">
                         <p className="font-semibold text-slate-900">
-                          {formatCurrency(payment.amount, currentLang)}
+                          {formatCurrencyCode(payment.amount, payment.currency)}
                         </p>
                         <p className="mt-1 text-sm text-slate-500">
                           {t('clients.details_payment_due', { date: formatDate(payment.dueDate, currentLang) })}

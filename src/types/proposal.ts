@@ -1,3 +1,5 @@
+import type { CurrencyCode } from '../i18n/config';
+
 export const proposalStatuses = [
   'draft',
   'sent',
@@ -16,6 +18,7 @@ export type Proposal = {
   title: string;
   description: string;
   amount: number;
+  currency: CurrencyCode;
   deliveryDays: number;
   recipientEmail: string;
   status: ProposalStatus;

@@ -11,7 +11,7 @@ import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../components/BrandLogo';
 import { Seo } from '../seo/Seo';
-import { formatCurrency, formatDateTime } from '../utils/formatting';
+import { formatCurrencyCode, formatDateTime } from '../utils/formatting';
 import {
   getSharedProposal,
   respondToSharedProposal,
@@ -220,7 +220,7 @@ export function SharedProposalPage() {
                       <p className="text-sm max-[374px]:hidden text-indigo-100">{t('proposals.shared_value_label')}</p>
                     </div>
                     <p className="mt-2 text-1xl font-semibold">
-                      {formatCurrency(proposal.amount, currentLang)}
+                      {formatCurrencyCode(proposal.amount, proposal.currency)}
                     </p>
                   </div>
 

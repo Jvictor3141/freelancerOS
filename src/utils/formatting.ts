@@ -3,6 +3,7 @@ import {
   isSupportedLanguage,
   LANGUAGE_CURRENCY_MAP,
   LANGUAGE_LOCALE_MAP,
+  CURRENCY_LOCALE_MAP,
 } from '../i18n/config';
 
 const ISO_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -29,6 +30,23 @@ export function formatCurrency(value: number, lang = 'pt'): string {
   const resolvedLang = isSupportedLanguage(lang) ? lang : 'pt';
   const locale = LANGUAGE_LOCALE_MAP[resolvedLang];
   const currency = LANGUAGE_CURRENCY_MAP[resolvedLang];
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+/**
+ * Formats a number as currency using an explicit ISO 4217 currency code.
+ * Locale is derived from the currency (BRL → pt-BR, USD → en-US, etc.).
+ */
+export function formatCurrencyCode(value: number, currency: string): string {
+  const locale = currency in CURRENCY_LOCALE_MAP
+    ? CURRENCY_LOCALE_MAP[currency as keyof typeof CURRENCY_LOCALE_MAP]
+    : 'pt-BR';
 
   return new Intl.NumberFormat(locale, {
     style: 'currency',

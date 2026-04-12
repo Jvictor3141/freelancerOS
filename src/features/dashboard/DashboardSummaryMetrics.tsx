@@ -5,11 +5,10 @@ import {
   Users,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
 import type { DashboardMetricSummary } from '../../types/dashboard'
-import { formatDashboardCurrency } from '../../utils/dashboard'
+import { formatCurrencyCode } from '../../utils/formatting'
+import { usePreferencesStore } from '../../stores/usePreferencesStore'
 import { DashboardMetricCard } from './DashboardMetricCard'
-import { isSupportedLanguage } from '../../i18n/config'
 
 type DashboardSummaryMetricsProps = {
   metrics: DashboardMetricSummary
@@ -18,9 +17,8 @@ type DashboardSummaryMetricsProps = {
 export function DashboardSummaryMetrics({
   metrics,
 }: DashboardSummaryMetricsProps) {
-  const { t, i18n } = useTranslation()
-  const { lang } = useParams<{ lang?: string }>()
-  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+  const { t } = useTranslation()
+  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
 
   const cards = [
     {
@@ -46,7 +44,7 @@ export function DashboardSummaryMetrics({
     },
     {
       label: t('dashboard.metrics_average_ticket'),
-      value: formatDashboardCurrency(metrics.averageTicket, currentLang),
+      value: formatCurrencyCode(metrics.averageTicket, defaultCurrency),
       description: t('dashboard.metrics_average_ticket_description'),
       icon: ArrowUpRight,
       iconClassName: 'bg-violet-100 text-violet-700',

@@ -12,6 +12,7 @@ export type SharedProposal = Pick<
   | 'title'
   | 'description'
   | 'amount'
+  | 'currency'
   | 'deliveryDays'
   | 'status'
   | 'sentAt'

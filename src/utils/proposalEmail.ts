@@ -5,13 +5,7 @@ import {
   buildFreelancerSignatureLines,
 } from './freelancerProfile';
 import { assertValidEmailAddress } from './email';
-
-function formatCurrency(value: number) {
-  return value.toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
-}
+import { formatCurrencyCode } from './formatting';
 
 export function buildProposalEmail(
   proposal: Proposal,
@@ -32,7 +26,7 @@ export function buildProposalEmail(
     freelancerIntro ? '' : null,
     `Segue a proposta do projeto "${proposal.title}".`,
     '',
-    `Valor: ${formatCurrency(proposal.amount)}`,
+    `Valor: ${formatCurrencyCode(proposal.amount, proposal.currency)}`,
     `Prazo estimado: ${proposal.deliveryDays} dia(s)`,
     '',
     'Escopo:',

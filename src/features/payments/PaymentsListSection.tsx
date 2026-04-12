@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { SelectField } from '../../components/SelectField'
 import type { PaymentWithProjectAndClient } from '../../types/viewModels'
-import { formatCurrency, formatDate } from '../../utils/formatting'
+import { formatCurrencyCode, formatDate } from '../../utils/formatting'
 import { canMarkPaymentAsPaid } from './paymentRules'
 import {
   type PaymentStatusFilter,
@@ -126,7 +126,7 @@ export function PaymentsListSection({
               <div className="grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
                 <p>
                   <span className="font-medium text-slate-900">{t('payments.card_value')}</span>{' '}
-                  {formatCurrency(payment.amount, currentLang)}
+                  {formatCurrencyCode(payment.amount, payment.currency)}
                 </p>
                 <p>
                   <span className="font-medium text-slate-900">
@@ -216,7 +216,7 @@ export function PaymentsListSection({
                   {payment.projectName}
                 </td>
                 <td className="px-6 py-4 text-sm text-slate-700">
-                  {formatCurrency(payment.amount, currentLang)}
+                  {formatCurrencyCode(payment.amount, payment.currency)}
                 </td>
                 <td className="px-6 py-4 text-sm text-slate-700">
                   {formatDate(payment.dueDate, currentLang)}

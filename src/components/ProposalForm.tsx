@@ -5,6 +5,8 @@ import { SelectField } from './SelectField';
 import type { ProposalInput } from '../types/inputs';
 import type { Client } from '../types/client';
 import type { Proposal } from '../types/proposal';
+import { SUPPORTED_CURRENCIES } from '../i18n/config';
+import { usePreferencesStore } from '../stores/usePreferencesStore';
 import { isValidEmailAddress } from '../utils/email';
 
 type ProposalFormProps = {
@@ -26,6 +28,7 @@ const emptyValues: ProposalFormValues = {
   title: '',
   description: '',
   amount: '',
+  currency: 'BRL',
   deliveryDays: '7',
   recipientEmail: '',
   status: 'draft',
@@ -40,7 +43,11 @@ export function ProposalForm({
   isSubmitting = false,
 }: ProposalFormProps) {
   const { t } = useTranslation();
-  const [values, setValues] = useState<ProposalFormValues>(emptyValues);
+  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency);
+  const [values, setValues] = useState<ProposalFormValues>({
+    ...emptyValues,
+    currency: defaultCurrency,
+  });
   const { notify } = useFeedback();
 
   function setField<K extends ProposalFormField>(
@@ -60,6 +67,7 @@ export function ProposalForm({
         title: initialValues.title,
         description: initialValues.description,
         amount: String(initialValues.amount),
+        currency: initialValues.currency,
         deliveryDays: String(initialValues.deliveryDays),
         recipientEmail: initialValues.recipientEmail,
         status: 'draft',
@@ -71,10 +79,11 @@ export function ProposalForm({
     const firstClient = clients[0];
     setValues({
       ...emptyValues,
+      currency: defaultCurrency,
       clientId: firstClient?.id ?? '',
       recipientEmail: firstClient?.email ?? '',
     });
-  }, [initialValues, clients]);
+  }, [initialValues, clients, defaultCurrency]);
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = event.target;
@@ -173,6 +182,7 @@ export function ProposalForm({
       title: values.title.trim(),
       description: values.description.trim(),
       amount,
+      currency: values.currency,
       deliveryDays,
       recipientEmail: values.recipientEmail.trim(),
       status: 'draft',
@@ -217,6 +227,25 @@ export function ProposalForm({
           onChange={handleChange}
           className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
           placeholder={t('forms.proposal_title_placeholder')}
+        />
+      </label>
+
+      <label>
+        <span className="mb-2 block text-sm font-medium text-slate-700">
+          {t('forms.currency_label')}
+        </span>
+        <SelectField
+          name="currency"
+          value={values.currency}
+          onChange={(nextValue) => {
+            if (SUPPORTED_CURRENCIES.includes(nextValue as typeof SUPPORTED_CURRENCIES[number])) {
+              setField('currency', nextValue as typeof values.currency)
+            }
+          }}
+          options={SUPPORTED_CURRENCIES.map((code) => ({
+            value: code,
+            label: t(`forms.currency_${code.toLowerCase()}`),
+          }))}
         />
       </label>
 

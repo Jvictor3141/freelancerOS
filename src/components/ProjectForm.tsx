@@ -5,6 +5,8 @@ import { SelectField } from './SelectField';
 import type { Client } from '../types/client';
 import type { Project } from '../types/project';
 import type { ProjectInput } from '../types/inputs';
+import { SUPPORTED_CURRENCIES } from '../i18n/config';
+import { usePreferencesStore } from '../stores/usePreferencesStore';
 import {
   isProjectStatus,
   projectEditableStatusOptions,
@@ -29,6 +31,7 @@ const emptyValues: ProjectFormState = {
   name: '',
   description: '',
   value: '',
+  currency: 'BRL',
   deadline: '',
   status: 'in_progress',
 };
@@ -41,7 +44,11 @@ export function ProjectForm({
   isSubmitting = false,
 }: ProjectFormProps) {
   const { t } = useTranslation();
-  const [values, setValues] = useState<ProjectFormState>(emptyValues);
+  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency);
+  const [values, setValues] = useState<ProjectFormState>({
+    ...emptyValues,
+    currency: defaultCurrency,
+  });
   const { notify } = useFeedback();
   const statusOptions = projectEditableStatusOptions;
 
@@ -62,6 +69,7 @@ export function ProjectForm({
         name: initialValues.name,
         description: initialValues.description,
         value: String(initialValues.value),
+        currency: initialValues.currency,
         deadline: initialValues.deadline,
         status: initialValues.status,
       });
@@ -70,9 +78,10 @@ export function ProjectForm({
 
     setValues({
       ...emptyValues,
+      currency: defaultCurrency,
       clientId: clients[0]?.id ?? '',
     });
-  }, [initialValues, clients]);
+  }, [initialValues, clients, defaultCurrency]);
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = event.target;
@@ -134,6 +143,7 @@ export function ProjectForm({
       name: values.name.trim(),
       description: values.description.trim(),
       value: numericValue,
+      currency: values.currency,
       deadline: values.deadline,
       status: values.status,
     });
@@ -182,6 +192,25 @@ export function ProjectForm({
           onChange={handleChange}
           className="min-h-28 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-[#635bff]"
           placeholder={t('forms.project_description_placeholder')}
+        />
+      </label>
+
+      <label>
+        <span className="mb-2 block text-sm font-medium text-slate-700">
+          {t('forms.currency_label')}
+        </span>
+        <SelectField
+          name="currency"
+          value={values.currency}
+          onChange={(nextValue) => {
+            if (SUPPORTED_CURRENCIES.includes(nextValue as typeof SUPPORTED_CURRENCIES[number])) {
+              setField('currency', nextValue as typeof values.currency)
+            }
+          }}
+          options={SUPPORTED_CURRENCIES.map((code) => ({
+            value: code,
+            label: t(`forms.currency_${code.toLowerCase()}`),
+          }))}
         />
       </label>
 

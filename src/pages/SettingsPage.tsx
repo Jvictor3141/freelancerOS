@@ -2,6 +2,7 @@ import {
   ArrowUpRight,
   Bell,
   BriefcaseBusiness,
+  Coins,
   KeyRound,
   Mail,
   Palette,
@@ -27,6 +28,7 @@ import type {
   FreelancerProfile,
   WorkspaceTheme,
 } from '../types/freelancerProfile';
+import { SUPPORTED_CURRENCIES, type CurrencyCode } from '../i18n/config';
 import {
   buildFreelancerIntro,
   buildFreelancerSignatureLines,
@@ -187,6 +189,8 @@ export function SettingsPage() {
   const { user } = useAuthStore();
   const theme = usePreferencesStore((state) => state.theme);
   const setTheme = usePreferencesStore((state) => state.setTheme);
+  const defaultCurrency = usePreferencesStore((state) => state.defaultCurrency);
+  const setDefaultCurrency = usePreferencesStore((state) => state.setDefaultCurrency);
   const disabledNotificationTypes = usePreferencesStore(
     (state) => state.disabledNotificationTypes,
   );
@@ -563,6 +567,46 @@ const profileIntro = useMemo(() => {
                     />
                   </button>
                 </div>
+              );
+            })}
+          </div>
+        </article>
+
+        <article className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
+          <div className="mb-5 flex items-center">
+            <div className="mr-2 inline-flex rounded-2xl bg-amber-50 p-3 text-amber-600">
+              <Coins size={18} />
+            </div>
+            <p className="text-sm font-medium text-slate-500">
+              {t('settings.currency_label')}
+            </p>
+          </div>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
+            {t('settings.currency_heading')}
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            {t('settings.currency_description')}
+          </p>
+
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {SUPPORTED_CURRENCIES.map((code) => {
+              const isSelected = defaultCurrency === code;
+              return (
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => setDefaultCurrency(code as CurrencyCode)}
+                  className={`flex flex-col items-start rounded-2xl border px-4 py-3 text-left transition hover:-translate-y-0.5 ${
+                    isSelected
+                      ? 'border-[#635bff] bg-indigo-50 text-[#635bff]'
+                      : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white'
+                  }`}
+                >
+                  <span className="text-lg font-bold">{code}</span>
+                  <span className="mt-0.5 text-xs text-slate-500">
+                    {t(`settings.currency_name_${code.toLowerCase()}`)}
+                  </span>
+                </button>
               );
             })}
           </div>

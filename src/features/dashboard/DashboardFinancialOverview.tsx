@@ -1,10 +1,9 @@
 import { AlertTriangle, ArrowUpRight, Clock3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
 import type { DashboardPaymentMetrics } from '../../types/dashboard'
-import { formatDashboardCurrency } from '../../utils/dashboard'
+import { formatCurrencyCode } from '../../utils/formatting'
+import { usePreferencesStore } from '../../stores/usePreferencesStore'
 import { DashboardFinancialStatCard } from './DashboardFinancialStatCard'
-import { isSupportedLanguage } from '../../i18n/config'
 
 type DashboardFinancialOverviewProps = {
   paymentMetrics: DashboardPaymentMetrics
@@ -13,24 +12,23 @@ type DashboardFinancialOverviewProps = {
 export function DashboardFinancialOverview({
   paymentMetrics,
 }: DashboardFinancialOverviewProps) {
-  const { t, i18n } = useTranslation()
-  const { lang } = useParams<{ lang?: string }>()
-  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+  const { t } = useTranslation()
+  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
 
   const cards = [
     {
       label: t('dashboard.financial_received'),
-      value: formatDashboardCurrency(paymentMetrics.receivedAmount, currentLang),
+      value: formatCurrencyCode(paymentMetrics.receivedAmount, defaultCurrency),
       icon: ArrowUpRight,
     },
     {
       label: t('dashboard.financial_pending'),
-      value: formatDashboardCurrency(paymentMetrics.pendingAmount, currentLang),
+      value: formatCurrencyCode(paymentMetrics.pendingAmount, defaultCurrency),
       icon: Clock3,
     },
     {
       label: t('dashboard.financial_overdue'),
-      value: formatDashboardCurrency(paymentMetrics.overdueAmount, currentLang),
+      value: formatCurrencyCode(paymentMetrics.overdueAmount, defaultCurrency),
       icon: AlertTriangle,
     },
   ]

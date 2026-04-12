@@ -1,7 +1,7 @@
 import { PencilLine } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import {
-  formatCurrency,
+  formatCurrencyCode,
   formatDate,
   formatDateTime,
 } from '../../utils/formatting'
@@ -53,7 +53,7 @@ export function ProposalDetailModalContent({ proposal, canEdit, onEdit }: Props)
         <div>
           <p className="text-xs font-medium text-slate-400">{t('proposals.value_label')}</p>
           <p className="mt-1 text-2xl font-semibold tracking-tight text-slate-950">
-            {formatCurrency(proposal.amount, currentLang)}
+            {formatCurrencyCode(proposal.amount, proposal.currency)}
           </p>
         </div>
         <span

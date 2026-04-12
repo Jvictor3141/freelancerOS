@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { formatCurrency } from '../../utils/formatting'
+import { formatCurrencyCode } from '../../utils/formatting'
+import { usePreferencesStore } from '../../stores/usePreferencesStore'
 import type { ProjectsCommercialSummary } from '../../types/viewModels'
 
 type ProjectsCommercialBannerProps = {
@@ -11,8 +12,8 @@ export function ProjectsCommercialBanner({
   summary,
   onOpenProposals,
 }: ProjectsCommercialBannerProps) {
-  const { t, i18n } = useTranslation()
-  const currentLang = i18n.resolvedLanguage ?? 'pt'
+  const { t } = useTranslation()
+  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
 
   return (
     <section className="flex flex-col gap-4 rounded-3xl border border-indigo-200 bg-indigo-50 px-5 py-4 text-sm text-indigo-900 lg:flex-row lg:items-center lg:justify-between">
@@ -24,7 +25,7 @@ export function ProjectsCommercialBanner({
           {t('projects.commercial_detail', {
             draftCount: summary.draftCount,
             sentCount: summary.sentCount,
-            value: formatCurrency(summary.openPipelineValue, currentLang),
+            value: formatCurrencyCode(summary.openPipelineValue, defaultCurrency),
           })}
         </p>
       </div>

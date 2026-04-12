@@ -6,7 +6,8 @@ import {
   Send,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { formatCurrency } from '../../utils/formatting'
+import { formatCurrencyCode } from '../../utils/formatting'
+import { usePreferencesStore } from '../../stores/usePreferencesStore'
 import type { ProposalMetrics } from '../../types/viewModels'
 
 type ProposalsOverviewSectionProps = {
@@ -18,8 +19,8 @@ export function ProposalsOverviewSection({
   metrics,
   onCreate,
 }: ProposalsOverviewSectionProps) {
-  const { t, i18n } = useTranslation()
-  const currentLang = i18n.resolvedLanguage ?? 'pt'
+  const { t } = useTranslation()
+  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
 
   const summaryCards = [
     {
@@ -39,7 +40,7 @@ export function ProposalsOverviewSection({
     },
     {
       label: t('proposals.overview_metric_open'),
-      value: formatCurrency(metrics.openPipelineValue, currentLang),
+      value: formatCurrencyCode(metrics.openPipelineValue, defaultCurrency),
       icon: Clock3,
     },
   ]

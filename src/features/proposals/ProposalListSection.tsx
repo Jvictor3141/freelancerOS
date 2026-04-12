@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { getActionButtonClassName } from '../../utils/actionButtonStyles'
 import {
-  formatCurrency,
+  formatCurrencyCode,
   formatDate,
   formatDateTime,
 } from '../../utils/formatting'
@@ -148,7 +148,7 @@ export function ProposalListSection({
                     <div className="shrink-0 rounded-2xl bg-slate-100 px-4 py-3 text-sm">
                       <p className="text-slate-500">{t('proposals.value_label')}</p>
                       <p className="mt-1 font-semibold text-slate-950">
-                        {formatCurrency(proposal.amount, currentLang)}
+                        {formatCurrencyCode(proposal.amount, proposal.currency)}
                       </p>
                     </div>
                   </div>

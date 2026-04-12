@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import type { ProjectWithClient } from '../../types/viewModels'
 import { getActionButtonClassName } from '../../utils/actionButtonStyles'
-import { formatCurrency, formatDate } from '../../utils/formatting'
+import { formatCurrencyCode, formatDate } from '../../utils/formatting'
 import {
   projectStatusClassName,
   projectStatusLabel,
@@ -102,7 +102,7 @@ export function ProjectsListSection({
                 </p>
                 <p>
                   <span className="font-medium text-slate-900">{t('projects.card_value')}</span>{' '}
-                  {formatCurrency(project.value, currentLang)}
+                  {formatCurrencyCode(project.value, project.currency)}
                 </p>
                 <p>
                   <span className="font-medium text-slate-900">{t('projects.card_deadline')}</span>{' '}
@@ -191,7 +191,7 @@ export function ProjectsListSection({
                 </td>
 
                 <td className="px-6 py-4 text-sm text-slate-700">
-                  {formatCurrency(project.value, currentLang)}
+                  {formatCurrencyCode(project.value, project.currency)}
                 </td>
 
                 <td className="px-6 py-4 text-sm text-slate-700">
