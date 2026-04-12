@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import type { DashboardPaymentAlert } from '../../types/dashboard'
 import { formatCurrencyCode, formatDate } from '../../utils/formatting'
-import { usePreferencesStore } from '../../stores/usePreferencesStore'
 import {
   paymentStatusClassName,
   paymentStatusLabel,
@@ -26,7 +25,6 @@ export function DashboardAlertsPanel({ alerts }: DashboardAlertsPanelProps) {
   const { t, i18n } = useTranslation()
   const { lang } = useParams<{ lang?: string }>()
   const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
-  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
   const alertsListRef = useRef<HTMLDivElement>(null)
   const [canScrollDown, setCanScrollDown] = useState(false)
 
@@ -112,7 +110,7 @@ export function DashboardAlertsPanel({ alerts }: DashboardAlertsPanelProps) {
                 <div className="mt-2.5 flex flex-col gap-1.5 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
                   <span>{t('dashboard.alerts_due_on', { date: formatDate(alert.dueDate, currentLang) })}</span>
                   <span className="font-semibold text-slate-900">
-                    {formatCurrencyCode(alert.amount, defaultCurrency)}
+                    {formatCurrencyCode(alert.amount, alert.currency)}
                   </span>
                 </div>
               </div>

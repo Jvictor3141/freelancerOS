@@ -49,7 +49,7 @@ export function DashboardPage() {
       <section className="grid gap-6 xl:grid-cols-12">
         <DashboardRevenueSection
           data={revenue}
-          totalReceived={paymentMetrics.receivedAmount}
+          paymentMetrics={paymentMetrics}
         />
         <DashboardRecentActivitiesPanel activities={recentActivities} />
       </section>

@@ -1,5 +1,6 @@
 import { getSupabaseErrorMessage, supabase } from '../lib/supabase'
-import type { DashboardViewModel } from '../types/dashboard'
+import type { DashboardViewModel, DashboardRevenuePoint } from '../types/dashboard'
+import { isSupportedCurrency } from '../i18n/config'
 import { parseCalendarDate } from '../utils/dateOnly'
 import { isPaymentAttentionStatus } from '../features/payments/paymentRules'
 import { isPaymentStatus } from '../utils/paymentStatus'
@@ -14,11 +15,7 @@ import {
 } from './readModelUtils'
 
 const DASHBOARD_SNAPSHOT_FUNCTION = 'get_dashboard_snapshot'
-const DASHBOARD_SNAPSHOT_MIGRATION = '20260329_dashboard_client_snapshots.sql'
-const MONTH_FORMATTER = new Intl.DateTimeFormat('pt-BR', {
-  month: 'short',
-  year: '2-digit',
-})
+const DASHBOARD_SNAPSHOT_MIGRATION = '20260413_dashboard_multicurrency.sql'
 
 export const emptyDashboardViewModel: DashboardViewModel = {
   metrics: {
@@ -27,11 +24,7 @@ export const emptyDashboardViewModel: DashboardViewModel = {
     completedProjects: 0,
     averageTicket: 0,
   },
-  paymentMetrics: {
-    receivedAmount: 0,
-    pendingAmount: 0,
-    overdueAmount: 0,
-  },
+  paymentMetrics: [],
   revenue: [],
   recentActivities: [],
   paymentAlerts: [],
@@ -60,12 +53,6 @@ function getDashboardSnapshotError(
   return getSupabaseErrorMessage(error, fallback)
 }
 
-function formatRevenueMonth(value: string) {
-  const date = parseCalendarDate(value)
-
-  return date ? MONTH_FORMATTER.format(date) : value
-}
-
 function parseMetrics(record: UnknownRecord | null) {
   return {
     totalClients: getNumberValue(record ?? {}, 'totalClients'),
@@ -75,36 +62,54 @@ function parseMetrics(record: UnknownRecord | null) {
   }
 }
 
-function parsePaymentMetrics(record: UnknownRecord | null) {
-  return {
-    receivedAmount: getNumberValue(record ?? {}, 'receivedAmount'),
-    pendingAmount: getNumberValue(record ?? {}, 'pendingAmount'),
-    overdueAmount: getNumberValue(record ?? {}, 'overdueAmount'),
-  }
+function parsePaymentMetrics(snapshot: UnknownRecord) {
+  return getArrayRecords(snapshot.paymentMetrics)
+    .map((record) => {
+      const currency = getStringValue(record, 'currency')
+      if (!isSupportedCurrency(currency)) return null
+
+      return {
+        currency,
+        receivedAmount: getNumberValue(record, 'receivedAmount'),
+        pendingAmount: getNumberValue(record, 'pendingAmount'),
+        overdueAmount: getNumberValue(record, 'overdueAmount'),
+      }
+    })
+    .filter((entry) => entry !== null)
 }
 
-function parseRevenue(snapshot: UnknownRecord) {
-  return getArrayRecords(snapshot.revenue).map((record) => ({
-    month: formatRevenueMonth(getStringValue(record, 'month')),
-    revenue: getNumberValue(record, 'revenue'),
-  }))
+function parseRevenue(snapshot: UnknownRecord): DashboardRevenuePoint[] {
+  return getArrayRecords(snapshot.revenue)
+    .map((record) => {
+      const currency = getStringValue(record, 'currency')
+      if (!isSupportedCurrency(currency)) return null
+
+      const rawMonth = getStringValue(record, 'month')
+      const date = parseCalendarDate(rawMonth)
+      if (!date) return null
+
+      return {
+        month: rawMonth,
+        currency,
+        revenue: getNumberValue(record, 'revenue'),
+      }
+    })
+    .filter((entry) => entry !== null)
 }
 
 function parseRecentActivities(snapshot: UnknownRecord) {
   return getArrayRecords(snapshot.recentActivities).map((record) => {
     const status = getStringValue(record, 'status')
+    const currency = getStringValue(record, 'currency')
 
     return {
       id: getStringValue(record, 'id'),
       title: getStringValue(record, 'title'),
-      clientName: getStringValue(
-        record,
-        'clientName',
-        'Cliente desconhecido',
-      ),
+      clientName: getStringValue(record, 'clientName', 'Cliente desconhecido'),
       status: normalizeProjectStatus(status),
       createdAt: getStringValue(record, 'createdAt'),
       value: getNumberValue(record, 'value'),
+      currency: isSupportedCurrency(currency) ? currency : ('BRL' as const),
     }
   })
 }
@@ -118,19 +123,14 @@ function parsePaymentAlerts(snapshot: UnknownRecord) {
         return null
       }
 
+      const currency = getStringValue(record, 'currency')
+
       return {
         id: getStringValue(record, 'id'),
-        clientName: getStringValue(
-          record,
-          'clientName',
-          'Cliente desconhecido',
-        ),
-        projectName: getStringValue(
-          record,
-          'projectName',
-          'Projeto desconhecido',
-        ),
+        clientName: getStringValue(record, 'clientName', 'Cliente desconhecido'),
+        projectName: getStringValue(record, 'projectName', 'Projeto desconhecido'),
         amount: getNumberValue(record, 'amount'),
+        currency: isSupportedCurrency(currency) ? currency : ('BRL' as const),
         dueDate: getStringValue(record, 'dueDate'),
         status,
       }
@@ -147,9 +147,7 @@ function parseDashboardSnapshot(value: unknown): DashboardViewModel {
 
   return {
     metrics: parseMetrics(getRecordValue(snapshot, 'metrics')),
-    paymentMetrics: parsePaymentMetrics(
-      getRecordValue(snapshot, 'paymentMetrics'),
-    ),
+    paymentMetrics: parsePaymentMetrics(snapshot),
     revenue: parseRevenue(snapshot),
     recentActivities: parseRecentActivities(snapshot),
     paymentAlerts: parsePaymentAlerts(snapshot),
