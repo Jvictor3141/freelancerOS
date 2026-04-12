@@ -1,3 +1,4 @@
+import type { CurrencyCode } from '../i18n/config'
 import type { Project } from './project'
 
 export type DashboardMetricSummary = {
@@ -7,14 +8,24 @@ export type DashboardMetricSummary = {
   averageTicket: number
 }
 
-export type DashboardPaymentMetrics = {
+/**
+ * Financial totals for a single currency. The dashboard returns one entry
+ * per currency that has any payment data — never a cross-currency sum.
+ */
+export type DashboardCurrencyBreakdown = {
+  currency: CurrencyCode
   receivedAmount: number
   pendingAmount: number
   overdueAmount: number
 }
 
+/**
+ * Sparse revenue data point. The SQL returns only (month, currency) pairs
+ * that have actual paid payments; the frontend fills zero-gaps for display.
+ */
 export type DashboardRevenuePoint = {
   month: string
+  currency: CurrencyCode
   revenue: number
 }
 
@@ -23,6 +34,7 @@ export type DashboardPaymentAlert = {
   clientName: string
   projectName: string
   amount: number
+  currency: CurrencyCode
   dueDate: string
   status: 'pending' | 'overdue'
 }
@@ -34,11 +46,12 @@ export type DashboardRecentActivity = {
   status: Project['status']
   createdAt: string
   value: number
+  currency: CurrencyCode
 }
 
 export type DashboardViewModel = {
   metrics: DashboardMetricSummary
-  paymentMetrics: DashboardPaymentMetrics
+  paymentMetrics: DashboardCurrencyBreakdown[]
   revenue: DashboardRevenuePoint[]
   recentActivities: DashboardRecentActivity[]
   paymentAlerts: DashboardPaymentAlert[]

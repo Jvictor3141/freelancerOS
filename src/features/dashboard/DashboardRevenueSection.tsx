@@ -1,8 +1,7 @@
 import { Suspense, lazy } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { DashboardRevenuePoint } from '../../types/dashboard'
+import type { DashboardCurrencyBreakdown, DashboardRevenuePoint } from '../../types/dashboard'
 import { formatCurrencyCode } from '../../utils/formatting'
-import { usePreferencesStore } from '../../stores/usePreferencesStore'
 
 const DashboardRevenueChart = lazy(async () => ({
   default: (await import('./DashboardRevenueChart')).DashboardRevenueChart,
@@ -10,7 +9,7 @@ const DashboardRevenueChart = lazy(async () => ({
 
 type DashboardRevenueSectionProps = {
   data: DashboardRevenuePoint[]
-  totalReceived: number
+  paymentMetrics: DashboardCurrencyBreakdown[]
 }
 
 function RevenueChartFallback() {
@@ -19,10 +18,11 @@ function RevenueChartFallback() {
 
 export function DashboardRevenueSection({
   data,
-  totalReceived,
+  paymentMetrics,
 }: DashboardRevenueSectionProps) {
   const { t } = useTranslation()
-  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
+
+  const receivedByCurrency = paymentMetrics.filter((row) => row.receivedAmount > 0)
 
   return (
     <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100 xl:col-span-8">
@@ -36,14 +36,20 @@ export function DashboardRevenueSection({
           </h3>
         </div>
 
-        <div className="rounded-2xl bg-slate-50 px-4 py-3">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-            {t('dashboard.revenue_total_label')}
-          </p>
-          <p className="mt-1 text-lg font-semibold text-slate-950">
-            {formatCurrencyCode(totalReceived, defaultCurrency)}
-          </p>
-        </div>
+        {receivedByCurrency.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {receivedByCurrency.map((row) => (
+              <div key={row.currency} className="rounded-2xl bg-slate-50 px-4 py-3">
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+                  {row.currency}
+                </p>
+                <p className="mt-1 text-lg font-semibold text-slate-950">
+                  {formatCurrencyCode(row.receivedAmount, row.currency)}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <Suspense fallback={<RevenueChartFallback />}>

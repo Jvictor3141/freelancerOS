@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next'
 import type { DashboardRecentActivity } from '../../types/dashboard'
 import { formatDashboardDate } from '../../utils/dashboard'
 import { formatCurrencyCode } from '../../utils/formatting'
-import { usePreferencesStore } from '../../stores/usePreferencesStore'
 import {
   projectStatusClassName,
   projectStatusLabel,
@@ -24,7 +23,6 @@ export function DashboardRecentActivitiesPanel({
 }: DashboardRecentActivitiesPanelProps) {
   const { t, i18n } = useTranslation()
   const currentLang = i18n.resolvedLanguage ?? 'pt'
-  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
 
   return (
     <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100 xl:col-span-4">
@@ -67,7 +65,9 @@ export function DashboardRecentActivitiesPanel({
 
               <div className="mt-3 flex flex-col gap-2 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
                 <span>{formatDashboardDate(activity.createdAt, currentLang)}</span>
-                <span>{formatCurrencyCode(activity.value, defaultCurrency)}</span>
+                <span className="font-semibold text-slate-900">
+                  {formatCurrencyCode(activity.value, activity.currency)}
+                </span>
               </div>
             </div>
           ))
