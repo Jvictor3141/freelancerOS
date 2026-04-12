@@ -6,41 +6,22 @@ import { convertToBase } from '../../services/exchangeRateService'
 import { useExchangeRates } from '../../hooks/useExchangeRates'
 import { usePreferencesStore } from '../../stores/usePreferencesStore'
 import { formatCurrencyCode } from '../../utils/formatting'
+import type { CurrencyCode } from '../../i18n/config'
 
-type DashboardConvertedTotalProps = {
+type ConvertedPanelProps = {
   paymentMetrics: DashboardCurrencyBreakdown[]
+  baseCurrency: CurrencyCode
+  onHide: () => void
 }
 
-export function DashboardConvertedTotal({
-  paymentMetrics,
-}: DashboardConvertedTotalProps) {
+/**
+ * Rendered only when the user enables the toggle.
+ * Keeping useExchangeRates inside this component ensures the exchange rate
+ * API is only called on demand — never on page load.
+ */
+function ConvertedPanel({ paymentMetrics, baseCurrency, onHide }: ConvertedPanelProps) {
   const { t } = useTranslation()
-  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
-  const [enabled, setEnabled] = useState(false)
-
-  const { rates, isLoading, isStale, error, retry } = useExchangeRates(
-    enabled ? defaultCurrency : 'BRL',
-  )
-
-  const needsConversion = paymentMetrics.some(
-    (row) => row.currency !== defaultCurrency,
-  )
-
-  if (!needsConversion || paymentMetrics.length === 0) {
-    return null
-  }
-
-  if (!enabled) {
-    return (
-      <button
-        type="button"
-        onClick={() => setEnabled(true)}
-        className="mt-auto w-fit self-end rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
-      >
-        {t('dashboard.financial_converted_toggle', { currency: defaultCurrency })}
-      </button>
-    )
-  }
+  const { rates, isLoading, isStale, error, retry } = useExchangeRates(baseCurrency)
 
   const totalReceived =
     rates !== null
@@ -72,7 +53,7 @@ export function DashboardConvertedTotal({
 
         <button
           type="button"
-          onClick={() => setEnabled(false)}
+          onClick={onHide}
           className="text-xs text-indigo-200 hover:text-white"
         >
           {t('dashboard.financial_converted_hide')}
@@ -105,7 +86,7 @@ export function DashboardConvertedTotal({
             </p>
             <p className="mt-0.5 text-lg font-semibold">
               {totalReceived !== null
-                ? `≈ ${formatCurrencyCode(totalReceived, defaultCurrency)}`
+                ? `≈ ${formatCurrencyCode(totalReceived, baseCurrency)}`
                 : '—'}
             </p>
           </div>
@@ -115,12 +96,52 @@ export function DashboardConvertedTotal({
             </p>
             <p className="mt-0.5 text-lg font-semibold">
               {totalPending !== null
-                ? `≈ ${formatCurrencyCode(totalPending, defaultCurrency)}`
+                ? `≈ ${formatCurrencyCode(totalPending, baseCurrency)}`
                 : '—'}
             </p>
           </div>
         </div>
       )}
     </div>
+  )
+}
+
+type DashboardConvertedTotalProps = {
+  paymentMetrics: DashboardCurrencyBreakdown[]
+}
+
+export function DashboardConvertedTotal({
+  paymentMetrics,
+}: DashboardConvertedTotalProps) {
+  const { t } = useTranslation()
+  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
+  const [enabled, setEnabled] = useState(false)
+
+  const needsConversion = paymentMetrics.some(
+    (row) => row.currency !== defaultCurrency,
+  )
+
+  if (!needsConversion || paymentMetrics.length === 0) {
+    return null
+  }
+
+  if (enabled) {
+    return (
+      <ConvertedPanel
+        paymentMetrics={paymentMetrics}
+        baseCurrency={defaultCurrency}
+        onHide={() => setEnabled(false)}
+      />
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => setEnabled(true)}
+      className="mt-auto w-fit self-end rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+    >
+      {t('dashboard.financial_converted_toggle', { currency: defaultCurrency })}
+    </button>
   )
 }
