@@ -39,7 +39,25 @@
       ]
     },
     {
+      "source": "/:lang(pt|en)/login",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
       "source": "/auth/callback",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
+      "source": "/:lang(pt|en)/auth/callback",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -57,6 +75,15 @@
       ]
     },
     {
+      "source": "/:lang(pt|en)/redefinir-senha",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        }
+      ]
+    },
+    {
       "source": "/propostas/compartilhadas/:path*",
       "headers": [
         {
@@ -66,7 +93,29 @@
       ]
     },
     {
+      "source": "/:lang(pt|en)/propostas/compartilhadas/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
       "source": "/dashboard",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/:lang(pt|en)/dashboard",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -92,7 +141,33 @@
       ]
     },
     {
+      "source": "/:lang(pt|en)/clientes",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
       "source": "/clients/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/:lang(pt|en)/clients/:path*",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -118,7 +193,33 @@
       ]
     },
     {
+      "source": "/:lang(pt|en)/projetos",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
       "source": "/pagamentos",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/:lang(pt|en)/pagamentos",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -144,7 +245,33 @@
       ]
     },
     {
+      "source": "/:lang(pt|en)/propostas",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
       "source": "/configuracoes",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, follow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/:lang(pt|en)/configuracoes",
       "headers": [
         {
           "key": "X-Robots-Tag",

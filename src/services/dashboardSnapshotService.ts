@@ -15,7 +15,8 @@ import {
 } from './readModelUtils'
 
 const DASHBOARD_SNAPSHOT_FUNCTION = 'get_dashboard_snapshot'
-const DASHBOARD_SNAPSHOT_MIGRATION = '20260413_dashboard_multicurrency.sql'
+const DASHBOARD_SNAPSHOT_MIGRATION =
+  '20260413_supported_currencies_and_read_models.sql'
 
 export const emptyDashboardViewModel: DashboardViewModel = {
   metrics: {

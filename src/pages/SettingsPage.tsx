@@ -588,7 +588,7 @@ const profileIntro = useMemo(() => {
             {t('settings.currency_description')}
           </p>
 
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {SUPPORTED_CURRENCIES.map((code) => {
               const isSelected = defaultCurrency === code;
               return (

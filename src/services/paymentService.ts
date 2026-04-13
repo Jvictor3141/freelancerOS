@@ -10,7 +10,8 @@ import { formatDateInputValue } from '../utils/dateOnly'
 import { ensureDatabaseBootstrap } from './bootstrapService'
 
 const PAYMENT_READ_MODEL = 'payments_read_model'
-const PAYMENT_READ_MODEL_MIGRATION = '20260328_payment_read_model.sql'
+const PAYMENT_READ_MODEL_MIGRATION =
+  '20260413_supported_currencies_and_read_models.sql'
 
 function isMissingPaymentReadModel(error: { message?: string } | null) {
   if (!error?.message) {

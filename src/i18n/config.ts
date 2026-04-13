@@ -21,7 +21,7 @@ export const LANGUAGE_CURRENCY_MAP: Record<SupportedLanguage, string> = {
   en: 'USD',
 };
 
-export const SUPPORTED_CURRENCIES = ['BRL', 'USD', 'EUR', 'GBP'] as const;
+export const SUPPORTED_CURRENCIES = ['BRL', 'USD', 'EUR'] as const;
 export type CurrencyCode = (typeof SUPPORTED_CURRENCIES)[number];
 
 export function isSupportedCurrency(value: string): value is CurrencyCode {
@@ -32,7 +32,6 @@ export const CURRENCY_LOCALE_MAP: Record<CurrencyCode, string> = {
   BRL: 'pt-BR',
   USD: 'en-US',
   EUR: 'de-DE',
-  GBP: 'en-GB',
 };
 
 void i18n

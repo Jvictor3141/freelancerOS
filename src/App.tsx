@@ -230,6 +230,21 @@ function App() {
         }
       />
 
+      {/* External entry points without /:lang for auth emails, old bookmarks,
+          and shared links whose recipient language is unknown upfront. */}
+      <Route
+        path="/login"
+        element={
+          user ? <Navigate to={authenticatedHome} replace /> : <LoginPage />
+        }
+      />
+      <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      <Route path="/redefinir-senha" element={<RecoveryPasswordPage />} />
+      <Route
+        path="/propostas/compartilhadas/:shareId"
+        element={<SharedProposalRoute />}
+      />
+
       {/* Language-prefixed routes */}
       <Route path="/:lang" element={<LangRouteProvider />}>
         {/* Index: landing or redirect to dashboard */}

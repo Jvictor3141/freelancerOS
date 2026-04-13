@@ -18,7 +18,11 @@ import {
   projectStatusClassName,
   projectStatusLabel,
 } from '../utils/projectStatus'
-import { isSupportedLanguage } from '../i18n/config'
+import {
+  isSupportedLanguage,
+  type CurrencyCode,
+} from '../i18n/config'
+import type { ClientCurrencyAmount } from '../types/clientDetails'
 
 const CLIENT_PROJECTS_VISIBLE_COUNT = 2
 const CLIENT_PAYMENTS_VISIBLE_COUNT = 3
@@ -31,6 +35,38 @@ const CLIENT_DETAILS_LIST_MAX_HEIGHT = Math.max(
   CLIENT_PAYMENTS_VISIBLE_COUNT * CLIENT_PAYMENT_CARD_MIN_HEIGHT +
     (CLIENT_PAYMENTS_VISIBLE_COUNT - 1) * CLIENT_DETAILS_LIST_GAP,
 )
+
+type CurrencyBreakdownValueProps = {
+  amounts: ClientCurrencyAmount[]
+  fallbackCurrency: CurrencyCode
+}
+
+function CurrencyBreakdownValue({
+  amounts,
+  fallbackCurrency,
+}: CurrencyBreakdownValueProps) {
+  const entries =
+    amounts.length > 0
+      ? amounts
+      : [{ currency: fallbackCurrency, amount: 0 } satisfies ClientCurrencyAmount]
+
+  return (
+    <div className="mt-2 flex flex-col items-end gap-1">
+      {entries.map(({ currency, amount }) => (
+        <span
+          key={`${currency}-${amount}`}
+          className={
+            entries.length === 1
+              ? 'text-lg font-semibold tracking-tight text-slate-950 sm:text-xl md:text-2xl lg:text-3xl'
+              : 'text-sm font-semibold text-slate-950 sm:text-base'
+          }
+        >
+          {formatCurrencyCode(amount, currency)}
+        </span>
+      ))}
+    </div>
+  )
+}
 
 export function ClientDetailsPage() {
   const { t, i18n } = useTranslation()
@@ -45,11 +81,11 @@ export function ClientDetailsPage() {
   const clientProjects = snapshot?.projects ?? []
   const clientPayments = snapshot?.payments ?? []
   const summary = snapshot?.summary ?? {
-    totalContracted: 0,
-    totalReceived: 0,
-    totalPending: 0,
-    totalOverdue: 0,
-    totalOutstanding: 0,
+    contractedByCurrency: [],
+    receivedByCurrency: [],
+    pendingByCurrency: [],
+    overdueByCurrency: [],
+    outstandingByCurrency: [],
     completedProjects: 0,
   }
 
@@ -181,9 +217,10 @@ export function ClientDetailsPage() {
             </div>
             <p className="text-sm font-medium text-slate-500">{t('clients.details_metric_received')}</p>
           </div>
-          <p className="mt-2 flex items-end justify-end text-lg font-semibold tracking-tight text-slate-950 sm:text-xl md:text-2xl lg:text-3xl">
-            {formatCurrencyCode(summary.totalReceived, defaultCurrency)}
-          </p>
+          <CurrencyBreakdownValue
+            amounts={summary.receivedByCurrency}
+            fallbackCurrency={defaultCurrency}
+          />
         </div>
 
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">
@@ -193,9 +230,10 @@ export function ClientDetailsPage() {
             </div>
             <p className="text-sm font-medium text-slate-500">{t('clients.details_metric_pending')}</p>
           </div>
-          <p className="mt-2 flex items-end justify-end text-lg font-semibold tracking-tight text-slate-950 sm:text-xl md:text-2xl lg:text-3xl">
-            {formatCurrencyCode(summary.totalOutstanding, defaultCurrency)}
-          </p>
+          <CurrencyBreakdownValue
+            amounts={summary.outstandingByCurrency}
+            fallbackCurrency={defaultCurrency}
+          />
         </div>
 
         <div className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100">

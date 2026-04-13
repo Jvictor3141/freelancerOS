@@ -1,6 +1,9 @@
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import type { CurrencyCode } from '../i18n/config'
+import {
+  isSupportedCurrency,
+  type CurrencyCode,
+} from '../i18n/config'
 import type { HeaderNotificationType } from '../components/headerNotificationsModel'
 import type { WorkspaceTheme } from '../types/freelancerProfile'
 
@@ -49,6 +52,20 @@ export const usePreferencesStore = create<PreferencesStore>()(
     {
       name: 'freelanceros-preferences',
       storage: createJSONStorage(() => localStorage),
+      merge: (persistedState, currentState) => {
+        const persisted = persistedState as Partial<PreferencesStoreState> | null
+        const persistedCurrency = persisted?.defaultCurrency
+        const defaultCurrency: CurrencyCode =
+          persistedCurrency && isSupportedCurrency(persistedCurrency)
+            ? persistedCurrency
+            : currentState.defaultCurrency
+
+        return {
+          ...currentState,
+          ...persisted,
+          defaultCurrency,
+        }
+      },
     },
   ),
 )
