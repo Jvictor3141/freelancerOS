@@ -1,13 +1,19 @@
+import type { CurrencyCode } from '../i18n/config'
 import type { Client } from './client'
 import type { Payment } from './payment'
 import type { Project } from './project'
 
+export type ClientCurrencyAmount = {
+  currency: CurrencyCode
+  amount: number
+}
+
 export type ClientFinancialSummary = {
-  totalContracted: number
-  totalReceived: number
-  totalPending: number
-  totalOverdue: number
-  totalOutstanding: number
+  contractedByCurrency: ClientCurrencyAmount[]
+  receivedByCurrency: ClientCurrencyAmount[]
+  pendingByCurrency: ClientCurrencyAmount[]
+  overdueByCurrency: ClientCurrencyAmount[]
+  outstandingByCurrency: ClientCurrencyAmount[]
   completedProjects: number
 }
 

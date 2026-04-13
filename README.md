@@ -2,11 +2,11 @@
 
 FreelancerOS e um painel SaaS para freelancers organizarem clientes, propostas, projetos e pagamentos em um unico fluxo.
 
-O projeto hoje e uma aplicacao React + Vite com autenticacao no Supabase, persistencia em banco, sincronizacao realtime, read models SQL para dashboard/detalhes e um fluxo publico para compartilhamento seguro de propostas.
+Hoje o projeto e uma aplicacao React + Vite com autenticacao no Supabase, persistencia em banco, sincronizacao realtime, read models SQL para dashboard/detalhes e um fluxo publico para compartilhamento seguro de propostas.
 
 ## O que existe no projeto atual
 
-- landing page publica com CTA para cadastro e login
+- landing page publica com suporte a `pt` e `en`
 - autenticacao com email e senha, callback de auth e recuperacao de senha
 - dashboard autenticado com metricas, grafico de receita, alertas e atividades recentes
 - CRUD de clientes com busca e pagina de detalhes financeiros
@@ -16,8 +16,7 @@ O projeto hoje e uma aplicacao React + Vite com autenticacao no Supabase, persis
 - envio assistido de propostas via `mailto:` com assunto e corpo preenchidos
 - aceite de proposta gerando projeto automaticamente
 - link seguro de proposta com expiracao e pagina publica para aceite ou recusa sem login
-- configuracoes de tema, perfil comercial do freelancer e atualizacao de senha
-- notificacoes operacionais no header para aceite de proposta, vencimentos e atrasos
+- configuracoes de tema, perfil comercial do freelancer, notificacoes e atualizacao de senha
 - sincronizacao realtime das tabelas principais com invalidador de snapshots
 - migracao automatica de dados legados do `localStorage` para o Supabase na primeira sessao autenticada
 
@@ -44,9 +43,27 @@ O projeto hoje e uma aplicacao React + Vite com autenticacao no Supabase, persis
 - `src/services`: integracao com Supabase, RPCs e fluxos de negocio
 - `src/stores`: estado global com Zustand
 - `src/utils`: regras puras, formatacao e agregacoes
-- `supabase/schema.sql`: schema consolidado, RLS, view `payments_read_model` e funcoes SQL de snapshot/aceite
-- `supabase/migrations`: historico de evolucao do banco
+- `src/i18n`: configuracao de idioma, moeda e navegacao com `/:lang`
+- `supabase/schema.sql`: schema consolidado para ambiente novo
+- `supabase/migrations`: historico de evolucao do banco para ambientes existentes
 - `supabase/functions/proposal-share`: Edge Function para links seguros de propostas
+
+## Idiomas e moedas
+
+- idiomas suportados: `pt` e `en`
+- moedas suportadas na aplicacao: `BRL`, `USD` e `EUR`
+- o dashboard e os detalhes financeiros trabalham por moeda para evitar soma incorreta entre valores de denominacoes diferentes
+
+## Rotas importantes
+
+- o app principal usa rotas com prefixo de idioma, por exemplo `/:lang/dashboard`
+- para links externos, o app tambem aceita entradas sem `/:lang` em:
+  - `/login`
+  - `/auth/callback`
+  - `/redefinir-senha`
+  - `/propostas/compartilhadas/:shareId`
+
+Isso evita quebrar links de email, callback de autenticacao e compartilhamento publico quando o idioma do usuario ainda nao e conhecido.
 
 ## Como rodar localmente
 
@@ -72,30 +89,54 @@ VITE_SUPABASE_AUTO_ANON_AUTH=false
 Observacoes:
 
 - `VITE_SUPABASE_ANON_KEY` tambem e aceito como fallback no cliente, mas o projeto hoje prioriza `VITE_SUPABASE_PUBLISHABLE_KEY`
-- `VITE_SITE_URL` e usado para montar os redirects de autenticacao
+- `VITE_SITE_URL` deve apontar para a origem publica do front-end
+- o callback externo usado pelo auth continua sendo `/auth/callback`
 
-### 3. Suba o schema no Supabase
+### 3. Configure o banco no Supabase
+
+#### Ambiente novo
 
 Execute o conteudo de `supabase/schema.sql` no SQL Editor do projeto Supabase.
 
 Esse arquivo ja inclui:
 
 - tabelas de `clients`, `projects`, `payments`, `proposals` e `proposal_share_links`
+- colunas de moeda alinhadas ao app atual
 - indices
 - policies com RLS por `user_id`
-- view `payments_read_model` para status derivado de pagamentos
+- view `payments_read_model`
 - funcoes SQL `get_dashboard_snapshot` e `get_client_details_snapshot`
 - funcoes SQL `accept_proposal` e `respond_to_shared_proposal`
 
-As migrations em `supabase/migrations` existem como historico da evolucao, mas o ponto de entrada para um ambiente novo e o `schema.sql`.
+#### Ambiente existente
+
+Se o projeto Supabase ja existe e voce esta atualizando uma base antiga, aplique as migrations pendentes em `supabase/migrations`.
+
+Para alinhar o estado atual do app com as moedas suportadas e os read models, a migration mais importante neste momento e:
+
+```text
+supabase/migrations/20260413_supported_currencies_and_read_models.sql
+```
+
+Essa migration:
+
+- restringe moedas a `BRL`, `USD` e `EUR`
+- reconstrui `payments_read_model`
+- reconstrui `get_dashboard_snapshot`
+- reconstrui `get_client_details_snapshot`
+
+Importante:
+
+- se sua base ainda tiver registros com `GBP`, normalize esses dados antes de aplicar essa migration
+- se voce estiver provisionando um ambiente novo, use `supabase/schema.sql` em vez de aplicar migrations manualmente uma por uma
 
 ### 4. Configure o Auth
 
 No Supabase Auth:
 
 - habilite login por email e senha
-- configure a `Site URL` para a URL local ou de producao
-- libere a rota de callback usada pelo app: `/auth/callback`
+- configure a `Site URL` para a origem do front-end
+- garanta que o callback externo usado pelo app esteja permitido: `/auth/callback`
 
 Se for usar `VITE_SUPABASE_AUTO_ANON_AUTH=true`, tambem e necessario habilitar Anonymous Sign-Ins no Supabase.
 
@@ -112,7 +153,11 @@ SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key
 PUBLIC_APP_URL=http://localhost:5173
 ```
 
-Sem essa function, o restante do painel funciona, mas o compartilhamento publico de propostas fica indisponivel.
+Observacoes:
+
+- `PUBLIC_APP_URL` deve apontar para a origem publica do front-end
+- o link compartilhado usa a rota externa `/propostas/compartilhadas/:shareId`
+- sem essa function, o restante do painel funciona, mas o compartilhamento publico de propostas fica indisponivel
 
 ### 6. Rode o projeto
 
@@ -136,7 +181,7 @@ pnpm check
 
 ## Testes
 
-Os testes automatizados atuais cobrem principalmente regras puras e um fluxo critico de store:
+Os testes automatizados atuais cobrem principalmente regras puras e alguns fluxos criticos de store:
 
 - agregacoes financeiras
 - datas sem drift de timezone
@@ -156,6 +201,7 @@ Hoje a suite nao cobre interface via browser nem testes E2E.
 
 ## Observacoes de deploy
 
-- `vercel.json` ja trata o rewrite da SPA para `index.html`
-- `vercel.json` tambem aplica headers de seguranca como `Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options` e `Referrer-Policy`
-- o link publico de proposta usa `PUBLIC_APP_URL` na Edge Function e `VITE_SITE_URL` no front-end, entao essas URLs precisam apontar para o dominio correto em producao
+- `vercel.json` trata o rewrite da SPA para `index.html`
+- `vercel.json` aplica headers de seguranca como `Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options` e `Referrer-Policy`
+- o deploy cobre rotas com e sem `/:lang` para auth, painel e compartilhamento publico
+- `VITE_SITE_URL` e `PUBLIC_APP_URL` precisam apontar para o dominio correto em producao

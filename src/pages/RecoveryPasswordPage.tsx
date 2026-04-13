@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, KeyRound, ShieldAlert } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLangNavigate } from '../i18n/hooks/useLangNavigate';
 import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../components/BrandLogo';
 import { PasswordField } from '../components/PasswordField';
@@ -16,7 +16,7 @@ type AuthFeedback = {
 
 export function RecoveryPasswordPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useLangNavigate();
   const { user, authFlow, loading, error, clearFeedback, logout } =
     useAuthStore();
   const [password, setPassword] = useState('');

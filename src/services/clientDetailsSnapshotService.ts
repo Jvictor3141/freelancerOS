@@ -1,6 +1,9 @@
 import { getSupabaseErrorMessage, supabase } from '../lib/supabase'
 import { isSupportedCurrency } from '../i18n/config'
-import type { ClientDetailsSnapshot } from '../types/clientDetails'
+import type {
+  ClientCurrencyAmount,
+  ClientDetailsSnapshot,
+} from '../types/clientDetails'
 import { isPaymentMethod, isPaymentStatus } from '../utils/paymentStatus'
 import { normalizeProjectStatus } from '../utils/projectStatus'
 import { getRecord, type UnknownRecord } from '../utils/typeGuards'
@@ -15,7 +18,7 @@ import {
 
 const CLIENT_DETAILS_SNAPSHOT_FUNCTION = 'get_client_details_snapshot'
 const CLIENT_DETAILS_SNAPSHOT_MIGRATION =
-  '20260329_dashboard_client_snapshots.sql'
+  '20260413_supported_currencies_and_read_models.sql'
 
 function isMissingClientDetailsSnapshotFunction(
   error: { message?: string } | null,
@@ -59,12 +62,53 @@ function parseClient(record: UnknownRecord | null) {
 }
 
 function parseSummary(record: UnknownRecord | null) {
+  function parseCurrencyAmounts(
+    key: string,
+    legacyKey: string,
+  ): ClientCurrencyAmount[] {
+    const amounts = getArrayRecords(record?.[key])
+      .map((entry) => {
+        const currency = getStringValue(entry, 'currency')
+        if (!isSupportedCurrency(currency)) {
+          return null
+        }
+
+        return {
+          currency,
+          amount: getNumberValue(entry, 'amount'),
+        }
+      })
+      .filter((entry) => entry !== null)
+
+    if (amounts.length > 0) {
+      return amounts
+    }
+
+    const legacyAmount = getNumberValue(record ?? {}, legacyKey)
+    return legacyAmount > 0 ? [{ currency: 'BRL', amount: legacyAmount }] : []
+  }
+
   return {
-    totalContracted: getNumberValue(record ?? {}, 'totalContracted'),
-    totalReceived: getNumberValue(record ?? {}, 'totalReceived'),
-    totalPending: getNumberValue(record ?? {}, 'totalPending'),
-    totalOverdue: getNumberValue(record ?? {}, 'totalOverdue'),
-    totalOutstanding: getNumberValue(record ?? {}, 'totalOutstanding'),
+    contractedByCurrency: parseCurrencyAmounts(
+      'contractedByCurrency',
+      'totalContracted',
+    ),
+    receivedByCurrency: parseCurrencyAmounts(
+      'receivedByCurrency',
+      'totalReceived',
+    ),
+    pendingByCurrency: parseCurrencyAmounts(
+      'pendingByCurrency',
+      'totalPending',
+    ),
+    overdueByCurrency: parseCurrencyAmounts(
+      'overdueByCurrency',
+      'totalOverdue',
+    ),
+    outstandingByCurrency: parseCurrencyAmounts(
+      'outstandingByCurrency',
+      'totalOutstanding',
+    ),
     completedProjects: getNumberValue(record ?? {}, 'completedProjects'),
   }
 }

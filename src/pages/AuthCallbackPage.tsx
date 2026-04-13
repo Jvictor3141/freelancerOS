@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { LoaderCircle } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+import { useLangNavigate } from '../i18n/hooks/useLangNavigate';
 import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../components/BrandLogo';
 import { Seo } from '../seo/Seo';
@@ -42,7 +43,7 @@ function getSafeNextPath(rawNext: string | null) {
 
 export function AuthCallbackPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
+  const navigate = useLangNavigate();
   const [searchParams] = useSearchParams();
   const { initialized, user, authFlow } = useAuthStore();
 

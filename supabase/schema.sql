@@ -18,6 +18,7 @@ create table if not exists public.projects (
   name text not null,
   description text not null default '',
   value numeric(12, 2) not null default 0,
+  currency varchar(3) not null default 'BRL' check (currency in ('BRL', 'USD', 'EUR')),
   deadline date,
   status text not null check (status in ('in_progress', 'review', 'completed')),
   created_at timestamptz not null default timezone('utc', now())
@@ -28,6 +29,7 @@ create table if not exists public.payments (
   user_id uuid not null default auth.uid(),
   project_id uuid not null references public.projects (id) on delete cascade,
   amount numeric(12, 2) not null default 0,
+  currency varchar(3) not null default 'BRL' check (currency in ('BRL', 'USD', 'EUR')),
   due_date date not null,
   paid_at date,
   status text not null check (status in ('pending', 'paid')),
@@ -44,6 +46,7 @@ create table if not exists public.proposals (
   title text not null,
   description text not null default '',
   amount numeric(12, 2) not null default 0,
+  currency varchar(3) not null default 'BRL' check (currency in ('BRL', 'USD', 'EUR')),
   delivery_days integer not null default 7 check (delivery_days > 0),
   recipient_email text not null,
   status text not null check (status in ('draft', 'sent', 'accepted', 'rejected')),
@@ -100,6 +103,7 @@ select
   user_id,
   project_id,
   amount,
+  currency,
   due_date,
   paid_at,
   case
@@ -151,31 +155,26 @@ with metrics as (
 ),
 payment_metrics as (
   select
+    currency,
     coalesce(sum(case when status = 'paid' then amount else 0 end), 0) as received_amount,
     coalesce(sum(case when status = 'pending' then amount else 0 end), 0) as pending_amount,
     coalesce(sum(case when status = 'overdue' then amount else 0 end), 0) as overdue_amount
   from public.payments_read_model
   where user_id = auth.uid()
-),
-revenue_buckets as (
-  select month_start::date
-  from generate_series(
-    date_trunc('month', timezone('America/Sao_Paulo', now()))::date - interval '5 months',
-    date_trunc('month', timezone('America/Sao_Paulo', now()))::date,
-    interval '1 month'
-  ) as month_start
+  group by currency
 ),
 revenue as (
   select
-    bucket.month_start,
-    coalesce(sum(payment.amount), 0) as revenue
-  from revenue_buckets bucket
-  left join public.payments_read_model payment
-    on payment.user_id = auth.uid()
-   and payment.status = 'paid'
-   and payment.paid_at is not null
-   and date_trunc('month', payment.paid_at::timestamp)::date = bucket.month_start
-  group by bucket.month_start
+    date_trunc('month', paid_at::timestamp)::date as month_start,
+    currency,
+    sum(amount) as revenue
+  from public.payments_read_model
+  where user_id = auth.uid()
+    and status = 'paid'
+    and paid_at is not null
+    and date_trunc('month', paid_at::timestamp)::date
+        >= (date_trunc('month', timezone('America/Sao_Paulo', now())) - interval '5 months')::date
+  group by date_trunc('month', paid_at::timestamp)::date, currency
 ),
 recent_activities as (
   select
@@ -184,7 +183,8 @@ recent_activities as (
     client.name as client_name,
     project.status,
     project.created_at,
-    project.value
+    project.value,
+    project.currency
   from public.projects project
   join public.clients client
     on client.id = project.client_id
@@ -199,6 +199,7 @@ payment_alerts as (
     client.name as client_name,
     project.name as project_name,
     payment.amount,
+    payment.currency,
     payment.due_date,
     payment.status,
     payment.created_at
@@ -226,13 +227,19 @@ select jsonb_build_object(
     from metrics
   ),
   'paymentMetrics',
-  (
-    select jsonb_build_object(
-      'receivedAmount', received_amount,
-      'pendingAmount', pending_amount,
-      'overdueAmount', overdue_amount
-    )
-    from payment_metrics
+  coalesce(
+    (
+      select jsonb_agg(
+        jsonb_build_object(
+          'currency', currency,
+          'receivedAmount', received_amount,
+          'pendingAmount', pending_amount,
+          'overdueAmount', overdue_amount
+        )
+      )
+      from payment_metrics
+    ),
+    '[]'::jsonb
   ),
   'revenue',
   coalesce(
@@ -240,6 +247,7 @@ select jsonb_build_object(
       select jsonb_agg(
         jsonb_build_object(
           'month', to_char(month_start, 'YYYY-MM-DD'),
+          'currency', currency,
           'revenue', revenue
         )
         order by month_start
@@ -258,7 +266,8 @@ select jsonb_build_object(
           'clientName', client_name,
           'status', status,
           'createdAt', created_at,
-          'value', value
+          'value', value,
+          'currency', currency
         )
         order by created_at desc
       )
@@ -275,6 +284,7 @@ select jsonb_build_object(
           'clientName', client_name,
           'projectName', project_name,
           'amount', amount,
+          'currency', currency,
           'dueDate', to_char(due_date, 'YYYY-MM-DD'),
           'status', status
         )
@@ -334,11 +344,100 @@ select case
     ),
     'summary',
     jsonb_build_object(
-      'totalContracted', coalesce((select sum(value) from client_projects), 0),
-      'totalReceived', coalesce((select sum(amount) from client_payments where status = 'paid'), 0),
-      'totalPending', coalesce((select sum(amount) from client_payments where status = 'pending'), 0),
-      'totalOverdue', coalesce((select sum(amount) from client_payments where status = 'overdue'), 0),
-      'totalOutstanding', coalesce((select sum(amount) from client_payments where status in ('pending', 'overdue')), 0),
+      'contractedByCurrency',
+      coalesce(
+        (
+          select jsonb_agg(
+            jsonb_build_object(
+              'currency', currency,
+              'amount', amount
+            )
+            order by currency
+          )
+          from (
+            select currency, sum(value) as amount
+            from client_projects
+            group by currency
+          ) contracted_totals
+        ),
+        '[]'::jsonb
+      ),
+      'receivedByCurrency',
+      coalesce(
+        (
+          select jsonb_agg(
+            jsonb_build_object(
+              'currency', currency,
+              'amount', amount
+            )
+            order by currency
+          )
+          from (
+            select currency, sum(amount) as amount
+            from client_payments
+            where status = 'paid'
+            group by currency
+          ) received_totals
+        ),
+        '[]'::jsonb
+      ),
+      'pendingByCurrency',
+      coalesce(
+        (
+          select jsonb_agg(
+            jsonb_build_object(
+              'currency', currency,
+              'amount', amount
+            )
+            order by currency
+          )
+          from (
+            select currency, sum(amount) as amount
+            from client_payments
+            where status = 'pending'
+            group by currency
+          ) pending_totals
+        ),
+        '[]'::jsonb
+      ),
+      'overdueByCurrency',
+      coalesce(
+        (
+          select jsonb_agg(
+            jsonb_build_object(
+              'currency', currency,
+              'amount', amount
+            )
+            order by currency
+          )
+          from (
+            select currency, sum(amount) as amount
+            from client_payments
+            where status = 'overdue'
+            group by currency
+          ) overdue_totals
+        ),
+        '[]'::jsonb
+      ),
+      'outstandingByCurrency',
+      coalesce(
+        (
+          select jsonb_agg(
+            jsonb_build_object(
+              'currency', currency,
+              'amount', amount
+            )
+            order by currency
+          )
+          from (
+            select currency, sum(amount) as amount
+            from client_payments
+            where status in ('pending', 'overdue')
+            group by currency
+          ) outstanding_totals
+        ),
+        '[]'::jsonb
+      ),
       'completedProjects', coalesce((select count(*) from client_projects where status = 'completed'), 0)
     ),
     'projects',
@@ -351,6 +450,7 @@ select case
             'name', name,
             'description', coalesce(description, ''),
             'value', value,
+            'currency', currency,
             'deadline', coalesce(to_char(deadline, 'YYYY-MM-DD'), ''),
             'status', status,
             'createdAt', created_at
@@ -369,6 +469,7 @@ select case
             'id', id,
             'projectId', project_id,
             'amount', amount,
+            'currency', currency,
             'dueDate', to_char(due_date, 'YYYY-MM-DD'),
             'paidAt', case
               when paid_at is null then null

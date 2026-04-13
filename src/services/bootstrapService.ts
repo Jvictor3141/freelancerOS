@@ -1,4 +1,5 @@
 import { supabase, getSupabaseErrorMessage } from '../lib/supabase';
+import { isSupportedCurrency } from '../i18n/config';
 import {
   toClientPayload,
   toPaymentPayload,
@@ -21,6 +22,10 @@ let bootstrapUserId: string | null = null;
 
 type MigrationState = 'started' | 'completed' | null;
 type LegacyProject = Omit<Project, 'status'> & { status: string };
+
+function resolveLegacyCurrency(value: string | null | undefined) {
+  return value && isSupportedCurrency(value) ? value : 'BRL';
+}
 
 function getMigrationStateKey(userId: string) {
   return `${MIGRATION_STATE_PREFIX}:${userId}`;
@@ -111,7 +116,7 @@ async function migrateLegacyData(userId: string) {
       getTableCount('payments', userId),
     ]);
 
-    if (counts.some((count) => count > 0)) {
+    if (counts.every((count) => count > 0)) {
       setMigrationState(userId, 'completed');
       return;
     }
@@ -159,7 +164,7 @@ async function migrateLegacyData(userId: string) {
             name: project.name,
             description: project.description,
             value: project.value,
-            currency: project.currency ?? 'BRL',
+            currency: resolveLegacyCurrency(project.currency),
             deadline: project.deadline,
             status: normalizeProjectStatus(project.status),
           },
@@ -190,7 +195,7 @@ async function migrateLegacyData(userId: string) {
           {
             projectId: payment.projectId,
             amount: payment.amount,
-            currency: payment.currency ?? 'BRL',
+            currency: resolveLegacyCurrency(payment.currency),
             dueDate: payment.dueDate,
             paidAt: payment.paidAt,
             status: toPersistedPaymentStatus(payment.status),

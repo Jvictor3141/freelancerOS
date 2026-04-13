@@ -7,9 +7,11 @@ import {
   // Users,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../components/BrandLogo';
 import { useScrollReveal } from '../lib/useScrollReveal';
 import { Seo } from '../seo/Seo';
+import { useLang } from '../i18n/hooks/useLang';
 import mockdashboardImg from '../assets/imagens/mock-dashboard.webp';
 import clientsPageImg from '../assets/imagens/clients-page.webp';
 import clientsDetailsImg from '../assets/imagens/clients-details.webp';
@@ -30,76 +32,6 @@ type FeatureSection = {
   image: string;
 };
 
-// ─── Static data ──────────────────────────────────────────────────────────────
-
-const marqueeItems = [
-  'Gestão de Clientes',
-  'Controle de Pagamentos',
-  'Projetos com Status',
-  'Propostas Profissionais',
-  'Dashboard Integrado',
-  'Sem Planilha Paralela',
-  'Financeiro Claro',
-  'Tudo Conectado',
-  'Para Freelancers',
-];
-
-const featureSections: FeatureSection[] = [
-  {
-    number: '01',
-    eyebrow: 'Gestão de clientes',
-    title: 'Cada cliente com seu contexto completo',
-    description:
-      'Nome, histórico, projetos e observações em um lugar. Você para de reabrir conversa para lembrar quem pediu o quê e em que prazo estava.',
-    benefit: 'Menos retrabalho para retomar conversas e definir próximos passos.',
-    imageLabel: 'Tela de clientes — lista com histórico e contexto completo',
-    image: clientsPageImg,
-  },
-  {
-    number: '02',
-    eyebrow: 'Controle de projetos',
-    title: 'Projetos com escopo, prazo e status visíveis',
-    description:
-      'Cada entrega vinculada ao cliente certo. Andamento, valor e prazo ficam visíveis sem depender de memória ou anotação perdida em algum lugar aleatório.',
-    benefit: 'Você sabe o que está em execução e o que precisa avançar hoje.',
-    imageLabel: 'Tela de projetos — escopo, status e prazo por cliente',
-    image: projectsPageImg,
-  },
-  {
-    number: '03',
-    eyebrow: 'Pagamentos e cobranças',
-    title: 'O que está em aberto aparece antes que você esqueça',
-    description:
-      'Pendente, atrasado e recebido ficam separados e claros. Você cobra no momento certo porque o sistema mostra — não porque você lembrou de conferir.',
-    benefit: 'Mais clareza para cobrar no tempo certo e fechar o mês sem surpresa.',
-    imageLabel: 'Tela de pagamentos — status por cliente com alertas de atraso',
-    image: paymentsPageImg,
-  },
-  {
-    number: '04',
-    eyebrow: 'Detalhes do cliente',
-    title: 'Histórico completo de cada relação comercial',
-    description:
-      'Projetos, pagamentos e observações de cada cliente reunidos em um só lugar. Você abre e sabe tudo o que aconteceu antes de retomar qualquer conversa.',
-    benefit: 'Contexto completo sem precisar buscar informação em vários lugares.',
-    imageLabel: 'Tela de detalhes do cliente — projetos e pagamentos vinculados',
-    image: clientsDetailsImg,
-  },
-];
-
-const stats = [
-  { value: '1', label: 'Painel único', detail: 'clientes, projetos e pagamentos' },
-  { value: '0', label: 'Planilhas paralelas', detail: 'a operação fica dentro do sistema' },
-  { value: '100%', label: 'Grátis para começar', detail: 'sem cartão de crédito' },
-];
-
-const footerLinks = [
-  { label: 'O problema', href: '#problema' },
-  { label: 'Como funciona', href: '#solucao' },
-  { label: 'Funcionalidades', href: '#funcionalidades' },
-  { label: 'Demonstração', href: '#demo' },
-];
-
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
 function getRevealStyle(delay: number, distance = 32): CSSProperties {
@@ -111,8 +43,8 @@ function getRevealStyle(delay: number, distance = 32): CSSProperties {
 
 // ─── Internal components ──────────────────────────────────────────────────────
 
-function MarqueeTicker() {
-  const doubled = [...marqueeItems, ...marqueeItems];
+function MarqueeTicker({ items }: { items: string[] }) {
+  const doubled = [...items, ...items];
   return (
     <div className="marquee-outer select-none overflow-hidden border-y border-slate-100 bg-white py-4">
       <div className="marquee-track flex w-max items-center">
@@ -132,12 +64,12 @@ function MarqueeTicker() {
   );
 }
 
-function DashboardMock() {
+function DashboardMock({ alt }: { alt: string }) {
   return (
     <div className="flex h-full items-center justify-center">
       <img
         src={mockdashboardImg}
-        alt="Dashboard do FreelancerOS"
+        alt={alt}
         className="w-full drop-shadow-[0_32px_48px_rgba(0,0,0,0.35)]"
         loading="eager"
       />
@@ -150,10 +82,11 @@ function DashboardMock() {
 type LightboxProps = {
   src: string;
   alt: string;
+  closeLabel: string;
   onClose: () => void;
 };
 
-function ImageLightbox({ src, alt, onClose }: LightboxProps) {
+function ImageLightbox({ src, alt, closeLabel, onClose }: LightboxProps) {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -170,7 +103,7 @@ function ImageLightbox({ src, alt, onClose }: LightboxProps) {
       <button
         onClick={onClose}
         className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
-        aria-label="Fechar"
+        aria-label={closeLabel}
       >
         <X size={20} />
       </button>
@@ -187,10 +120,101 @@ function ImageLightbox({ src, alt, onClose }: LightboxProps) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function LandingPage() {
+  const { t } = useTranslation();
+  const lang = useLang();
   const pageRef = useRef<HTMLDivElement>(null);
   useScrollReveal(pageRef);
 
   const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
+
+  const marqueeItems = [
+    t('landing.marquee_1'),
+    t('landing.marquee_2'),
+    t('landing.marquee_3'),
+    t('landing.marquee_4'),
+    t('landing.marquee_5'),
+    t('landing.marquee_6'),
+    t('landing.marquee_7'),
+    t('landing.marquee_8'),
+    t('landing.marquee_9'),
+  ];
+
+  const navLinks = [
+    { label: t('landing.nav_problem'), href: '#problema' },
+    { label: t('landing.nav_solution'), href: '#solucao' },
+    { label: t('landing.nav_features'), href: '#funcionalidades' },
+    { label: t('landing.nav_demo'), href: '#demo' },
+  ];
+
+  const featureSections: FeatureSection[] = [
+    {
+      number: '01',
+      eyebrow: t('landing.feature_1_eyebrow'),
+      title: t('landing.feature_1_title'),
+      description: t('landing.feature_1_desc'),
+      benefit: t('landing.feature_1_benefit'),
+      imageLabel: t('landing.feature_1_img'),
+      image: clientsPageImg,
+    },
+    {
+      number: '02',
+      eyebrow: t('landing.feature_2_eyebrow'),
+      title: t('landing.feature_2_title'),
+      description: t('landing.feature_2_desc'),
+      benefit: t('landing.feature_2_benefit'),
+      imageLabel: t('landing.feature_2_img'),
+      image: projectsPageImg,
+    },
+    {
+      number: '03',
+      eyebrow: t('landing.feature_3_eyebrow'),
+      title: t('landing.feature_3_title'),
+      description: t('landing.feature_3_desc'),
+      benefit: t('landing.feature_3_benefit'),
+      imageLabel: t('landing.feature_3_img'),
+      image: paymentsPageImg,
+    },
+    {
+      number: '04',
+      eyebrow: t('landing.feature_4_eyebrow'),
+      title: t('landing.feature_4_title'),
+      description: t('landing.feature_4_desc'),
+      benefit: t('landing.feature_4_benefit'),
+      imageLabel: t('landing.feature_4_img'),
+      image: clientsDetailsImg,
+    },
+  ];
+
+  const stats = [
+    { value: t('landing.stat_1_value'), label: t('landing.stat_1_label'), detail: t('landing.stat_1_detail') },
+    { value: t('landing.stat_2_value'), label: t('landing.stat_2_label'), detail: t('landing.stat_2_detail') },
+    { value: t('landing.stat_3_value'), label: t('landing.stat_3_label'), detail: t('landing.stat_3_detail') },
+  ];
+
+  const painItems = [
+    { title: t('landing.pain_1_title'), description: t('landing.pain_1_desc') },
+    { title: t('landing.pain_2_title'), description: t('landing.pain_2_desc') },
+    { title: t('landing.pain_3_title'), description: t('landing.pain_3_desc') },
+    { title: t('landing.pain_4_title'), description: t('landing.pain_4_desc') },
+  ];
+
+  const solutionCards = [
+    { title: t('landing.solution_card_1_title'), desc: t('landing.solution_card_1_desc') },
+    { title: t('landing.solution_card_2_title'), desc: t('landing.solution_card_2_desc') },
+    { title: t('landing.solution_card_3_title'), desc: t('landing.solution_card_3_desc') },
+  ];
+
+  const heroMiniStats = [
+    { value: t('landing.hero_mini_stat_1_value'), label: t('landing.hero_mini_stat_1_label') },
+    { value: t('landing.hero_mini_stat_2_value'), label: t('landing.hero_mini_stat_2_label') },
+    { value: t('landing.hero_mini_stat_3_value'), label: t('landing.hero_mini_stat_3_label') },
+  ];
+
+  const demoChecklist = [
+    t('landing.demo_check_1'),
+    t('landing.demo_check_2'),
+    t('landing.demo_check_3'),
+  ];
 
   return (
     <>
@@ -198,18 +222,18 @@ export function LandingPage() {
         <ImageLightbox
           src={lightbox.src}
           alt={lightbox.alt}
+          closeLabel={t('landing.lightbox_close')}
           onClose={() => setLightbox(null)}
         />
       )}
       <Seo
-        title="FreelancerOS | Organize clientes, projetos e pagamentos"
-        description="FreelancerOS e o painel para freelancers centralizarem clientes, projetos, propostas e pagamentos em um unico lugar."
+        title={t('landing.seo_title')}
+        description={t('landing.seo_description')}
         robots="index, follow"
         canonical="/"
         openGraph={{
-          title: 'FreelancerOS | Organize clientes, projetos e pagamentos',
-          description:
-            'FreelancerOS e o painel para freelancers centralizarem clientes, projetos, propostas e pagamentos em um unico lugar.',
+          title: t('landing.seo_title'),
+          description: t('landing.seo_description'),
           image: '/freelanceros-og.png',
           url: '/',
           type: 'website',
@@ -217,9 +241,8 @@ export function LandingPage() {
         }}
         twitter={{
           card: 'summary_large_image',
-          title: 'FreelancerOS | Organize clientes, projetos e pagamentos',
-          description:
-            'FreelancerOS e o painel para freelancers centralizarem clientes, projetos, propostas e pagamentos em um unico lugar.',
+          title: t('landing.seo_title'),
+          description: t('landing.seo_description'),
           image: '/freelanceros-og.png',
         }}
       />
@@ -233,13 +256,13 @@ export function LandingPage() {
         {/* ── HEADER ─────────────────────────────────────────────────────────── */}
         <header className="sticky top-0 z-30 border-b border-white/6 bg-slate-950/92 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8 lg:px-10">
-            <Link to="/" className="inline-flex items-center">
+            <Link to={`/${lang}`} className="inline-flex items-center">
               <BrandLogo variant="lockup" tone="inverse" className="h-7 w-auto sm:h-8" />
             </Link>
 
             <nav className="hidden items-center gap-7 text-sm font-medium text-white/50 lg:flex">
-              {footerLinks.map(({ label, href }) => (
-                <a key={label} href={href} className="transition hover:text-white">
+              {navLinks.map(({ label, href }) => (
+                <a key={href} href={href} className="transition hover:text-white">
                   {label}
                 </a>
               ))}
@@ -247,16 +270,16 @@ export function LandingPage() {
 
             <div className="flex items-center gap-2 sm:gap-3">
               <Link
-                to="/login?mode=sign_in"
+                to={`/${lang}/login?mode=sign_in`}
                 className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-white/65 transition hover:bg-white/8 hover:text-white"
               >
-                Entrar
+                {t('landing.header_sign_in')}
               </Link>
               <Link
-                to="/login?mode=sign_up"
+                to={`/${lang}/login?mode=sign_up`}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-[#635bff] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-0.5 hover:brightness-105"
               >
-                Criar conta
+                {t('landing.header_sign_up')}
                 <ArrowRight size={15} />
               </Link>
             </div>
@@ -283,45 +306,39 @@ export function LandingPage() {
               >
                 <div className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/6 px-4 py-2 text-sm font-medium text-white/55 backdrop-blur">
                   <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                  Para freelancers que trabalham por projeto
+                  {t('landing.hero_badge')}
                 </div>
 
                 <div className="space-y-5">
                   <h1 className="text-5xl font-bold leading-[1.1] tracking-tight text-white sm:text-6xl lg:text-[4.25rem]">
-                    Pare de operar
+                    {t('landing.hero_h1_line1')}
                     <br />
-                    no modo{' '}
-                    <em className="font-light italic text-white/30">bagunça.</em>
+                    {t('landing.hero_h1_line2')}{' '}
+                    <em className="font-light italic text-white/30">{t('landing.hero_h1_chaos')}</em>
                   </h1>
                   <p className="max-w-lg text-base leading-7 text-white/50 sm:text-lg">
-                    O FreelancerOS organiza clientes, projetos e pagamentos em um único painel
-                    — para você saber o que está em andamento, o que falta cobrar e o que já
-                    entrou.
+                    {t('landing.hero_description')}
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
                   <Link
-                    to="/login?mode=sign_up"
+                    to={`/${lang}/login?mode=sign_up`}
                     className="inline-flex items-center gap-2 rounded-full bg-[#635bff] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_20px_40px_rgba(99,91,255,0.3)] transition hover:-translate-y-0.5 hover:brightness-110"
                   >
-                    Criar conta grátis
+                    {t('landing.hero_cta_primary')}
                     <ArrowRight size={16} />
                   </Link>
                   <a
                     href="#demo"
                     className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/6 px-6 py-3.5 text-sm font-semibold text-white/65 backdrop-blur transition hover:bg-white/10 hover:text-white"
                   >
-                    Ver o produto
+                    {t('landing.hero_cta_secondary')}
                   </a>
                 </div>
 
                 <div className="grid grid-cols-3 gap-6 border-t border-white/8 pt-8">
-                  {[
-                    { value: 'Grátis', label: 'para começar' },
-                    { value: '1 painel', label: 'tudo conectado' },
-                    { value: '< 5 min', label: 'para configurar' },
-                  ].map(({ value, label }) => (
+                  {heroMiniStats.map(({ value, label }) => (
                     <div key={label}>
                       <p className="text-base font-bold text-white sm:text-lg">{value}</p>
                       <p className="mt-0.5 text-xs text-white/35">{label}</p>
@@ -336,14 +353,14 @@ export function LandingPage() {
                 style={getRevealStyle(100, 64)}
                 className="relative pt-2 lg:-mb-8"
               >
-                <DashboardMock />
+                <DashboardMock alt={t('landing.dashboard_mock_alt')} />
               </div>
             </div>
           </div>
         </section>
 
         {/* ── MARQUEE ────────────────────────────────────────────────────────── */}
-        <MarqueeTicker />
+        <MarqueeTicker items={marqueeItems} />
 
         {/* ── PROBLEM ────────────────────────────────────────────────────────── */}
         <section id="problema" className="bg-white py-20 lg:py-28">
@@ -354,53 +371,29 @@ export function LandingPage() {
               <div data-scroll-reveal style={getRevealStyle(0, 48)} className="space-y-8">
                 <div className="space-y-4">
                   <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#635bff]">
-                    O problema
+                    {t('landing.problem_eyebrow')}
                   </p>
                   <h2 className="text-4xl font-bold leading-[1.15] tracking-tight text-slate-950 sm:text-5xl">
-                    Quando a operação fica espalhada, o prejuízo não é só visual.
+                    {t('landing.problem_heading')}
                   </h2>
                   <p className="text-base leading-7 text-slate-500">
-                    A bagunça custa tempo para encontrar contexto, atrasa cobrança e dificulta
-                    saber o que realmente precisa de atenção no dia.
+                    {t('landing.problem_description')}
                   </p>
                 </div>
 
                 <div className="rounded-[28px] border border-slate-900 bg-slate-950 p-6 text-white">
                   <p className="text-2xl font-bold leading-snug tracking-tight sm:text-3xl">
-                    Você lembrou de cobrar todos esse mês?
+                    {t('landing.problem_quote_heading')}
                   </p>
                   <p className="mt-4 text-sm leading-7 text-white/55">
-                    Sem controle central, você confere conversa por conversa, reabre planilha,
-                    olha extrato e tenta lembrar o que ainda está em aberto. Isso consome tempo
-                    e aumenta a chance de deixar dinheiro passar.
+                    {t('landing.problem_quote_description')}
                   </p>
                 </div>
               </div>
 
               {/* Right: Pain list */}
               <div className="space-y-4">
-                {[
-                  {
-                    title: 'Cobrança esquecida no meio da correria',
-                    description:
-                      'Você entrega, troca de contexto e percebe tarde demais que faltou cobrar ou confirmar um pagamento.',
-                  },
-                  {
-                    title: 'Financeiro sem status confiável',
-                    description:
-                      'Parte está na planilha, parte no banco e parte no WhatsApp. No fim, ninguém sabe ao certo o que já entrou.',
-                  },
-                  {
-                    title: 'Clientes e projetos espalhados',
-                    description:
-                      'Briefing, valor, prazo e histórico ficam quebrados entre vários lugares e o contexto se perde.',
-                  },
-                  {
-                    title: 'Dia sem visão clara de prioridade',
-                    description:
-                      'Sem um painel central, você gasta tempo descobrindo o que está em andamento e quem precisa de retorno.',
-                  },
-                ].map(({ title, description }, i) => (
+                {painItems.map(({ title, description }, i) => (
                   <article
                     key={title}
                     data-scroll-reveal
@@ -430,14 +423,13 @@ export function LandingPage() {
               className="mx-auto mb-12 max-w-3xl space-y-4 text-center"
             >
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#635bff]">
-                O produto por dentro
+                {t('landing.solution_eyebrow')}
               </p>
               <h2 className="text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-                Um painel. Toda a sua operação.
+                {t('landing.solution_heading')}
               </h2>
               <p className="text-base leading-7 text-slate-500">
-                O FreelancerOS conecta clientes, projetos e pagamentos em uma única interface.
-                Você abre e sabe o que precisa de atenção — sem caçar informação.
+                {t('landing.solution_description')}
               </p>
             </div>
 
@@ -445,7 +437,7 @@ export function LandingPage() {
               <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-[0_24px_70px_rgba(15,23,42,0.1)]">
                 <img
                   src={proposalsPageImg}
-                  alt="Tela de propostas do FreelancerOS"
+                  alt={t('landing.solution_proposals_alt')}
                   className="block w-full"
                   loading="lazy"
                 />
@@ -453,11 +445,7 @@ export function LandingPage() {
             </div>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {[
-                { title: 'Métricas em tempo real', desc: 'Recebido, pendente e atrasado sempre visíveis.' },
-                { title: 'Alertas de prioridade', desc: 'O sistema mostra o que precisa de ação hoje.' },
-                { title: 'Tudo conectado', desc: 'Cada pagamento vinculado ao projeto e ao cliente.' },
-              ].map(({ title, desc }, i) => (
+              {solutionCards.map(({ title, desc }, i) => (
                 <div
                   key={title}
                   data-scroll-reveal
@@ -478,10 +466,10 @@ export function LandingPage() {
           <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
             <div data-scroll-reveal style={getRevealStyle(0, 44)} className="mb-16 space-y-3">
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#635bff]">
-                Funcionalidades
+                {t('landing.features_eyebrow')}
               </p>
               <h2 className="max-w-2xl text-4xl font-bold tracking-tight text-slate-950 sm:text-5xl">
-                Cada área existe para resolver parte da sua rotina.
+                {t('landing.features_heading')}
               </h2>
             </div>
 
@@ -548,10 +536,10 @@ export function LandingPage() {
               className="mb-14 space-y-4 text-center"
             >
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#635bff]">
-                Sem complicação
+                {t('landing.stats_eyebrow')}
               </p>
               <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                Feito para funcionar no dia a dia real.
+                {t('landing.stats_heading')}
               </h2>
             </div>
 
@@ -583,30 +571,24 @@ export function LandingPage() {
                   <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">
                     <Smartphone size={13} className="text-[#635bff]" />
                     <span className="text-xs font-semibold text-slate-600">
-                      Funciona em qualquer dispositivo
+                      {t('landing.demo_device_badge')}
                     </span>
                   </div>
                   <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#635bff]">
-                    Demonstração
+                    {t('landing.demo_eyebrow')}
                   </p>
                   <h2 className="text-4xl font-bold leading-snug tracking-tight text-slate-950 sm:text-5xl">
-                    Sua operação
+                    {t('landing.demo_h2_line1')}
                     <br />
-                    no celular também.
+                    {t('landing.demo_h2_line2')}
                   </h2>
                   <p className="text-base leading-7 text-slate-500">
-                    O FreelancerOS é responsivo e funciona bem em qualquer tela — você
-                    acompanha cobranças e projetos onde estiver, sem precisar estar na frente
-                    do computador.
+                    {t('landing.demo_description')}
                   </p>
                 </div>
 
                 <div className="space-y-3">
-                  {[
-                    'Painel com métricas acessível direto do celular',
-                    'Cobranças e projetos com status visível em qualquer tela',
-                    'Interface adaptada para uso rápido em mobilidade',
-                  ].map((item) => (
+                  {demoChecklist.map((item) => (
                     <div key={item} className="flex items-start gap-3">
                       <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-[#635bff]" />
                       <p className="text-sm leading-6 text-slate-600">{item}</p>
@@ -615,10 +597,10 @@ export function LandingPage() {
                 </div>
 
                 <Link
-                  to="/login?mode=sign_up"
+                  to={`/${lang}/login?mode=sign_up`}
                   className="inline-flex items-center gap-2 rounded-full bg-[#635bff] px-6 py-3.5 text-sm font-semibold text-white shadow-[0_20px_40px_rgba(99,91,255,0.28)] transition hover:-translate-y-0.5 hover:brightness-110"
                 >
-                  Criar conta grátis
+                  {t('landing.demo_cta')}
                   <ArrowRight size={16} />
                 </Link>
               </div>
@@ -639,7 +621,7 @@ export function LandingPage() {
                     </div>
                     <img
                       src={mobileViewImg}
-                      alt="FreelancerOS no celular"
+                      alt={t('landing.demo_mobile_alt')}
                       className="block w-full"
                       loading="lazy"
                     />
@@ -659,47 +641,9 @@ export function LandingPage() {
           </div>
         </section>
 
-        {/* ── TESTIMONIAL ────────────────────────────────────────────────────── 
+        {/* ── TESTIMONIAL ──────────────────────────────────────────────────────
         <section className="bg-slate-50 py-20 lg:py-28">
-          <div className="mx-auto max-w-4xl px-5 sm:px-8 lg:px-10">
-            <blockquote
-              data-scroll-reveal
-              style={getRevealStyle(0, 44)}
-              className="space-y-8 text-center"
-            >
-              <div className="flex justify-center">
-                <div className="flex gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <svg
-                      key={i}
-                      className="h-5 w-5 text-amber-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-              </div>
-              <p className="text-2xl font-medium leading-snug text-slate-800 sm:text-3xl">
-                &ldquo;Antes eu perdia pelo menos uma cobrança por mês. Agora o sistema mostra
-                exatamente o que está em aberto. A diferença no fechamento do mês foi
-                imediata.&rdquo;
-              </p>
-              <footer className="flex items-center justify-center gap-4">
-                {/* Avatar placeholder 
-                <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-dashed border-slate-300 bg-slate-200">
-                  <div className="flex h-full w-full items-center justify-center">
-                    <Users size={18} className="text-slate-400" />
-                  </div>
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold text-slate-900">Nome do cliente</p>
-                  <p className="text-sm text-slate-500">Freelancer · Área de atuação</p>
-                </div>
-              </footer>
-            </blockquote>
-          </div>
+          ...
         </section> */}
 
         {/* ── CTA ────────────────────────────────────────────────────────────── */}
@@ -711,29 +655,27 @@ export function LandingPage() {
           <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
             <div className="mx-auto max-w-3xl space-y-6 text-center">
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-indigo-300/60">
-                Pronto para começar
+                {t('landing.cta_eyebrow')}
               </p>
               <h2 className="text-4xl font-bold leading-snug tracking-tight text-white sm:text-5xl lg:text-6xl">
-                Se hoje seu controle depende de planilha e memória, já está custando tempo
-                demais.
+                {t('landing.cta_heading')}
               </h2>
               <p className="text-base leading-7 text-indigo-100/55">
-                Centralize clientes, projetos e pagamentos no FreelancerOS. Grátis para começar,
-                sem precisar de cartão.
+                {t('landing.cta_description')}
               </p>
               <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                 <Link
-                  to="/login?mode=sign_up"
+                  to={`/${lang}/login?mode=sign_up`}
                   className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-bold text-indigo-700 shadow-[0_20px_50px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 hover:brightness-105"
                 >
-                  Criar conta grátis
+                  {t('landing.cta_primary')}
                   <ArrowRight size={16} />
                 </Link>
                 <Link
-                  to="/login?mode=sign_in"
+                  to={`/${lang}/login?mode=sign_in`}
                   className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/8 px-8 py-4 text-sm font-semibold text-white/75 backdrop-blur transition hover:bg-white/14 hover:text-white"
                 >
-                  Já tenho conta
+                  {t('landing.cta_secondary')}
                 </Link>
               </div>
             </div>
@@ -747,18 +689,17 @@ export function LandingPage() {
               <div className="space-y-4">
                 <BrandLogo variant="lockup" tone="inverse" className="h-8 w-auto" />
                 <p className="max-w-xs text-sm leading-7 text-white/45">
-                  Painel para freelancers organizarem clientes, projetos e pagamentos sem
-                  depender de planilha ou memória.
+                  {t('landing.footer_tagline')}
                 </p>
               </div>
 
               <div>
                 <p className="mb-4 text-xs font-bold uppercase tracking-widest text-white/25">
-                  Produto
+                  {t('landing.footer_product_heading')}
                 </p>
                 <div className="flex flex-col gap-3 text-sm text-white/50">
-                  {footerLinks.map(({ label, href }) => (
-                    <a key={label} href={href} className="transition hover:text-white">
+                  {navLinks.map(({ label, href }) => (
+                    <a key={href} href={href} className="transition hover:text-white">
                       {label}
                     </a>
                   ))}
@@ -767,42 +708,42 @@ export function LandingPage() {
 
               <div>
                 <p className="mb-4 text-xs font-bold uppercase tracking-widest text-white/25">
-                  Acesso
+                  {t('landing.footer_access_heading')}
                 </p>
                 <div className="flex flex-col gap-3 text-sm">
                   <Link
-                    to="/login?mode=sign_in"
+                    to={`/${lang}/login?mode=sign_in`}
                     className="text-white/50 transition hover:text-white"
                   >
-                    Entrar no painel
+                    {t('landing.footer_sign_in')}
                   </Link>
                   <Link
-                    to="/login?mode=sign_up"
+                    to={`/${lang}/login?mode=sign_up`}
                     className="text-white/50 transition hover:text-white"
                   >
-                    Criar conta
+                    {t('landing.footer_create_account')}
                   </Link>
                 </div>
               </div>
 
               <div>
                 <p className="mb-4 text-xs font-bold uppercase tracking-widest text-white/25">
-                  Comece agora
+                  {t('landing.footer_start_heading')}
                 </p>
                 <Link
-                  to="/login?mode=sign_up"
+                  to={`/${lang}/login?mode=sign_up`}
                   className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/6 px-5 py-2.5 text-sm font-semibold text-white/65 transition hover:bg-white/10 hover:text-white"
                 >
-                  Criar conta grátis
+                  {t('landing.footer_cta')}
                   <ArrowRight size={14} />
                 </Link>
               </div>
             </div>
 
             <div className="flex flex-col gap-3 pt-6 text-xs text-white/25 sm:flex-row sm:items-center sm:justify-between">
-              <p>© {new Date().getFullYear()} FreelancerOS. Todos os direitos reservados.</p>
+              <p>{t('landing.footer_copyright', { year: new Date().getFullYear() })}</p>
               <a href="#top" className="transition hover:text-white">
-                Voltar ao topo ↑
+                {t('landing.footer_back_to_top')}
               </a>
             </div>
           </div>
