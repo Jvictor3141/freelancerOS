@@ -2,13 +2,17 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { isSupportedLanguage, SUPPORTED_LANGUAGES } from '../i18n/config';
 
+type LanguageSwitcherProps = {
+  tone?: 'light' | 'dark';
+};
+
 /**
  * Language switcher component.
  * Persists selection to localStorage (via i18next detector config) and
  * immediately swaps the current URL path to the new language prefix
  * so the UI updates without a page reload.
  */
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ tone = 'light' }: LanguageSwitcherProps) {
   const { i18n, t } = useTranslation();
   const navigate = useNavigate();
   const params = useParams<Record<string, string>>();
@@ -39,9 +43,23 @@ export function LanguageSwitcher() {
     }
   }
 
+  const containerClass =
+    tone === 'dark'
+      ? 'flex items-center rounded-2xl border border-white/15 bg-white/8 p-1 backdrop-blur'
+      : 'flex items-center rounded-2xl border border-slate-200 bg-white p-1 shadow-sm shadow-slate-100';
+
+  const buttonClass = (isActive: boolean) =>
+    tone === 'dark'
+      ? `rounded-xl px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
+          isActive ? 'bg-[#635bff] text-white shadow-sm' : 'text-white/50 hover:text-white'
+        }`
+      : `rounded-xl px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
+          isActive ? 'bg-[#635bff] text-white shadow-sm' : 'text-slate-500 hover:text-slate-800'
+        }`;
+
   return (
     <div
-      className="flex items-center rounded-2xl border border-slate-200 bg-white p-1 shadow-sm shadow-slate-100"
+      className={containerClass}
       role="group"
       aria-label={t('language_switcher.label')}
     >
@@ -51,11 +69,7 @@ export function LanguageSwitcher() {
           type="button"
           onClick={() => switchLanguage(lang)}
           aria-pressed={currentLang === lang}
-          className={`rounded-xl px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
-            currentLang === lang
-              ? 'bg-[#635bff] text-white shadow-sm'
-              : 'text-slate-500 hover:text-slate-800'
-          }`}
+          className={buttonClass(currentLang === lang)}
         >
           {lang}
         </button>

@@ -9,6 +9,7 @@ import {
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../components/BrandLogo';
+import { LanguageSwitcher } from '../components/LanguageSwitcher';
 import { useScrollReveal } from '../lib/useScrollReveal';
 import { Seo } from '../seo/Seo';
 import { useLang } from '../i18n/hooks/useLang';
@@ -269,6 +270,9 @@ export function LandingPage() {
             </nav>
 
             <div className="flex items-center gap-2 sm:gap-3">
+              <div className="scale-[0.8] min-[495px]:scale-100 origin-left transition-transform">
+                <LanguageSwitcher tone="dark" />
+              </div>
               <Link
                 to={`/${lang}/login?mode=sign_in`}
                 className="inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold text-white/65 transition hover:bg-white/8 hover:text-white"
@@ -277,7 +281,7 @@ export function LandingPage() {
               </Link>
               <Link
                 to={`/${lang}/login?mode=sign_up`}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#635bff] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-0.5 hover:brightness-105"
+                className="hidden min-[495px]:inline-flex items-center justify-center gap-2 rounded-full bg-[#635bff] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-0.5 hover:brightness-105"
               >
                 {t('landing.header_sign_up')}
                 <ArrowRight size={15} />
