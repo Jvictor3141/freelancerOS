@@ -2,6 +2,8 @@ import { Suspense, lazy } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { DashboardCurrencyBreakdown, DashboardRevenuePoint } from '../../types/dashboard'
 import { formatCurrencyCode } from '../../utils/formatting'
+import { CURRENCY_COLORS } from './DashboardRevenueChart'
+import type { CurrencyCode } from '../../i18n/config'
 
 const DashboardRevenueChart = lazy(async () => ({
   default: (await import('./DashboardRevenueChart')).DashboardRevenueChart,
@@ -40,7 +42,11 @@ export function DashboardRevenueSection({
           <div className="flex flex-wrap gap-2">
             {receivedByCurrency.map((row) => (
               <div key={row.currency} className="rounded-2xl bg-slate-50 px-4 py-3">
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+                <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+                  <span
+                    className="inline-block h-2 w-2 shrink-0 rounded-full"
+                    style={{ backgroundColor: CURRENCY_COLORS[row.currency as CurrencyCode] }}
+                  />
                   {row.currency}
                 </p>
                 <p className="mt-1 text-lg font-semibold text-slate-950">
