@@ -215,7 +215,14 @@
     "recent_activities_label": "Atividade recente",
     "recent_activities_heading": "Últimos projetos criados",
     "recent_activities_aria": "Lista de atividades recentes",
-    "recent_activities_empty": "Nenhuma atividade recente encontrada."
+    "recent_activities_empty": "Nenhuma atividade recente encontrada.",
+    "recent_activities_empty_cta": "Criar projeto",
+    "financial_empty_cta": "Criar primeiro projeto",
+    "revenue_empty_cta": "Ir para pagamentos",
+    "revenue_trend_up": "+{{pct}}% vs mês anterior",
+    "revenue_trend_down": "-{{pct}}% vs mês anterior",
+    "revenue_trend_new": "novo este mês",
+    "revenue_trend_flat": "igual ao mês anterior"
   },
   "clients": {
     "seo_title": "Clientes | FreelancerOS",

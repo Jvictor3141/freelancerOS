@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { DashboardRecentActivity } from '../../types/dashboard'
 import { formatDashboardDate } from '../../utils/dashboard'
@@ -6,6 +7,7 @@ import {
   projectStatusClassName,
   projectStatusLabel,
 } from '../../utils/projectStatus'
+import { useLangPath } from '../../i18n/hooks/useLangPath'
 
 const MAX_VISIBLE_ACTIVITY_CARDS = 3
 const ACTIVITY_CARD_MIN_HEIGHT = 116
@@ -23,6 +25,7 @@ export function DashboardRecentActivitiesPanel({
 }: DashboardRecentActivitiesPanelProps) {
   const { t, i18n } = useTranslation()
   const currentLang = i18n.resolvedLanguage ?? 'pt'
+  const langPath = useLangPath()
 
   return (
     <div className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100 xl:col-span-4">
@@ -72,8 +75,14 @@ export function DashboardRecentActivitiesPanel({
             </div>
           ))
         ) : (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
-            {t('dashboard.recent_activities_empty')}
+          <div className="flex flex-col gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6">
+            <p className="text-sm text-slate-500">{t('dashboard.recent_activities_empty')}</p>
+            <Link
+              to={langPath('/projetos')}
+              className="w-fit rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              {t('dashboard.recent_activities_empty_cta')}
+            </Link>
           </div>
         )}
       </div>

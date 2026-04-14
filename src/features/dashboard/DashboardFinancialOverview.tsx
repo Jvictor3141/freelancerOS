@@ -1,8 +1,10 @@
 import { ArrowUpRight, AlertTriangle, Clock3 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { DashboardCurrencyBreakdown } from '../../types/dashboard'
 import { formatCurrencyCode } from '../../utils/formatting'
 import { DashboardConvertedTotal } from './DashboardConvertedTotal'
+import { useLangPath } from '../../i18n/hooks/useLangPath'
 
 type DashboardFinancialOverviewProps = {
   paymentMetrics: DashboardCurrencyBreakdown[]
@@ -12,6 +14,7 @@ export function DashboardFinancialOverview({
   paymentMetrics,
 }: DashboardFinancialOverviewProps) {
   const { t } = useTranslation()
+  const langPath = useLangPath()
 
   return (
     <div className="rounded-[28px] bg-[#635bff] p-4 md:p-6 text-white shadow-[0_24px_60px_rgba(99,91,255,0.28)] xl:col-span-8">
@@ -26,9 +29,17 @@ export function DashboardFinancialOverview({
         </div>
 
         {paymentMetrics.length === 0 ? (
-          <p className="text-sm text-indigo-200">
-            {t('dashboard.financial_empty')}
-          </p>
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-indigo-200">
+              {t('dashboard.financial_empty')}
+            </p>
+            <Link
+              to={langPath('/projetos')}
+              className="w-fit rounded-2xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+            >
+              {t('dashboard.financial_empty_cta')}
+            </Link>
+          </div>
         ) : (
           <div className="flex flex-col gap-2">
             {/* Column headers */}
