@@ -6,6 +6,7 @@ import type { PaymentInput } from '../types/inputs';
 import type { Payment } from '../types/payment';
 import type { Project } from '../types/project';
 import { formatDateInputValue } from '../utils/dateOnly';
+import { formatCurrencyCode } from '../utils/formatting';
 import { paymentMethods } from '../types/payment';
 import {
   isPersistedPaymentStatus,
@@ -48,6 +49,8 @@ export function PaymentForm({
   const { t } = useTranslation();
   const [values, setValues] = useState<PaymentFormState>(emptyValues);
   const { notify } = useFeedback();
+
+  const selectedProject = projects.find((p) => p.id === values.projectId) ?? null;
 
   function setField<K extends PaymentFormField>(
     field: K,
@@ -128,6 +131,16 @@ export function PaymentForm({
       return;
     }
 
+    if (selectedProject && amount > selectedProject.value) {
+      notify({
+        tone: 'warning',
+        title: t('forms.payment_error_amount_exceeds_project', {
+          max: formatCurrencyCode(selectedProject.value, selectedProject.currency),
+        }),
+      });
+      return;
+    }
+
     if (!values.dueDate) {
       notify({
         tone: 'warning',
@@ -184,12 +197,20 @@ export function PaymentForm({
             type="number"
             name="amount"
             min="0"
+            max={selectedProject?.value}
             step="0.01"
             value={values.amount}
             onChange={handleChange}
             className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
             placeholder={t('forms.payment_amount_placeholder')}
           />
+          {selectedProject && (
+            <span className="text-xs text-slate-400">
+              {t('forms.payment_amount_hint', {
+                max: formatCurrencyCode(selectedProject.value, selectedProject.currency),
+              })}
+            </span>
+          )}
         </label>
 
         <label className="flex flex-col gap-2 text-sm font-medium text-slate-700">

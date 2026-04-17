@@ -61,7 +61,7 @@ export function HeaderNotificationsMenu() {
         onClick={() => setIsOpen((currentValue) => !currentValue)}
         aria-label={t('common.open_notifications_aria')}
         aria-expanded={isOpen}
-        className={`relative inline-flex h-14 w-14 items-center justify-center rounded-2xl border bg-white text-slate-700 shadow-sm shadow-slate-100 transition ${
+        className={`relative inline-flex h-10 w-10 items-center justify-center rounded-2xl border bg-white text-slate-700 shadow-sm shadow-slate-100 transition md:h-14 md:w-14 ${
           isOpen
             ? 'border-slate-300 bg-slate-50 text-slate-950'
             : 'border-slate-200 hover:bg-slate-50'

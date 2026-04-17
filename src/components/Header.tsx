@@ -96,7 +96,9 @@ export function Header() {
         </div>
 
         <div className="flex items-center justify-end gap-3 self-start xl:self-auto">
-          <LanguageSwitcher />
+          <div className="origin-left scale-[0.75] transition-transform md:scale-100">
+            <LanguageSwitcher />
+          </div>
 
           <HeaderNotificationsMenu />
 
@@ -128,7 +130,7 @@ export function Header() {
               onClick={() => setIsAccountMenuOpen((v) => !v)}
               aria-label={t('header.open_account_menu')}
               aria-expanded={isAccountMenuOpen}
-              className="inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm shadow-slate-100 transition hover:bg-slate-50"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm shadow-slate-100 transition hover:bg-slate-50 md:h-14 md:w-14"
             >
               <UserRound size={20} />
             </button>
