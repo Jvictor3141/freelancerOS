@@ -5,6 +5,7 @@ import { DashboardLoadingState } from '../features/dashboard/DashboardLoadingSta
 import { DashboardRecentActivitiesPanel } from '../features/dashboard/DashboardRecentActivitiesPanel'
 import { DashboardRevenueSection } from '../features/dashboard/DashboardRevenueSection'
 import { DashboardSummaryMetrics } from '../features/dashboard/DashboardSummaryMetrics'
+import { DashboardUpcomingDueDates } from '../features/dashboard/DashboardUpcomingDueDates'
 import { useDashboardData } from '../features/dashboard/useDashboardData'
 
 export function DashboardPage() {
@@ -18,6 +19,7 @@ export function DashboardPage() {
     recentActivities,
     retryLoad,
     revenue,
+    upcomingPayments,
   } = useDashboardData()
 
   if (isLoading) {
@@ -45,6 +47,8 @@ export function DashboardPage() {
       </section>
 
       <DashboardSummaryMetrics metrics={metrics} />
+
+      <DashboardUpcomingDueDates payments={upcomingPayments} />
 
       <section className="grid gap-6 xl:grid-cols-12">
         <DashboardRevenueSection

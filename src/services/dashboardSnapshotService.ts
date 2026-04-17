@@ -29,6 +29,7 @@ export const emptyDashboardViewModel: DashboardViewModel = {
   revenue: [],
   recentActivities: [],
   paymentAlerts: [],
+  upcomingPayments: [],
 }
 
 function isMissingDashboardSnapshotFunction(error: { message?: string } | null) {
@@ -115,8 +116,8 @@ function parseRecentActivities(snapshot: UnknownRecord) {
   })
 }
 
-function parsePaymentAlerts(snapshot: UnknownRecord) {
-  return getArrayRecords(snapshot.paymentAlerts)
+function parseAlertRecords(rawArray: unknown) {
+  return getArrayRecords(rawArray)
     .map((record) => {
       const status = getStringValue(record, 'status')
 
@@ -139,6 +140,10 @@ function parsePaymentAlerts(snapshot: UnknownRecord) {
     .filter((alert) => alert !== null)
 }
 
+function parsePaymentAlerts(snapshot: UnknownRecord) {
+  return parseAlertRecords(snapshot.paymentAlerts)
+}
+
 function parseDashboardSnapshot(value: unknown): DashboardViewModel {
   const snapshot = getRecord(value)
 
@@ -152,6 +157,7 @@ function parseDashboardSnapshot(value: unknown): DashboardViewModel {
     revenue: parseRevenue(snapshot),
     recentActivities: parseRecentActivities(snapshot),
     paymentAlerts: parsePaymentAlerts(snapshot),
+    upcomingPayments: parseAlertRecords(snapshot.upcomingPayments),
   }
 }
 

@@ -55,4 +55,5 @@ export type DashboardViewModel = {
   revenue: DashboardRevenuePoint[]
   recentActivities: DashboardRecentActivity[]
   paymentAlerts: DashboardPaymentAlert[]
+  upcomingPayments: DashboardPaymentAlert[]
 }
