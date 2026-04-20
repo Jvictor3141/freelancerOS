@@ -53,10 +53,15 @@ export function DashboardUpcomingDueDates({ payments }: DashboardUpcomingDueDate
   if (items.length === 0) return null
 
   return (
-    <section aria-label={t('dashboard.upcoming_label')}>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
-        {t('dashboard.upcoming_label')}
-      </p>
+    <section
+      aria-label={t('dashboard.upcoming_label')}
+      className="rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm shadow-slate-100"
+    >
+      <div className="mb-4">
+        <p className="text-sm font-medium text-slate-500">
+          {t('dashboard.upcoming_label')}
+        </p>
+      </div>
 
       <div className="flex gap-3 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
         {items.map((item) => {

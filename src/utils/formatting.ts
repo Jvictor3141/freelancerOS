@@ -57,6 +57,34 @@ export function formatCurrencyCode(value: number, currency: string): string {
 }
 
 /**
+ * Compact currency for space-constrained contexts (tables, dashboards).
+ * Values < 1 000 → full precision; ≥ 1 000 → compact with 1 decimal
+ * (e.g. R$ 7,2 mil | $7.2K | € 1,5 M).
+ */
+export function formatCurrencyCompact(value: number, currency: string): string {
+  const locale = currency in CURRENCY_LOCALE_MAP
+    ? CURRENCY_LOCALE_MAP[currency as keyof typeof CURRENCY_LOCALE_MAP]
+    : 'pt-BR';
+
+  if (value < 1_000) {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  }
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    notation: 'compact',
+    compactDisplay: 'short',
+    maximumFractionDigits: 1,
+  }).format(value);
+}
+
+/**
  * Formats a date using the given i18n language.
  * Defaults to pt-BR when no lang is supplied.
  */

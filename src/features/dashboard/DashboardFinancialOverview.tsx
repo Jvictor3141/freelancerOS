@@ -2,7 +2,7 @@ import { ArrowUpRight, AlertTriangle, Clock3 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { DashboardCurrencyBreakdown } from '../../types/dashboard'
-import { formatCurrencyCode } from '../../utils/formatting'
+import { formatCurrencyCompact } from '../../utils/formatting'
 import { DashboardConvertedTotal } from './DashboardConvertedTotal'
 import { useLangPath } from '../../i18n/hooks/useLangPath'
 
@@ -43,17 +43,17 @@ export function DashboardFinancialOverview({
         ) : (
           <div className="flex flex-col gap-2">
             {/* Column headers */}
-            <div className="grid grid-cols-4 gap-2 px-1 text-xs font-medium uppercase tracking-[0.14em] text-indigo-200">
+            <div className="grid grid-cols-[2.5rem_1fr_1fr_1fr] gap-3 px-1 text-xs font-medium uppercase tracking-[0.14em] text-indigo-200">
               <span>{t('dashboard.financial_currency')}</span>
-              <span className="text-right">{t('dashboard.financial_received')}</span>
-              <span className="text-right">{t('dashboard.financial_pending')}</span>
-              <span className="text-right">{t('dashboard.financial_overdue')}</span>
+              <span className="text-right text-xs">{t('dashboard.financial_received')}</span>
+              <span className="text-right text-xs">{t('dashboard.financial_pending')}</span>
+              <span className="text-right text-xs">{t('dashboard.financial_overdue')}</span>
             </div>
 
             {paymentMetrics.map((row) => (
               <div
                 key={row.currency}
-                className="grid grid-cols-4 gap-2 rounded-2xl bg-white/10 px-3 py-3 backdrop-blur-sm"
+                className="grid grid-cols-[2.5rem_1fr_1fr_1fr] gap-3 rounded-2xl bg-white/10 px-3 py-3 backdrop-blur-sm"
               >
                 <div className="flex items-center gap-1.5 font-semibold">
                   <span className="text-sm">{row.currency}</span>
@@ -61,22 +61,22 @@ export function DashboardFinancialOverview({
 
                 <div className="flex items-center justify-end gap-1 text-right">
                   <ArrowUpRight size={12} className="shrink-0 text-emerald-300" />
-                  <span className="text-sm font-semibold">
-                    {formatCurrencyCode(row.receivedAmount, row.currency)}
+                  <span className="text-xs sm:text-sm font-semibold">
+                    {formatCurrencyCompact(row.receivedAmount, row.currency)}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-end gap-1 text-right">
                   <Clock3 size={12} className="shrink-0 text-amber-300" />
-                  <span className="text-sm font-semibold">
-                    {formatCurrencyCode(row.pendingAmount, row.currency)}
+                  <span className="text-xs sm:text-sm font-semibold">
+                    {formatCurrencyCompact(row.pendingAmount, row.currency)}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-end gap-1 text-right">
                   <AlertTriangle size={12} className="shrink-0 text-rose-300" />
-                  <span className="text-sm font-semibold">
-                    {formatCurrencyCode(row.overdueAmount, row.currency)}
+                  <span className="text-xs sm:text-sm font-semibold">
+                    {formatCurrencyCompact(row.overdueAmount, row.currency)}
                   </span>
                 </div>
               </div>

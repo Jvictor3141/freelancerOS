@@ -47,7 +47,7 @@ export function DashboardRecentActivitiesPanel({
           activities.map((activity) => (
             <div
               key={activity.id}
-              className="min-h-29 rounded-2xl border border-slate-200 bg-slate-50/70 p-4"
+              className="min-h-29 rounded-2xl border border-slate-200 bg-slate-50/80 p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
