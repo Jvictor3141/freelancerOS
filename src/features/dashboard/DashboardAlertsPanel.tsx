@@ -11,7 +11,7 @@ import {
 import { isSupportedLanguage } from '../../i18n/config'
 
 const MAX_VISIBLE_ALERT_CARDS = 1
-const ALERT_CARD_MIN_HEIGHT = 102
+const ALERT_CARD_MIN_HEIGHT = 200
 const ALERT_CARD_GAP = 12
 const ALERTS_SCROLL_AREA_MAX_HEIGHT =
   MAX_VISIBLE_ALERT_CARDS * ALERT_CARD_MIN_HEIGHT +
@@ -88,7 +88,7 @@ export function DashboardAlertsPanel({ alerts }: DashboardAlertsPanelProps) {
             alerts.map((alert) => (
               <div
                 key={alert.id}
-                className="min-h-25.5 rounded-2xl border border-slate-200 bg-slate-50/80 p-3.5"
+                className="min-h-25.5 rounded-2xl border border-slate-200 bg-slate-50/80 p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -123,7 +123,7 @@ export function DashboardAlertsPanel({ alerts }: DashboardAlertsPanelProps) {
         </div>
 
         {canScrollDown ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-center rounded-b-2xl bg-linear-to-t from-white via-white/94 to-transparent translate-y-10 px-4 pb-0 pt-1 text-center text-[8px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-center rounded-b-2xl bg-linear-to-t from-white via-white/94 to-transparent px-4 pb-1 pt-6 text-center text-[8px] font-semibold uppercase tracking-[0.18em] text-slate-400">
             <span className="inline-flex items-center gap-1.5">
               {t('dashboard.alerts_scroll_hint')}
               <ChevronDown size={14} />
