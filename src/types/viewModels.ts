@@ -22,7 +22,7 @@ export type ProjectsCommercialSummary = {
   openCount: number
   sentCount: number
   draftCount: number
-  openPipelineValue: number
+  openPipelineValue: { currency: CurrencyCode; amount: number }[]
 }
 
 export type ProposalMetrics = {
