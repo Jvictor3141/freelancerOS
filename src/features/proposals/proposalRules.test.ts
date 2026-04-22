@@ -98,16 +98,20 @@ describe('proposal rules', () => {
     ])
   })
 
-  it('counts proposals by status and sums open pipeline value', () => {
-    const proposals: Array<Pick<Proposal, 'status' | 'amount'>> = [
-      { status: 'draft', amount: 1000 },
-      { status: 'sent', amount: 2000 },
-      { status: 'accepted', amount: 3000 },
-      { status: 'rejected', amount: 4000 },
+  it('counts proposals by status and groups open pipeline value by currency', () => {
+    const proposals: Array<Pick<Proposal, 'status' | 'amount' | 'currency'>> = [
+      { status: 'draft',    amount: 1000, currency: 'BRL' },
+      { status: 'sent',     amount: 2000, currency: 'BRL' },
+      { status: 'sent',     amount:  500, currency: 'USD' },
+      { status: 'accepted', amount: 3000, currency: 'BRL' },
+      { status: 'rejected', amount: 4000, currency: 'EUR' },
     ]
 
     expect(countProposalsByStatus(proposals, 'draft')).toBe(1)
     expect(countProposalsByStatus(proposals, 'accepted')).toBe(1)
-    expect(getOpenProposalValue(proposals)).toBe(3000)
+    expect(getOpenProposalValue(proposals)).toEqual([
+      { currency: 'BRL', amount: 3000 },
+      { currency: 'USD', amount: 500 },
+    ])
   })
 })

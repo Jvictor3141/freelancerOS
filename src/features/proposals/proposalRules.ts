@@ -159,11 +159,14 @@ export function countProposalsByStatus(
 }
 
 export function getOpenProposalValue(
-  proposals: Array<Pick<Proposal, 'status' | 'amount'>>,
-): number {
-  return proposals.reduce((total, proposal) => {
-    return isProposalOpenStatus(proposal.status)
-      ? total + proposal.amount
-      : total
-  }, 0)
+  proposals: Array<Pick<Proposal, 'status' | 'amount' | 'currency'>>,
+): { currency: Proposal['currency']; amount: number }[] {
+  const map = new Map<Proposal['currency'], number>()
+
+  for (const proposal of proposals) {
+    if (!isProposalOpenStatus(proposal.status)) continue
+    map.set(proposal.currency, (map.get(proposal.currency) ?? 0) + proposal.amount)
+  }
+
+  return Array.from(map.entries()).map(([currency, amount]) => ({ currency, amount }))
 }
