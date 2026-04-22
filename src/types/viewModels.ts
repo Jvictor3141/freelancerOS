@@ -1,6 +1,7 @@
 import type { Payment } from './payment'
 import type { Proposal } from './proposal'
 import type { Project } from './project'
+import type { CurrencyCode } from '../i18n/config'
 
 export type PaymentWithProjectAndClient = Payment & {
   projectName: string
@@ -28,5 +29,5 @@ export type ProposalMetrics = {
   draftCount: number
   sentCount: number
   acceptedCount: number
-  openPipelineValue: number
+  openPipelineValue: { currency: CurrencyCode; amount: number }[]
 }

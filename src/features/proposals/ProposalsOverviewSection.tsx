@@ -6,8 +6,7 @@ import {
   Send,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { formatCurrencyCode } from '../../utils/formatting'
-import { usePreferencesStore } from '../../stores/usePreferencesStore'
+import { formatCurrencyCompact } from '../../utils/formatting'
 import type { ProposalMetrics } from '../../types/viewModels'
 
 type ProposalsOverviewSectionProps = {
@@ -20,29 +19,11 @@ export function ProposalsOverviewSection({
   onCreate,
 }: ProposalsOverviewSectionProps) {
   const { t } = useTranslation()
-  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
 
-  const summaryCards = [
-    {
-      label: t('proposals.overview_metric_drafts'),
-      value: metrics.draftCount,
-      icon: PencilLine,
-    },
-    {
-      label: t('proposals.overview_metric_sent'),
-      value: metrics.sentCount,
-      icon: Send,
-    },
-    {
-      label: t('proposals.overview_metric_accepted'),
-      value: metrics.acceptedCount,
-      icon: CheckCircle2,
-    },
-    {
-      label: t('proposals.overview_metric_open'),
-      value: formatCurrencyCode(metrics.openPipelineValue, defaultCurrency),
-      icon: Clock3,
-    },
+  const countCards = [
+    { label: t('proposals.overview_metric_drafts'),   value: metrics.draftCount,    icon: PencilLine   },
+    { label: t('proposals.overview_metric_sent'),     value: metrics.sentCount,     icon: Send         },
+    { label: t('proposals.overview_metric_accepted'), value: metrics.acceptedCount, icon: CheckCircle2 },
   ]
 
   return (
@@ -54,24 +35,39 @@ export function ProposalsOverviewSection({
         </h2>
 
         <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-4">
-          {summaryCards.map((card) => {
+          {countCards.map((card) => {
             const Icon = card.icon
-
             return (
-              <div
-                key={card.label}
-                className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm"
-              >
-                <div className='flex items-center'>
+              <div key={card.label} className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
+                <div className="flex items-center">
                   <div className="mr-2 inline-flex rounded-2xl bg-white/12 p-2">
                     <Icon size={10} />
                   </div>
                   <p className="text-sm text-indigo-100">{card.label}:</p>
                 </div>
-                <p className="flex items-end justify-end mt-2 text-lg font-semibold">{card.value}</p>
+                <p className="mt-2 text-right text-lg font-semibold">{card.value}</p>
               </div>
             )
           })}
+
+          <div className="rounded-3xl bg-white/12 p-4 backdrop-blur-sm">
+            <div className="flex items-center">
+              <div className="mr-2 inline-flex rounded-2xl bg-white/12 p-2">
+                <Clock3 size={10} />
+              </div>
+              <p className="text-sm text-indigo-100">{t('proposals.overview_metric_open')}:</p>
+            </div>
+            <div className="mt-2 flex flex-col items-end gap-0.5">
+              {metrics.openPipelineValue.length > 0
+                ? metrics.openPipelineValue.map(({ currency, amount }) => (
+                    <p key={currency} className="text-lg font-semibold leading-tight">
+                      {formatCurrencyCompact(amount, currency)}
+                    </p>
+                  ))
+                : <p className="text-lg font-semibold">—</p>
+              }
+            </div>
+          </div>
         </div>
       </article>
 
