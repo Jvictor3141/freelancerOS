@@ -5,7 +5,7 @@ export type DashboardMetricSummary = {
   totalClients: number
   projectsInProgress: number
   completedProjects: number
-  averageTicket: number
+  proposalAcceptanceRate: number
 }
 
 /**

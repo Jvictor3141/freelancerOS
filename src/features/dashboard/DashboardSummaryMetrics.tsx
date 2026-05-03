@@ -1,13 +1,11 @@
 import {
-  ArrowUpRight,
   CheckCircle2,
   FolderKanban,
+  Target,
   Users,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { DashboardMetricSummary } from '../../types/dashboard'
-import { formatCurrencyCode } from '../../utils/formatting'
-import { usePreferencesStore } from '../../stores/usePreferencesStore'
 import { DashboardMetricCard } from './DashboardMetricCard'
 
 type DashboardSummaryMetricsProps = {
@@ -18,7 +16,11 @@ export function DashboardSummaryMetrics({
   metrics,
 }: DashboardSummaryMetricsProps) {
   const { t } = useTranslation()
-  const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
+
+  const acceptanceRateDisplay =
+    metrics.proposalAcceptanceRate === 0
+      ? '—'
+      : `${metrics.proposalAcceptanceRate.toFixed(0)}%`
 
   const cards = [
     {
@@ -43,10 +45,10 @@ export function DashboardSummaryMetrics({
       iconClassName: 'bg-emerald-100 text-emerald-700',
     },
     {
-      label: t('dashboard.metrics_average_ticket'),
-      value: formatCurrencyCode(metrics.averageTicket, defaultCurrency),
-      description: t('dashboard.metrics_average_ticket_description'),
-      icon: ArrowUpRight,
+      label: t('dashboard.metrics_proposal_acceptance_rate'),
+      value: acceptanceRateDisplay,
+      description: t('dashboard.metrics_proposal_acceptance_rate_description'),
+      icon: Target,
       iconClassName: 'bg-violet-100 text-violet-700',
     },
   ]

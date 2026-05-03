@@ -23,7 +23,7 @@ export const emptyDashboardViewModel: DashboardViewModel = {
     totalClients: 0,
     projectsInProgress: 0,
     completedProjects: 0,
-    averageTicket: 0,
+    proposalAcceptanceRate: 0,
   },
   paymentMetrics: [],
   revenue: [],
@@ -60,7 +60,7 @@ function parseMetrics(record: UnknownRecord | null) {
     totalClients: getNumberValue(record ?? {}, 'totalClients'),
     projectsInProgress: getNumberValue(record ?? {}, 'projectsInProgress'),
     completedProjects: getNumberValue(record ?? {}, 'completedProjects'),
-    averageTicket: getNumberValue(record ?? {}, 'averageTicket'),
+    proposalAcceptanceRate: getNumberValue(record ?? {}, 'proposalAcceptanceRate'),
   }
 }
 
