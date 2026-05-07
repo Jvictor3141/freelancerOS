@@ -5,10 +5,6 @@ export const proposalStatusOptions = ['all', ...proposalStatuses] as const;
 
 export type ProposalStatusFilter = (typeof proposalStatusOptions)[number];
 
-export function isProposalStatus(value: string): value is ProposalStatus {
-  return isOneOf(proposalStatuses, value);
-}
-
 export function isProposalStatusFilter(
   value: string,
 ): value is ProposalStatusFilter {

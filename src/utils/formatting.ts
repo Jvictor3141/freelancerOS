@@ -44,13 +44,14 @@ export function formatCurrency(value: number, lang = 'pt'): string {
  * Locale is derived from the currency (BRL → pt-BR, USD → en-US, etc.).
  */
 export function formatCurrencyCode(value: number, currency: string): string {
-  const locale = currency in CURRENCY_LOCALE_MAP
-    ? CURRENCY_LOCALE_MAP[currency as keyof typeof CURRENCY_LOCALE_MAP]
+  const resolvedCurrency = currency || 'BRL';
+  const locale = resolvedCurrency in CURRENCY_LOCALE_MAP
+    ? CURRENCY_LOCALE_MAP[resolvedCurrency as keyof typeof CURRENCY_LOCALE_MAP]
     : 'pt-BR';
 
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency,
+    currency: resolvedCurrency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
@@ -62,14 +63,15 @@ export function formatCurrencyCode(value: number, currency: string): string {
  * (e.g. R$ 7,2 mil | $7.2K | € 1,5 M).
  */
 export function formatCurrencyCompact(value: number, currency: string): string {
-  const locale = currency in CURRENCY_LOCALE_MAP
-    ? CURRENCY_LOCALE_MAP[currency as keyof typeof CURRENCY_LOCALE_MAP]
+  const resolvedCurrency = currency || 'BRL';
+  const locale = resolvedCurrency in CURRENCY_LOCALE_MAP
+    ? CURRENCY_LOCALE_MAP[resolvedCurrency as keyof typeof CURRENCY_LOCALE_MAP]
     : 'pt-BR';
 
   if (value < 1_000) {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency,
+      currency: resolvedCurrency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value);
@@ -77,7 +79,7 @@ export function formatCurrencyCompact(value: number, currency: string): string {
 
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency,
+    currency: resolvedCurrency,
     notation: 'compact',
     compactDisplay: 'short',
     maximumFractionDigits: 1,

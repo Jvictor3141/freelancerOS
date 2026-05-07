@@ -27,13 +27,6 @@ const preferencesStoreInitialState: PreferencesStoreState = {
   disabledNotificationTypes: [],
 }
 
-export const preferencesStoreSelectors = {
-  theme: (state: PreferencesStoreState) => state.theme,
-  defaultCurrency: (state: PreferencesStoreState) => state.defaultCurrency,
-  disabledNotificationTypes: (state: PreferencesStoreState) =>
-    state.disabledNotificationTypes,
-}
-
 export const usePreferencesStore = create<PreferencesStore>()(
   persist(
     (set) => ({

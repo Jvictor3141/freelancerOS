@@ -4,7 +4,6 @@ import {
   CheckCircle2,
   Smartphone,
   X,
-  // Users,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -644,11 +643,6 @@ export function LandingPage() {
             </div>
           </div>
         </section>
-
-        {/* ── TESTIMONIAL ──────────────────────────────────────────────────────
-        <section className="bg-slate-50 py-20 lg:py-28">
-          ...
-        </section> */}
 
         {/* ── CTA ────────────────────────────────────────────────────────────── */}
         <section
