@@ -3,10 +3,7 @@ export type FeedbackMessageTone = 'success' | 'error' | 'info' | 'warning';
 export function getToastToneForMessage(message: string): FeedbackMessageTone {
   const normalizedMessage = message.trim().toLowerCase();
 
-  if (
-    normalizedMessage.includes('não foi possível') ||
-    normalizedMessage.includes('não foi possível')
-  ) {
+  if (normalizedMessage.includes('não foi possível')) {
     return 'error';
   }
 

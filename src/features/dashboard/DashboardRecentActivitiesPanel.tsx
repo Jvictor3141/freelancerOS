@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { DashboardRecentActivity } from '../../types/dashboard'
-import { formatDashboardDate } from '../../utils/dashboard'
-import { formatCurrencyCode } from '../../utils/formatting'
+import { formatCurrencyCode, formatDate } from '../../utils/formatting'
 import {
   projectStatusClassName,
   projectStatusLabel,
@@ -67,7 +66,7 @@ export function DashboardRecentActivitiesPanel({
               </div>
 
               <div className="mt-3 flex flex-col gap-2 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-                <span>{formatDashboardDate(activity.createdAt, currentLang)}</span>
+                <span>{formatDate(activity.createdAt, currentLang)}</span>
                 <span className="font-semibold text-slate-900">
                   {formatCurrencyCode(activity.value, activity.currency)}
                 </span>

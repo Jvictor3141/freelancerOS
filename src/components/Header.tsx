@@ -3,10 +3,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
 import { BrandLogo } from './BrandLogo';
-import { useFeedback } from './FeedbackProvider';
 import { HeaderNotificationsMenu } from './HeaderNotificationsMenu';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { getToastToneForMessage } from '../lib/feedback';
+import { useAlert } from '../lib/useAlert';
 import { getErrorMessage } from '../lib/supabase';
 import { isSupportedLanguage, LANGUAGE_LOCALE_MAP } from '../i18n/config';
 import { useAuthStore } from '../stores/useAuthStore';
@@ -15,7 +14,7 @@ export function Header() {
   const { t, i18n } = useTranslation();
   const { lang } = useParams<{ lang?: string }>();
   const { user, loading, logout } = useAuthStore();
-  const { notify } = useFeedback();
+  const { alert } = useAlert();
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
   const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
 
@@ -27,13 +26,6 @@ export function Header() {
     day: 'numeric',
     month: 'long',
   });
-
-  function alert(message: string) {
-    notify({
-      tone: getToastToneForMessage(message),
-      title: message,
-    });
-  }
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
