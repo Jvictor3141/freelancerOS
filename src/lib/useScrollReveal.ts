@@ -10,7 +10,7 @@ type ScrollRevealOptions = {
 export function useScrollReveal(
   rootRef: RefObject<HTMLElement | null>,
   options?: ScrollRevealOptions,
-) {
+): void {
   const rootMargin = options?.rootMargin ?? '0px 0px -10% 0px';
   const selector = options?.selector ?? '[data-scroll-reveal]';
   const threshold = options?.threshold ?? 0.12;
@@ -44,11 +44,11 @@ export function useScrollReveal(
     let animationFrame = 0;
     let lastScrollY = window.scrollY;
 
-    const revealTarget = (target: HTMLElement) => {
+    const revealTarget = (target: HTMLElement): void => {
       target.dataset.inView = 'true';
     };
 
-    const syncScrollState = () => {
+    const syncScrollState = (): void => {
       const nextScrollY = window.scrollY;
       const delta = nextScrollY - lastScrollY;
 
@@ -65,7 +65,7 @@ export function useScrollReveal(
       animationFrame = 0;
     };
 
-    const queueScrollStateSync = () => {
+    const queueScrollStateSync = (): void => {
       if (animationFrame !== 0) {
         return;
       }
@@ -73,7 +73,7 @@ export function useScrollReveal(
       animationFrame = window.requestAnimationFrame(syncScrollState);
     };
 
-    const syncInitialVisibility = (target: HTMLElement) => {
+    const syncInitialVisibility = (target: HTMLElement): void => {
       const rect = target.getBoundingClientRect();
       const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
       const hasReachedRevealPoint = rect.top <= viewportHeight * 0.88;

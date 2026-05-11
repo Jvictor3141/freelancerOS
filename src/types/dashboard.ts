@@ -29,6 +29,8 @@ export type DashboardRevenuePoint = {
   revenue: number
 }
 
+export type PaymentAlertStatus = 'pending' | 'overdue'
+
 export type DashboardPaymentAlert = {
   id: string
   clientName: string
@@ -36,7 +38,7 @@ export type DashboardPaymentAlert = {
   amount: number
   currency: CurrencyCode
   dueDate: string
-  status: 'pending' | 'overdue'
+  status: PaymentAlertStatus
 }
 
 export type DashboardRecentActivity = {

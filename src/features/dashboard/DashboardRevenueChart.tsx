@@ -12,13 +12,7 @@ import type { DashboardRevenuePoint } from '../../types/dashboard'
 import { SUPPORTED_CURRENCIES, type CurrencyCode } from '../../i18n/config'
 import { formatCurrencyCode } from '../../utils/formatting'
 import { parseCalendarDate } from '../../utils/dateOnly'
-
-// One colour per supported currency — consistent, distinguishable on white.
-export const CURRENCY_COLORS: Record<CurrencyCode, string> = {
-  BRL: '#635bff',
-  USD: '#22c55e',
-  EUR: '#f59e0b',
-}
+import { CURRENCY_COLORS } from './dashboardRevenueColors'
 
 type ChartRow = { month: string } & Partial<Record<CurrencyCode, number>>
 

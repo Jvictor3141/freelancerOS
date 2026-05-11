@@ -11,13 +11,13 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
 import { getActionButtonClassName } from '../../utils/actionButtonStyles'
 import {
   formatCurrencyCode,
   formatDate,
   formatDateTime,
 } from '../../utils/formatting'
+import { useLang } from '../../i18n/hooks/useLang'
 import {
   canAcceptProposal,
   canEditProposal,
@@ -34,7 +34,6 @@ import {
   proposalStatusClassName,
   proposalStatusLabel,
 } from '../../utils/proposalStatus'
-import { isSupportedLanguage } from '../../i18n/config'
 
 type ProposalListSectionProps = {
   proposals: ProposalWithClient[]
@@ -91,9 +90,8 @@ export function ProposalListSection({
   onOpenProjects,
   onRemove,
 }: ProposalListSectionProps) {
-  const { t, i18n } = useTranslation()
-  const { lang } = useParams<{ lang?: string }>()
-  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+  const { t } = useTranslation()
+  const currentLang = useLang()
 
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">

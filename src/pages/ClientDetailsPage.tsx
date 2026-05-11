@@ -18,10 +18,8 @@ import {
   projectStatusClassName,
   projectStatusLabel,
 } from '../utils/projectStatus'
-import {
-  isSupportedLanguage,
-  type CurrencyCode,
-} from '../i18n/config'
+import type { CurrencyCode } from '../i18n/config'
+import { useLang } from '../i18n/hooks/useLang'
 import type { ClientCurrencyAmount } from '../types/clientDetails'
 
 const CLIENT_PROJECTS_VISIBLE_COUNT = 2
@@ -69,9 +67,9 @@ function CurrencyBreakdownValue({
 }
 
 export function ClientDetailsPage() {
-  const { t, i18n } = useTranslation()
-  const { id, lang } = useParams<{ id?: string; lang?: string }>()
-  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+  const { t } = useTranslation()
+  const { id } = useParams<{ id?: string }>()
+  const currentLang = useLang()
   const defaultCurrency = usePreferencesStore((s) => s.defaultCurrency)
   const navigate = useNavigate()
   const { snapshot, combinedError, hasLoadError, isLoading, retryLoad } =

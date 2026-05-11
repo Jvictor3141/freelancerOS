@@ -4,6 +4,7 @@ import { SelectField } from '../../components/SelectField'
 import type { ProposalSecureShareLink } from '../../types/sharedProposal'
 import type { ProposalWithClient } from '../../types/viewModels'
 import { formatDateTime } from '../../utils/formatting'
+import { useLang } from '../../i18n/hooks/useLang'
 import { shareExpirationValues } from './proposalsView'
 
 type ProposalShareModalContentProps = {
@@ -31,8 +32,8 @@ export function ProposalShareModalContent({
   onClose,
   onGenerateShareLink,
 }: ProposalShareModalContentProps) {
-  const { t, i18n } = useTranslation()
-  const currentLang = i18n.resolvedLanguage ?? 'pt'
+  const { t } = useTranslation()
+  const currentLang = useLang()
 
   const expirationOptions = shareExpirationValues.map((days) => ({
     value: days,

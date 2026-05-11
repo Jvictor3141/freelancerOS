@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import type { ProposalWithClient } from '../../types/viewModels'
 import { formatDateTime } from '../../utils/formatting'
 import { isAcceptedProposal } from './proposalRules'
+import { useLang } from '../../i18n/hooks/useLang'
 
 type ProposalResponseNotificationsSectionProps = {
   notifications: ProposalWithClient[]
@@ -13,8 +14,8 @@ export function ProposalResponseNotificationsSection({
   notifications,
   onDismiss,
 }: ProposalResponseNotificationsSectionProps) {
-  const { t, i18n } = useTranslation()
-  const currentLang = i18n.resolvedLanguage ?? 'pt'
+  const { t } = useTranslation()
+  const currentLang = useLang()
 
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white p-6 shadow-sm shadow-slate-100">
