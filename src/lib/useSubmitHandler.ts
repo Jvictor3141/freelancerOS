@@ -14,11 +14,11 @@ type SubmitConfig<TInput, TSelected extends { id: string }> = {
 
 export function useSubmitHandler<TInput, TSelected extends { id: string }>(
   config: SubmitConfig<TInput, TSelected>,
-) {
+): { isSubmitting: boolean; handleSubmit: (values: TInput) => Promise<void> } {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { alert } = useAlert()
 
-  async function handleSubmit(values: TInput) {
+  async function handleSubmit(values: TInput): Promise<void> {
     const isEditing = Boolean(config.selected)
     setIsSubmitting(true)
     try {

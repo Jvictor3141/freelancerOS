@@ -5,6 +5,7 @@ import {
   formatDate,
   formatDateTime,
 } from '../../utils/formatting'
+import { useLang } from '../../i18n/hooks/useLang'
 import {
   proposalStatusClassName,
   proposalStatusLabel,
@@ -24,8 +25,8 @@ type MetaField = {
 }
 
 export function ProposalDetailModalContent({ proposal, canEdit, onEdit }: Props) {
-  const { t, i18n } = useTranslation()
-  const currentLang = i18n.resolvedLanguage ?? 'pt'
+  const { t } = useTranslation()
+  const currentLang = useLang()
   const hasClientResponse = hasSharedLinkClientResponse(proposal)
   const isAccepted = isAcceptedProposal(proposal)
 

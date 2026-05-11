@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { DashboardCurrencyBreakdown, DashboardRevenuePoint } from '../../types/dashboard'
 import { formatCurrencyCode } from '../../utils/formatting'
-import { CURRENCY_COLORS } from './DashboardRevenueChart'
+import { CURRENCY_COLORS } from './dashboardRevenueColors'
 import type { CurrencyCode } from '../../i18n/config'
 import { useLangPath } from '../../i18n/hooks/useLangPath'
 

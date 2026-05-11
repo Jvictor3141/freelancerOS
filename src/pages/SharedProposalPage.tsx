@@ -9,6 +9,7 @@ import {
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useLang } from '../i18n/hooks/useLang';
 import { BrandLogo } from '../components/BrandLogo';
 import { Seo } from '../seo/Seo';
 import { formatCurrencyCode, formatDateTime } from '../utils/formatting';
@@ -41,8 +42,8 @@ function getTokenFromHash() {
 }
 
 export function SharedProposalPage() {
-  const { t, i18n } = useTranslation();
-  const currentLang = i18n.resolvedLanguage ?? 'pt';
+  const { t } = useTranslation();
+  const currentLang = useLang();
   const { shareId = '' } = useParams();
   const [proposal, setProposal] = useState<SharedProposal | null>(null);
   const [error, setError] = useState<string | null>(null);

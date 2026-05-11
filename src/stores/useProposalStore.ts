@@ -68,7 +68,7 @@ const proposalStoreInitialState: ProposalStoreState = {
 let loadProposalsPromise: Promise<void> | null = null
 let shouldReloadProposalsAfterCurrentLoad = false
 
-function getProposalStoreError(error: unknown, fallback: string) {
+function getProposalStoreError(error: unknown, fallback: string): string {
   return getErrorMessage(error, fallback)
 }
 

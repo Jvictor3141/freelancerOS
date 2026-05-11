@@ -1,14 +1,13 @@
 import { ChevronDown } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
 import type { DashboardPaymentAlert } from '../../types/dashboard'
 import { formatCurrencyCode, formatDate } from '../../utils/formatting'
 import {
   paymentStatusClassName,
   paymentStatusLabel,
 } from '../../utils/paymentStatus'
-import { isSupportedLanguage } from '../../i18n/config'
+import { useLang } from '../../i18n/hooks/useLang'
 
 const MAX_VISIBLE_ALERT_CARDS = 1
 const ALERT_CARD_MIN_HEIGHT = 200
@@ -22,9 +21,8 @@ type DashboardAlertsPanelProps = {
 }
 
 export function DashboardAlertsPanel({ alerts }: DashboardAlertsPanelProps) {
-  const { t, i18n } = useTranslation()
-  const { lang } = useParams<{ lang?: string }>()
-  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+  const { t } = useTranslation()
+  const currentLang = useLang()
   const alertsListRef = useRef<HTMLDivElement>(null)
   const [canScrollDown, setCanScrollDown] = useState(false)
 

@@ -1,9 +1,10 @@
 import { parseCalendarDate } from './dateOnly';
 import {
-  isSupportedLanguage,
   LANGUAGE_CURRENCY_MAP,
   LANGUAGE_LOCALE_MAP,
   CURRENCY_LOCALE_MAP,
+  type CurrencyCode,
+  type SupportedLanguage,
 } from '../i18n/config';
 
 const ISO_DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -26,10 +27,9 @@ function toValidDate(value: string | Date | null | undefined): Date | null {
  * Formats a number as currency using the given i18n language.
  * Defaults to pt-BR / BRL when no lang is supplied.
  */
-export function formatCurrency(value: number, lang = 'pt'): string {
-  const resolvedLang = isSupportedLanguage(lang) ? lang : 'pt';
-  const locale = LANGUAGE_LOCALE_MAP[resolvedLang];
-  const currency = LANGUAGE_CURRENCY_MAP[resolvedLang];
+export function formatCurrency(value: number, lang: SupportedLanguage = 'pt'): string {
+  const locale = LANGUAGE_LOCALE_MAP[lang];
+  const currency = LANGUAGE_CURRENCY_MAP[lang];
 
   return new Intl.NumberFormat(locale, {
     style: 'currency',
@@ -43,15 +43,12 @@ export function formatCurrency(value: number, lang = 'pt'): string {
  * Formats a number as currency using an explicit ISO 4217 currency code.
  * Locale is derived from the currency (BRL → pt-BR, USD → en-US, etc.).
  */
-export function formatCurrencyCode(value: number, currency: string): string {
-  const resolvedCurrency = currency || 'BRL';
-  const locale = resolvedCurrency in CURRENCY_LOCALE_MAP
-    ? CURRENCY_LOCALE_MAP[resolvedCurrency as keyof typeof CURRENCY_LOCALE_MAP]
-    : 'pt-BR';
+export function formatCurrencyCode(value: number, currency: CurrencyCode): string {
+  const locale = CURRENCY_LOCALE_MAP[currency];
 
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: resolvedCurrency,
+    currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
@@ -62,16 +59,13 @@ export function formatCurrencyCode(value: number, currency: string): string {
  * Values < 1 000 → full precision; ≥ 1 000 → compact with 1 decimal
  * (e.g. R$ 7,2 mil | $7.2K | € 1,5 M).
  */
-export function formatCurrencyCompact(value: number, currency: string): string {
-  const resolvedCurrency = currency || 'BRL';
-  const locale = resolvedCurrency in CURRENCY_LOCALE_MAP
-    ? CURRENCY_LOCALE_MAP[resolvedCurrency as keyof typeof CURRENCY_LOCALE_MAP]
-    : 'pt-BR';
+export function formatCurrencyCompact(value: number, currency: CurrencyCode): string {
+  const locale = CURRENCY_LOCALE_MAP[currency];
 
   if (value < 1_000) {
     return new Intl.NumberFormat(locale, {
       style: 'currency',
-      currency: resolvedCurrency,
+      currency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     }).format(value);
@@ -79,7 +73,7 @@ export function formatCurrencyCompact(value: number, currency: string): string {
 
   return new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: resolvedCurrency,
+    currency,
     notation: 'compact',
     compactDisplay: 'short',
     maximumFractionDigits: 1,
@@ -92,14 +86,12 @@ export function formatCurrencyCompact(value: number, currency: string): string {
  */
 export function formatDate(
   value: string | Date | null | undefined,
-  lang = 'pt',
+  lang: SupportedLanguage = 'pt',
 ): string {
   const date = toValidDate(value);
   if (!date) return '-';
 
-  const resolvedLang = isSupportedLanguage(lang) ? lang : 'pt';
-  const locale = LANGUAGE_LOCALE_MAP[resolvedLang];
-  return new Intl.DateTimeFormat(locale).format(date);
+  return new Intl.DateTimeFormat(LANGUAGE_LOCALE_MAP[lang]).format(date);
 }
 
 /**
@@ -107,14 +99,12 @@ export function formatDate(
  */
 export function formatDateTime(
   value: string | Date | null | undefined,
-  lang = 'pt',
+  lang: SupportedLanguage = 'pt',
 ): string {
   const date = toValidDate(value);
   if (!date) return '-';
 
-  const resolvedLang = isSupportedLanguage(lang) ? lang : 'pt';
-  const locale = LANGUAGE_LOCALE_MAP[resolvedLang];
-  return new Intl.DateTimeFormat(locale, {
+  return new Intl.DateTimeFormat(LANGUAGE_LOCALE_MAP[lang], {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(date);

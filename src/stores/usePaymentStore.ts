@@ -53,7 +53,7 @@ const paymentStoreInitialState: PaymentStoreState = {
 
 let loadPaymentsPromise: Promise<void> | null = null
 
-function getPaymentStoreError(error: unknown, fallback: string) {
+function getPaymentStoreError(error: unknown, fallback: string): string {
   return getErrorMessage(error, fallback)
 }
 

@@ -1,7 +1,6 @@
 import { PencilLine, Trash2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router-dom'
 import type { ProjectWithClient } from '../../types/viewModels'
 import { getActionButtonClassName } from '../../utils/actionButtonStyles'
 import { formatCurrencyCode, formatDate } from '../../utils/formatting'
@@ -9,7 +8,7 @@ import {
   projectStatusClassName,
   projectStatusLabel,
 } from '../../utils/projectStatus'
-import { isSupportedLanguage } from '../../i18n/config'
+import { useLang } from '../../i18n/hooks/useLang'
 
 type ProjectsListSectionProps = {
   projects: ProjectWithClient[]
@@ -52,9 +51,8 @@ export function ProjectsListSection({
   onEdit,
   onRemove,
 }: ProjectsListSectionProps) {
-  const { t, i18n } = useTranslation()
-  const { lang } = useParams<{ lang?: string }>()
-  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+  const { t } = useTranslation()
+  const currentLang = useLang()
 
   return (
     <section className="rounded-[28px] border border-slate-200 bg-white shadow-sm shadow-slate-100">

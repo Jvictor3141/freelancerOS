@@ -6,6 +6,7 @@ import {
   projectStatusClassName,
   projectStatusLabel,
 } from '../../utils/projectStatus'
+import { useLang } from '../../i18n/hooks/useLang'
 import { useLangPath } from '../../i18n/hooks/useLangPath'
 
 const MAX_VISIBLE_ACTIVITY_CARDS = 3
@@ -22,8 +23,8 @@ type DashboardRecentActivitiesPanelProps = {
 export function DashboardRecentActivitiesPanel({
   activities,
 }: DashboardRecentActivitiesPanelProps) {
-  const { t, i18n } = useTranslation()
-  const currentLang = i18n.resolvedLanguage ?? 'pt'
+  const { t } = useTranslation()
+  const currentLang = useLang()
   const langPath = useLangPath()
 
   return (

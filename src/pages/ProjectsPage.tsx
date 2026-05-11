@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Modal } from '../components/Modal'
 import { ProjectForm } from '../components/ProjectForm'
@@ -9,12 +9,11 @@ import { ProjectsCommercialBanner } from '../features/projects/ProjectsCommercia
 import { ProjectsListSection } from '../features/projects/ProjectsListSection'
 import { ProjectsToolbar } from '../features/projects/ProjectsToolbar'
 import { useProjectsPage } from '../features/projects/useProjectsPage'
-import { isSupportedLanguage } from '../i18n/config'
+import { useLang } from '../i18n/hooks/useLang'
 
 export function ProjectsPage() {
-  const { t, i18n } = useTranslation()
-  const { lang } = useParams<{ lang?: string }>()
-  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+  const { t } = useTranslation()
+  const currentLang = useLang()
   const navigate = useNavigate()
   const {
     clients,

@@ -13,12 +13,12 @@ type RemovalConfig<T extends { id: string }> = {
 
 export function useRemovalHandler<T extends { id: string }>(
   config: RemovalConfig<T>,
-) {
+): (item: T) => Promise<void> {
   const { t } = useTranslation()
   const { confirm } = useFeedback()
   const { alert } = useAlert()
 
-  return async function (item: T) {
+  return async function (item: T): Promise<void> {
     const confirmed = await confirm({
       title: `${config.confirmLabel}?`,
       description: config.description(item),

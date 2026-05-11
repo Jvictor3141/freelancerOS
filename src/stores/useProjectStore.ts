@@ -52,7 +52,7 @@ const projectStoreInitialState: ProjectStoreState = {
 
 let loadProjectsPromise: Promise<void> | null = null
 
-function getProjectStoreError(error: unknown, fallback: string) {
+function getProjectStoreError(error: unknown, fallback: string): string {
   return getErrorMessage(error, fallback)
 }
 

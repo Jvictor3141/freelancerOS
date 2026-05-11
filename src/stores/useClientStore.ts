@@ -53,7 +53,7 @@ const clientStoreInitialState: ClientStoreState = {
 
 let loadClientsPromise: Promise<void> | null = null
 
-function getClientStoreError(error: unknown, fallback: string) {
+function getClientStoreError(error: unknown, fallback: string): string {
   return getErrorMessage(error, fallback)
 }
 

@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ClientForm } from '../components/ClientForm'
 import { ClientsListSection } from '../features/clients/ClientsListSection'
@@ -6,12 +6,11 @@ import { useClientsPage } from '../features/clients/useClientsPage'
 import { Modal } from '../components/Modal'
 import { PageBanner } from '../components/page/PageBanner'
 import { PageLoadingState } from '../components/page/PageLoadingState'
-import { isSupportedLanguage } from '../i18n/config'
+import { useLang } from '../i18n/hooks/useLang'
 
 export function ClientsPage() {
-  const { t, i18n } = useTranslation()
-  const { lang } = useParams<{ lang?: string }>()
-  const currentLang = lang && isSupportedLanguage(lang) ? lang : (i18n.resolvedLanguage ?? 'pt')
+  const { t } = useTranslation()
+  const currentLang = useLang()
   const navigate = useNavigate()
   const {
     error,
