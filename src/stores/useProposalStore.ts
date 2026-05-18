@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { ProposalInput } from '../types/inputs'
-import { getErrorMessage } from '../lib/supabase'
+import { getErrorMessage } from '../lib/errors'
 import {
   acceptProposal as acceptProposalService,
   createProposal as createProposalService,

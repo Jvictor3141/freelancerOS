@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { ClientInput } from '../types/inputs'
-import { getErrorMessage } from '../lib/supabase'
+import { getErrorMessage } from '../lib/errors'
 import {
   createClient as createClientService,
   deleteClient as deleteClientService,

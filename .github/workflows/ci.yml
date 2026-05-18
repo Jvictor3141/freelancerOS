@@ -36,3 +36,6 @@ jobs:
 
       - name: Rodar build
         run: pnpm build
+
+      - name: Rodar testes
+        run: pnpm test
