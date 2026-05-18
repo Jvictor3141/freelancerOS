@@ -20,6 +20,14 @@ vi.mock('../services/proposalShareService', () => ({
   createProposalSecureShareLink: vi.fn(),
 }))
 
+vi.mock('./useProjectStore', () => ({
+  useProjectStore: Object.assign(vi.fn(), {
+    setState: vi.fn(),
+    getState: vi.fn(() => ({ projects: [], selectedProject: null })),
+    subscribe: vi.fn(),
+  }),
+}))
+
 import { useProposalStore } from './useProposalStore'
 
 function createProposal(overrides: Partial<Proposal> = {}): Proposal {
