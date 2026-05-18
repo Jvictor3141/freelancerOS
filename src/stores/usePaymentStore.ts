@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { getErrorMessage } from '../lib/supabase'
+import { getErrorMessage } from '../lib/errors'
 import {
   createPayment as createPaymentService,
   deletePayment as deletePaymentService,

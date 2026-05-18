@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getErrorMessage } from './supabase'
+import { getErrorMessage } from './errors'
 import { useAlert } from './useAlert'
 
 type SubmitConfig<TInput, TSelected extends { id: string }> = {

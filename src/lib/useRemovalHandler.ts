@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useFeedback } from '../components/FeedbackProvider'
-import { getErrorMessage } from './supabase'
+import { getErrorMessage } from './errors'
 import { useAlert } from './useAlert'
 
 type RemovalConfig<T extends { id: string }> = {

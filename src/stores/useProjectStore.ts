@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { ProjectInput } from '../types/inputs'
-import { getErrorMessage } from '../lib/supabase'
+import { getErrorMessage } from '../lib/errors'
 import {
   createProject as createProjectService,
   deleteProject as deleteProjectService,
