@@ -56,6 +56,7 @@ type ProposalRow = {
   title: string;
   description: string | null;
   amount: number | string;
+  currency: string;
   delivery_days: number;
   recipient_email: string;
   status: 'draft' | 'sent' | 'accepted' | 'rejected';
@@ -295,6 +296,7 @@ async function getProposalById(proposalId: string) {
         title,
         description,
         amount,
+        currency,
         delivery_days,
         recipient_email,
         status,
@@ -379,6 +381,7 @@ async function buildSharedProposalPayload(share: ProposalShareRow) {
       title: sharedProposal.title,
       description: sharedProposal.description ?? '',
       amount: Number(sharedProposal.amount),
+      currency: sharedProposal.currency,
       deliveryDays: sharedProposal.delivery_days,
       status: sharedProposal.status,
       sentAt: sharedProposal.sent_at,

@@ -1,207 +1,239 @@
+<div align="center">
+
+<img src="src/assets/freelanceros-logo.svg" alt="FreelancerOS" width="200" />
+
 # FreelancerOS
 
-FreelancerOS e um painel SaaS para freelancers organizarem clientes, propostas, projetos e pagamentos em um unico fluxo.
+**O painel operacional do freelancer moderno.**  
+Gerencie clientes, projetos, propostas e pagamentos em um único fluxo — com sincronização em tempo real e suporte multilíngue.
 
-Hoje o projeto e uma aplicacao React + Vite com autenticacao no Supabase, persistencia em banco, sincronizacao realtime, read models SQL para dashboard/detalhes e um fluxo publico para compartilhamento seguro de propostas.
+[![CI](https://github.com/Jvictor3141/freelanceros/actions/workflows/ci.yml/badge.svg)](https://github.com/Jvictor3141/freelanceros/actions/workflows/ci.yml)
+![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?logo=supabase&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7-646cff?logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06b6d4?logo=tailwindcss&logoColor=white)
 
-## O que existe no projeto atual
+[Demo](https://usefreelanceros.app) · [Reportar Bug](https://github.com/Jvictor3141/freelanceros/issues) · [Solicitar Feature](https://github.com/Jvictor3141/freelanceros/issues)
 
-- landing page publica com suporte a `pt` e `en`
-- autenticacao com email e senha, callback de auth e recuperacao de senha
-- dashboard autenticado com metricas, grafico de receita, alertas e atividades recentes
-- CRUD de clientes com busca e pagina de detalhes financeiros
-- CRUD de projetos com filtros por status e cliente
-- CRUD de pagamentos com filtros, marcacao manual como pago e leitura de pendencias
-- CRUD de propostas com status `draft`, `sent`, `accepted` e `rejected`
-- envio assistido de propostas via `mailto:` com assunto e corpo preenchidos
-- aceite de proposta gerando projeto automaticamente
-- link seguro de proposta com expiracao e pagina publica para aceite ou recusa sem login
-- configuracoes de tema, perfil comercial do freelancer, notificacoes e atualizacao de senha
-- sincronizacao realtime das tabelas principais com invalidador de snapshots
-- migracao automatica de dados legados do `localStorage` para o Supabase na primeira sessao autenticada
+</div>
+
+---
+
+## Visão Geral
+
+FreelancerOS é um SaaS para freelancers organizarem toda a sua operação comercial em um só lugar. O produto oferece um dashboard com métricas financeiras em tempo real, gerenciamento completo do ciclo de vida de propostas — incluindo compartilhamento seguro com links de expiração — e controle de clientes, projetos e pagamentos com suporte a múltiplas moedas.
+
+## Funcionalidades
+
+- **Dashboard** — métricas financeiras, gráfico de receita, alertas e atividades recentes, tudo calculado via read models SQL otimizados
+- **Clientes** — CRUD com busca, página de detalhes com histórico financeiro consolidado por cliente
+- **Projetos** — CRUD com filtros por status e vínculo a clientes
+- **Pagamentos** — controle de vencimentos, marcação manual como pago e visão de pendências
+- **Propostas** — ciclo completo (`draft → sent → accepted/rejected`), envio assistido via `mailto:` e aceite automático gerando projeto
+- **Compartilhamento seguro** — links com expiração via Supabase Edge Function; aceite ou recusa sem necessidade de login
+- **Múltiplas moedas** — `BRL`, `USD` e `EUR` com agregações separadas para evitar soma incorreta entre denominações
+- **Tempo real** — sincronização das tabelas principais com invalidador de snapshots via Supabase Realtime
+- **Internacionalização** — `pt` e `en` com rotas prefixadas por idioma (`/:lang/dashboard`)
+- **Configurações** — perfil comercial do freelancer, preferências de tema, notificações e troca de senha
+- **Migração automática** — dados legados do `localStorage` migrados para o Supabase na primeira sessão autenticada
 
 ## Stack
 
-- React 19
-- TypeScript
-- Vite 7
-- Tailwind CSS 4
-- React Router 7
-- Zustand
-- Supabase Auth
-- Supabase Postgres + RLS
-- Supabase Edge Functions
-- Recharts
-- Vitest
-- ESLint
+| Camada | Tecnologia |
+|---|---|
+| Frontend | React 19, TypeScript, Vite 7 |
+| Estilização | Tailwind CSS 4 |
+| Roteamento | React Router 7 |
+| Estado Global | Zustand |
+| Backend / Auth | Supabase (PostgreSQL, Auth, RLS, Edge Functions) |
+| Gráficos | Recharts |
+| Ícones | Lucide React |
+| i18n | i18next + react-i18next |
+| Testes | Vitest |
+| Linting | ESLint 9 |
+| Package Manager | pnpm |
+| Deploy | Vercel |
 
-## Estrutura principal
+## Estrutura do Projeto
 
-- `src/pages`: rotas principais da aplicacao
-- `src/features`: composicao por dominio (`dashboard`, `clients`, `projects`, `payments`, `proposals`)
-- `src/components`: componentes reutilizaveis, formularios e modais
-- `src/services`: integracao com Supabase, RPCs e fluxos de negocio
-- `src/stores`: estado global com Zustand
-- `src/utils`: regras puras, formatacao e agregacoes
-- `src/i18n`: configuracao de idioma, moeda e navegacao com `/:lang`
-- `supabase/schema.sql`: schema consolidado para ambiente novo
-- `supabase/migrations`: historico de evolucao do banco para ambientes existentes
-- `supabase/functions/proposal-share`: Edge Function para links seguros de propostas
+```
+freelanceros/
+├── .github/workflows/        # CI: lint + build no push/PR
+├── supabase/
+│   ├── schema.sql            # Schema consolidado para ambiente novo
+│   ├── migrations/           # Histórico de evolução do banco
+│   └── functions/
+│       └── proposal-share/   # Edge Function para links seguros
+├── src/
+│   ├── pages/                # Componentes de rota (12 páginas)
+│   ├── features/             # Composição por domínio
+│   │   ├── dashboard/
+│   │   ├── clients/
+│   │   ├── projects/
+│   │   ├── payments/
+│   │   └── proposals/
+│   ├── components/           # Componentes reutilizáveis e formulários
+│   ├── services/             # Integração com Supabase e lógica de negócio
+│   ├── stores/               # Estado global com Zustand
+│   ├── types/                # Interfaces TypeScript
+│   ├── utils/                # Funções puras e regras de domínio
+│   ├── i18n/                 # Configuração de idioma e moeda
+│   ├── locales/              # Traduções (pt.json, en.json)
+│   └── lib/                  # Helpers e hooks customizados
+└── public/                   # Assets estáticos e SEO
+```
 
-## Idiomas e moedas
+## Começando
 
-- idiomas suportados: `pt` e `en`
-- moedas suportadas na aplicacao: `BRL`, `USD` e `EUR`
-- o dashboard e os detalhes financeiros trabalham por moeda para evitar soma incorreta entre valores de denominacoes diferentes
+### Pré-requisitos
 
-## Rotas importantes
+- Node.js 22+
+- pnpm 10+
+- Uma conta no [Supabase](https://supabase.com)
 
-- o app principal usa rotas com prefixo de idioma, por exemplo `/:lang/dashboard`
-- para links externos, o app tambem aceita entradas sem `/:lang` em:
-  - `/login`
-  - `/auth/callback`
-  - `/redefinir-senha`
-  - `/propostas/compartilhadas/:shareId`
-
-Isso evita quebrar links de email, callback de autenticacao e compartilhamento publico quando o idioma do usuario ainda nao e conhecido.
-
-## Como rodar localmente
-
-### 1. Instale as dependencias
+### Instalação
 
 ```bash
+# Clone o repositório
+git clone https://github.com/Jvictor3141/freelanceros.git
+cd freelanceros
+
+# Instale as dependências
 pnpm install
 ```
 
-### 2. Configure o `.env`
+### Variáveis de Ambiente
 
-Use estas variaveis no front-end:
+Crie um arquivo `.env` na raiz do projeto:
 
 ```bash
 VITE_SUPABASE_URL=https://seu-projeto.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sua_publishable_key
 VITE_SITE_URL=http://localhost:5173
-
-# opcional: cria sessao anonima automaticamente se nao houver login
-VITE_SUPABASE_AUTO_ANON_AUTH=false
 ```
 
-Observacoes:
+> `VITE_SUPABASE_ANON_KEY` também é aceito como fallback, mas o projeto prioriza `VITE_SUPABASE_PUBLISHABLE_KEY`.
 
-- `VITE_SUPABASE_ANON_KEY` tambem e aceito como fallback no cliente, mas o projeto hoje prioriza `VITE_SUPABASE_PUBLISHABLE_KEY`
-- `VITE_SITE_URL` deve apontar para a origem publica do front-end
-- o callback externo usado pelo auth continua sendo `/auth/callback`
-
-### 3. Configure o banco no Supabase
+### Configuração do Banco de Dados
 
 #### Ambiente novo
 
-Execute o conteudo de `supabase/schema.sql` no SQL Editor do projeto Supabase.
+Execute o conteúdo de `supabase/schema.sql` no SQL Editor do Supabase. O arquivo inclui:
 
-Esse arquivo ja inclui:
-
-- tabelas de `clients`, `projects`, `payments`, `proposals` e `proposal_share_links`
-- colunas de moeda alinhadas ao app atual
-- indices
-- policies com RLS por `user_id`
-- view `payments_read_model`
-- funcoes SQL `get_dashboard_snapshot` e `get_client_details_snapshot`
-- funcoes SQL `accept_proposal` e `respond_to_shared_proposal`
+- Tabelas: `clients`, `projects`, `payments`, `proposals`, `proposal_share_links`
+- View: `payments_read_model`
+- Funções SQL: `get_dashboard_snapshot`, `get_client_details_snapshot`, `accept_proposal`, `respond_to_shared_proposal`
+- Políticas RLS por `user_id` e índices
 
 #### Ambiente existente
 
-Se o projeto Supabase ja existe e voce esta atualizando uma base antiga, aplique as migrations pendentes em `supabase/migrations`.
+Aplique as migrations pendentes em `supabase/migrations/` em ordem cronológica. A migration mais relevante é:
 
-Para alinhar o estado atual do app com as moedas suportadas e os read models, a migration mais importante neste momento e:
-
-```text
+```
 supabase/migrations/20260413_supported_currencies_and_read_models.sql
 ```
 
-Essa migration:
+Ela restringe moedas a `BRL`, `USD` e `EUR` e reconstrói os read models. Se sua base tiver registros com `GBP`, normalize esses dados antes de aplicá-la.
 
-- restringe moedas a `BRL`, `USD` e `EUR`
-- reconstrui `payments_read_model`
-- reconstrui `get_dashboard_snapshot`
-- reconstrui `get_client_details_snapshot`
+### Configuração do Auth
 
-Importante:
+No painel do Supabase → Authentication:
 
-- se sua base ainda tiver registros com `GBP`, normalize esses dados antes de aplicar essa migration
-- se voce estiver provisionando um ambiente novo, use `supabase/schema.sql` em vez de aplicar migrations manualmente uma por uma
+1. Habilite **Email/Password** login
+2. Configure a **Site URL** para a origem do front-end
+3. Adicione `/auth/callback` como redirect URL permitida
 
-### 4. Configure o Auth
+### Edge Function de Compartilhamento
 
-No Supabase Auth:
+O módulo de links seguros de propostas depende da Edge Function `proposal-share`. Para publicá-la:
 
-- habilite login por email e senha
-- configure a `Site URL` para a origem do front-end
-- garanta que o callback externo usado pelo app esteja permitido: `/auth/callback`
+```bash
+supabase functions deploy proposal-share
+```
 
-Se for usar `VITE_SUPABASE_AUTO_ANON_AUTH=true`, tambem e necessario habilitar Anonymous Sign-Ins no Supabase.
-
-### 5. Publique a Edge Function de compartilhamento
-
-O modulo de link seguro de propostas depende da function `proposal-share`.
-
-Publique a function no mesmo projeto Supabase do front-end e configure os secrets abaixo:
+Configure os secrets da função:
 
 ```bash
 SUPABASE_URL=https://seu-projeto.supabase.co
 SUPABASE_ANON_KEY=sua_anon_key
 SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key
-PUBLIC_APP_URL=http://localhost:5173
+PUBLIC_APP_URL=https://seu-dominio.com
 ```
 
-Observacoes:
+> Sem esta função, o restante do painel continua funcional. Apenas o compartilhamento público de propostas ficará indisponível.
 
-- `PUBLIC_APP_URL` deve apontar para a origem publica do front-end
-- o link compartilhado usa a rota externa `/propostas/compartilhadas/:shareId`
-- sem essa function, o restante do painel funciona, mas o compartilhamento publico de propostas fica indisponivel
-
-### 6. Rode o projeto
+### Rodando Localmente
 
 ```bash
 pnpm dev
 ```
 
-## Scripts
+A aplicação estará disponível em `http://localhost:5173`.
 
-```bash
-pnpm dev
-pnpm build
-pnpm preview
-pnpm lint
-pnpm lint:fix
-pnpm typecheck
-pnpm test
-pnpm test:watch
-pnpm check
-```
+## Scripts Disponíveis
+
+| Comando | Descrição |
+|---|---|
+| `pnpm dev` | Inicia o servidor de desenvolvimento |
+| `pnpm build` | Gera o build de produção |
+| `pnpm preview` | Pré-visualiza o build de produção |
+| `pnpm lint` | Verifica o código com ESLint |
+| `pnpm lint:fix` | Corrige problemas de lint automaticamente |
+| `pnpm typecheck` | Verifica tipagem TypeScript |
+| `pnpm test` | Executa a suíte de testes |
+| `pnpm test:watch` | Executa testes em modo watch |
+| `pnpm check` | Roda lint + typecheck + testes |
 
 ## Testes
 
-Os testes automatizados atuais cobrem principalmente regras puras e alguns fluxos criticos de store:
+A suíte de testes cobre regras de domínio puras e fluxos críticos de store:
 
-- agregacoes financeiras
-- datas sem drift de timezone
-- validacao de email usada no fluxo de `mailto:`
-- regras de status de pagamentos
-- regras comerciais de propostas
-- notificacoes operacionais do header
-- conciliacao de recarga concorrente na `useProposalStore`
+- Agregações financeiras e formatação de moeda
+- Datas sem drift de timezone (`dateOnly`)
+- Validação de email usada no fluxo de `mailto:`
+- Regras de status de pagamentos e projetos
+- Regras de negócio de propostas
+- Notificações operacionais do header
+- Conciliação de recarga concorrente na `useProposalStore`
 
-Hoje a suite nao cobre interface via browser nem testes E2E.
+> A CI atual roda `lint` + `build`. Testes ainda não estão integrados ao pipeline.
 
-## Limites atuais importantes
+## Roteamento
 
-- o envio de proposta abre o cliente de email do usuario via `mailto:`; o app nao envia email transacional por conta propria
-- a CI em `.github/workflows/ci.yml` roda `lint` e `build`, mas ainda nao executa `pnpm test`
-- a feature de compartilhamento seguro depende da Edge Function `proposal-share`; sem ela, o restante do painel continua funcional
+O app usa rotas prefixadas por idioma para as páginas autenticadas:
 
-## Observacoes de deploy
+```
+/:lang(pt|en)/dashboard
+/:lang/clientes
+/:lang/projetos
+/:lang/pagamentos
+/:lang/propostas
+/:lang/configuracoes
+```
 
-- `vercel.json` trata o rewrite da SPA para `index.html`
-- `vercel.json` aplica headers de seguranca como `Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options` e `Referrer-Policy`
-- o deploy cobre rotas com e sem `/:lang` para auth, painel e compartilhamento publico
-- `VITE_SITE_URL` e `PUBLIC_APP_URL` precisam apontar para o dominio correto em producao
+As rotas externas (auth, callback, compartilhamento) não utilizam o prefixo de idioma para garantir compatibilidade com links de e-mail e callbacks de autenticação:
+
+```
+/login
+/auth/callback
+/redefinir-senha
+/propostas/compartilhadas/:shareId
+```
+
+## Deploy
+
+O projeto está configurado para deploy na Vercel via `vercel.json`:
+
+- **SPA Rewrite**: todas as rotas são redirecionadas para `index.html`
+- **Security Headers**: `Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`
+- **Cache**: rotas do dashboard com `Cache-Control: no-store`
+- **SEO**: `X-Robots-Tag: noindex` em rotas autenticadas, callback e proposta pública
+
+Em produção, `VITE_SITE_URL` e `PUBLIC_APP_URL` devem apontar para o domínio correto.
+
+## Limitações Conhecidas
+
+- O envio de proposta utiliza `mailto:` — o app não realiza envio de e-mail transacional por conta própria
+- Testes automatizados não estão integrados ao pipeline de CI
+- O compartilhamento seguro de propostas requer a Edge Function `proposal-share` deployada no mesmo projeto Supabase
