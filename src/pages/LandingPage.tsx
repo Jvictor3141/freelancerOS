@@ -20,6 +20,12 @@ import paymentsPageImg from '../assets/imagens/payments-page.webp';
 import proposalsPageImg from '../assets/imagens/proposals-page.webp';
 import mobileViewImg from '../assets/imagens/mobile-viewl.webp';
 
+const LANDING_LANGUAGE_ALTERNATES = [
+  { hrefLang: 'pt-BR', href: '/pt/' },
+  { hrefLang: 'en-US', href: '/en/' },
+  { hrefLang: 'x-default', href: '/pt/' },
+];
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type FeatureSection = {
@@ -122,6 +128,7 @@ function ImageLightbox({ src, alt, closeLabel, onClose }: LightboxProps) {
 export function LandingPage() {
   const { t } = useTranslation();
   const lang = useLang();
+  const canonicalPath = `/${lang}/`;
   const pageRef = useRef<HTMLDivElement>(null);
   useScrollReveal(pageRef);
 
@@ -230,12 +237,13 @@ export function LandingPage() {
         title={t('landing.seo_title')}
         description={t('landing.seo_description')}
         robots="index, follow"
-        canonical="/"
+        canonical={canonicalPath}
+        alternates={LANDING_LANGUAGE_ALTERNATES}
         openGraph={{
           title: t('landing.seo_title'),
           description: t('landing.seo_description'),
           image: '/freelanceros-og.png',
-          url: '/',
+          url: canonicalPath,
           type: 'website',
           siteName: 'FreelancerOS',
         }}

@@ -18,11 +18,17 @@ type TwitterConfig = {
   image?: string;
 };
 
+type AlternateLink = {
+  hrefLang: string;
+  href: string;
+};
+
 type SeoProps = {
   title: string;
   description?: string;
   robots?: string;
   canonical?: string | null;
+  alternates?: AlternateLink[];
   openGraph?: OpenGraphConfig;
   twitter?: TwitterConfig;
 };
@@ -87,6 +93,23 @@ function upsertCanonical(canonical: string | null | undefined) {
   }
 }
 
+function syncAlternateLinks(alternates: AlternateLink[] | undefined) {
+  if (typeof document === 'undefined') return;
+
+  document.head
+    .querySelectorAll<HTMLLinkElement>('link[data-seo-managed="alternate"]')
+    .forEach((element) => element.remove());
+
+  alternates?.forEach(({ hrefLang, href }) => {
+    const link = document.createElement('link');
+    link.setAttribute('rel', 'alternate');
+    link.setAttribute('hreflang', hrefLang);
+    link.setAttribute('href', toAbsoluteUrl(href));
+    link.setAttribute('data-seo-managed', 'alternate');
+    document.head.appendChild(link);
+  });
+}
+
 /**
  * SEO component.
  * Sets <title>, meta tags, canonical link and <html lang=""> attribute.
@@ -97,6 +120,7 @@ export function Seo({
   description,
   robots,
   canonical,
+  alternates,
   openGraph,
   twitter,
 }: SeoProps) {
@@ -122,6 +146,7 @@ export function Seo({
     }
 
     upsertCanonical(canonical);
+    syncAlternateLinks(alternates);
 
     if (openGraph) {
       upsertMeta('property', 'og:title', openGraph.title ?? title);
@@ -170,7 +195,16 @@ export function Seo({
         upsertMeta('name', 'twitter:image', toAbsoluteUrl(twitter.image));
       }
     }
-  }, [canonical, description, htmlLang, openGraph, robots, title, twitter]);
+  }, [
+    alternates,
+    canonical,
+    description,
+    htmlLang,
+    openGraph,
+    robots,
+    title,
+    twitter,
+  ]);
 
   return null;
 }
