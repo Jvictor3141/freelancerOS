@@ -9,6 +9,27 @@ Disallow: /dashboard
 Disallow: /login
 Disallow: /pagamentos
 Disallow: /projetos
+Disallow: /propostas
 Disallow: /redefinir-senha
+Disallow: /pt/auth/callback
+Disallow: /pt/clientes
+Disallow: /pt/clients
+Disallow: /pt/configuracoes
+Disallow: /pt/dashboard
+Disallow: /pt/login
+Disallow: /pt/pagamentos
+Disallow: /pt/projetos
+Disallow: /pt/propostas
+Disallow: /pt/redefinir-senha
+Disallow: /en/auth/callback
+Disallow: /en/clientes
+Disallow: /en/clients
+Disallow: /en/configuracoes
+Disallow: /en/dashboard
+Disallow: /en/login
+Disallow: /en/pagamentos
+Disallow: /en/projetos
+Disallow: /en/propostas
+Disallow: /en/redefinir-senha
 
 Sitemap: https://usefreelanceros.app/sitemap.xml
